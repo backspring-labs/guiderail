@@ -30,13 +30,13 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		expect(artifacts.length).toBeGreaterThan(0);
 
 		const domainManifests = await adapter.listDomains();
-		expect(domainManifests.length).toBe(3);
+		expect(domainManifests.length).toBe(9);
 
 		const capabilityManifests = await adapter.listCapabilities();
-		expect(capabilityManifests.length).toBe(6);
+		expect(capabilityManifests.length).toBe(16);
 
 		const entityManifests = await adapter.listEntities();
-		expect(entityManifests.length).toBe(10);
+		expect(entityManifests.length).toBe(39);
 
 		const researchManifests = await adapter.listResearch();
 		expect(researchManifests.length).toBeGreaterThan(0);
@@ -45,16 +45,16 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		const normalizer = new MockNormalizer(connection.sourceId);
 
 		const normalizedDomains = normalizer.normalizeDomains(domains);
-		expect(normalizedDomains.length).toBe(3);
+		expect(normalizedDomains.length).toBe(9);
 
 		const normalizedCapabilities = normalizer.normalizeCapabilities(capabilities);
-		expect(normalizedCapabilities.length).toBe(6);
+		expect(normalizedCapabilities.length).toBe(16);
 
 		const normalizedNodes = normalizer.normalizeNodes(nodes);
-		expect(normalizedNodes.length).toBe(10);
+		expect(normalizedNodes.length).toBe(39);
 
 		const normalizedEdges = normalizer.normalizeEdges(edges);
-		expect(normalizedEdges.length).toBe(11);
+		expect(normalizedEdges.length).toBe(45);
 
 		const normalizedJourneys = normalizer.normalizeJourneys(journeys);
 		expect(normalizedJourneys.length).toBe(1);
@@ -71,8 +71,8 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 
 		// 5. Create graph from normalized entities
 		const graph = createGraph(normalizedNodes, normalizedEdges);
-		expect(graph.nodes.size).toBe(10);
-		expect(graph.edges.size).toBe(11);
+		expect(graph.nodes.size).toBe(39);
+		expect(graph.edges.size).toBe(45);
 
 		// 6. Initialize context machine with the graph
 		const actor = createActor(contextMachine).start();

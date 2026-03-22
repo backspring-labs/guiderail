@@ -107,22 +107,25 @@ describe("Story Route Walkthrough — full lifecycle with pause/return", () => {
 		// 9. Continue to remaining waypoints
 		actor.send({ type: "NEXT_WAYPOINT" }); // waypoint 3
 		expect(nav(actor).activeWaypointIndex).toBe(3);
-		// Waypoint 3 has perspectiveId: "persp-provider"
-		expect(nav(actor).activePerspectiveId).toBe("persp-provider");
+		// Waypoint 3 has perspectiveId: "persp-process"
+		expect(nav(actor).activePerspectiveId).toBe("persp-process");
 		// Waypoint 3 has provider focus target
 		const providerTarget = nav(actor).activeFocusTargets.find((ft) => ft.type === "provider");
 		expect(providerTarget).toBeDefined();
 		expect(providerTarget?.targetId).toBe("prov-visa");
 
-		actor.send({ type: "NEXT_WAYPOINT" }); // waypoint 4 (last)
+		actor.send({ type: "NEXT_WAYPOINT" }); // waypoint 4
 		expect(nav(actor).activeWaypointIndex).toBe(4);
-		// Waypoint 4 has process_stage focus target
+
+		actor.send({ type: "NEXT_WAYPOINT" }); // waypoint 5 (last)
+		expect(nav(actor).activeWaypointIndex).toBe(5);
+		// Waypoint 5 has process_stage focus target
 		const stageTarget = nav(actor).activeFocusTargets.find((ft) => ft.type === "process_stage");
 		expect(stageTarget).toBeDefined();
 
 		// 10. Can't advance past last waypoint
 		actor.send({ type: "NEXT_WAYPOINT" });
-		expect(nav(actor).activeWaypointIndex).toBe(4);
+		expect(nav(actor).activeWaypointIndex).toBe(5);
 
 		// 11. END_ROUTE — clean state, domain preserved
 		actor.send({ type: "END_ROUTE" });

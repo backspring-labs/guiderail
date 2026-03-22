@@ -33,11 +33,11 @@ const graph = createGraph(nodes, edges);
 
 describe("createGraph", () => {
 	it("creates a graph with correct node count", () => {
-		expect(graph.nodes.size).toBe(10);
+		expect(graph.nodes.size).toBe(39);
 	});
 
 	it("creates a graph with correct edge count", () => {
-		expect(graph.edges.size).toBe(11);
+		expect(graph.edges.size).toBe(45);
 	});
 });
 
@@ -95,14 +95,14 @@ describe("getEdgesForNode", () => {
 
 	it("returns inbound edges", () => {
 		const result = getEdgesForNode(graph, "n-core-ledger", "in");
-		expect(result.length).toBe(2);
+		expect(result.length).toBe(3);
 	});
 });
 
 describe("filterNodes", () => {
 	it("filters by type", () => {
 		const services = filterNodes(graph, (n) => n.type === "service");
-		expect(services.length).toBe(5);
+		expect(services.length).toBe(17);
 	});
 
 	it("filters by tag", () => {
@@ -152,7 +152,7 @@ describe("getNodesForLayer", () => {
 		if (!defaultLayer) return;
 
 		const result = getNodesForLayer(graph, defaultLayer);
-		expect(result.length).toBe(10);
+		expect(result.length).toBe(39);
 	});
 
 	it("filters by eligible types for process layer", () => {
@@ -215,8 +215,8 @@ describe("filterNodesByTags", () => {
 describe("filterNodesByType", () => {
 	it("finds actor nodes", () => {
 		const result = filterNodesByType(graph, ["actor"]);
-		expect(result.length).toBe(1);
-		expect(result[0]?.id).toBe("n-customer");
+		expect(result.length).toBe(2);
+		expect(result.some((n) => n.id === "n-customer")).toBe(true);
 	});
 });
 
@@ -260,8 +260,8 @@ describe("getProvidersForValueStream", () => {
 describe("getValueStreamsForDomain", () => {
 	it("returns value streams for payments domain", () => {
 		const result = getValueStreamsForDomain("dom-payments", valueStreams);
-		expect(result.length).toBe(1);
-		expect(result[0]?.label).toBe("Retail Payments");
+		expect(result.length).toBe(2);
+		expect(result.some((vs) => vs.label === "Retail Payments")).toBe(true);
 	});
 
 	it("returns value streams for accounts domain", () => {

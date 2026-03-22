@@ -158,12 +158,12 @@ describe("Context Machine 0.2.0", () => {
 
 	it("INITIALIZE with new fields stores them", () => {
 		const actor = createFullCtx();
-		expect(actor.getSnapshot().context.providers.length).toBe(5);
-		expect(actor.getSnapshot().context.storyRoutes.length).toBe(1);
-		expect(actor.getSnapshot().context.storyWaypoints.length).toBe(5);
-		expect(actor.getSnapshot().context.valueStreams.length).toBe(2);
-		expect(actor.getSnapshot().context.processes.length).toBe(1);
-		expect(actor.getSnapshot().context.processStages.length).toBe(4);
+		expect(actor.getSnapshot().context.providers.length).toBe(20);
+		expect(actor.getSnapshot().context.storyRoutes.length).toBe(3);
+		expect(actor.getSnapshot().context.storyWaypoints.length).toBe(18);
+		expect(actor.getSnapshot().context.valueStreams.length).toBe(3);
+		expect(actor.getSnapshot().context.processes.length).toBe(2);
+		expect(actor.getSnapshot().context.processStages.length).toBe(9);
 	});
 
 	it("SELECT_VALUE_STREAM updates nav", () => {

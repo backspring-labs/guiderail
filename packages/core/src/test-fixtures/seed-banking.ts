@@ -56,6 +56,42 @@ export const domains: Domain[] = [
 		description: "Payment processing and money movement",
 		tags: ["core"],
 	},
+	{
+		id: "dom-risk-identity",
+		label: "Risk & Identity",
+		description: "Risk management, identity verification, and fraud prevention",
+		tags: ["risk", "security"],
+	},
+	{
+		id: "dom-orchestration",
+		label: "Orchestration & Control",
+		description: "Payment orchestration, routing, and policy engines",
+		tags: ["orchestration"],
+	},
+	{
+		id: "dom-channels",
+		label: "Channels & Experience",
+		description: "Digital channels, interfaces, and user experiences",
+		tags: ["channels", "ux"],
+	},
+	{
+		id: "dom-networks",
+		label: "Networks & Schemes",
+		description: "Card networks, payment schemes, and interchange",
+		tags: ["networks", "schemes"],
+	},
+	{
+		id: "dom-rails",
+		label: "Rails & Money Movement",
+		description: "Payment rails, clearing, and settlement",
+		tags: ["rails", "settlement"],
+	},
+	{
+		id: "dom-data-rewards",
+		label: "Data & Rewards",
+		description: "Analytics, rewards, loyalty, and behavioral data",
+		tags: ["data", "rewards"],
+	},
 ].map((d) => DomainSchema.parse(d));
 
 // --- Capabilities ---
@@ -120,6 +156,107 @@ export const capabilities: Capability[] = [
 		edgeIds: ["e-payment-rail", "e-payment-ledger", "e-risk-payment"],
 		journeyIds: [],
 		tags: ["payments", "processing"],
+	},
+	{
+		id: "cap-fraud-detection",
+		domainId: "dom-risk-identity",
+		label: "Fraud Detection",
+		description: "Real-time fraud detection and prevention across payment and account events",
+		nodeIds: ["n-fraud-engine", "n-risk-svc", "n-aml-screening"],
+		edgeIds: ["e-orch-fraud", "e-fraud-aml"],
+		journeyIds: [],
+		tags: ["fraud", "risk", "real-time"],
+	},
+	{
+		id: "cap-identity-verification",
+		domainId: "dom-risk-identity",
+		label: "Identity Verification",
+		description: "Customer identity verification using KYC, biometrics, and document analysis",
+		nodeIds: ["n-kyc-provider", "n-biometric-auth", "n-identity-svc"],
+		edgeIds: ["e-identity-kyc", "e-identity-biometric"],
+		journeyIds: [],
+		tags: ["identity", "kyc", "biometrics"],
+	},
+	{
+		id: "cap-payment-orchestration",
+		domainId: "dom-orchestration",
+		label: "Payment Orchestration",
+		description: "Intelligent routing and orchestration of payment flows across rails and networks",
+		nodeIds: ["n-payment-router", "n-workflow-engine", "n-payment-orch"],
+		edgeIds: ["e-router-workflow", "e-router-orch"],
+		journeyIds: [],
+		tags: ["orchestration", "routing"],
+	},
+	{
+		id: "cap-policy-engine",
+		domainId: "dom-orchestration",
+		label: "Policy Engine",
+		description:
+			"Centralized policy evaluation for transaction limits, compliance, and agent controls",
+		nodeIds: ["n-policy-engine", "n-agent-policy"],
+		edgeIds: ["e-agent-policy", "e-policy-router"],
+		journeyIds: [],
+		tags: ["policy", "compliance", "controls"],
+	},
+	{
+		id: "cap-wallet-management",
+		domainId: "dom-channels",
+		label: "Wallet Management",
+		description: "Digital wallet provisioning, tokenization, and payment credential management",
+		nodeIds: ["n-mobile-app", "n-web-app", "n-merchant-checkout"],
+		edgeIds: ["e-web-gw", "e-merchant-gw"],
+		journeyIds: [],
+		tags: ["wallet", "tokenization", "channels"],
+	},
+	{
+		id: "cap-digital-channels",
+		domainId: "dom-channels",
+		label: "Digital Channels",
+		description: "Multi-channel digital banking interfaces including web, mobile, and agent",
+		nodeIds: ["n-web-app", "n-mobile-app", "n-merchant-checkout", "n-agent-interface"],
+		edgeIds: ["e-web-gw", "e-merchant-gw", "e-agent-interface-gw"],
+		journeyIds: [],
+		tags: ["channels", "digital", "omnichannel"],
+	},
+	{
+		id: "cap-network-authorization",
+		domainId: "dom-networks",
+		label: "Network Authorization",
+		description: "Card network authorization, scheme routing, and interchange management",
+		nodeIds: ["n-visa-network", "n-mastercard-network", "n-card-processor"],
+		edgeIds: ["e-processor-visa", "e-processor-mastercard"],
+		journeyIds: [],
+		tags: ["networks", "authorization", "interchange"],
+	},
+	{
+		id: "cap-settlement",
+		domainId: "dom-rails",
+		label: "Settlement & Clearing",
+		description: "End-of-day settlement, clearing, and reconciliation across payment rails",
+		nodeIds: ["n-clearing-house", "n-settlement-engine", "n-core-ledger"],
+		edgeIds: ["e-clearing-settlement", "e-settlement-ledger"],
+		journeyIds: [],
+		tags: ["settlement", "clearing", "reconciliation"],
+	},
+	{
+		id: "cap-rewards-processing",
+		domainId: "dom-data-rewards",
+		label: "Rewards Processing",
+		description: "Points accrual, redemption, and loyalty program management",
+		nodeIds: ["n-rewards-engine", "n-analytics-platform"],
+		edgeIds: ["e-event-rewards"],
+		journeyIds: [],
+		tags: ["rewards", "loyalty", "points"],
+	},
+	{
+		id: "cap-analytics",
+		domainId: "dom-data-rewards",
+		label: "Analytics & Insights",
+		description: "Transaction analytics, behavioral insights, and reporting",
+		nodeIds: ["n-analytics-platform", "n-data-warehouse", "n-event-bus"],
+		edgeIds: ["e-event-analytics", "e-analytics-warehouse"],
+		journeyIds: [],
+		tags: ["analytics", "data", "insights"],
 	},
 ].map((d) => CapabilitySchema.parse(d));
 
@@ -264,6 +401,222 @@ export const nodes: Node[] = [
 			"persp-provider": { x: 1300, y: 500 },
 		},
 	},
+	// --- Channels & Experience ---
+	{
+		id: "n-web-app",
+		type: "screen",
+		label: "Web Banking App",
+		description: "Customer-facing web banking application",
+		tags: ["channel", "web"],
+	},
+	{
+		id: "n-merchant-checkout",
+		type: "screen",
+		label: "Merchant Checkout",
+		description: "Merchant-facing checkout and payment acceptance interface",
+		tags: ["channel", "merchant", "checkout"],
+	},
+	{
+		id: "n-agent-interface",
+		type: "screen",
+		label: "AI Agent Interface",
+		description: "Conversational interface for AI-driven banking interactions",
+		tags: ["channel", "agent", "ai"],
+	},
+	// --- Orchestration & Control ---
+	{
+		id: "n-payment-router",
+		type: "service",
+		label: "Payment Router",
+		description:
+			"Intelligent payment routing across rails and networks based on cost, speed, and availability",
+		tags: ["orchestration", "routing", "payments"],
+	},
+	{
+		id: "n-policy-engine",
+		type: "service",
+		label: "Bank Policy Engine",
+		description:
+			"Centralized policy evaluation for transaction limits, compliance rules, and agent permissions",
+		tags: ["policy", "compliance", "controls"],
+	},
+	{
+		id: "n-workflow-engine",
+		type: "service",
+		label: "Workflow Engine",
+		description: "Orchestrates multi-step payment and account workflows with state management",
+		tags: ["orchestration", "workflow", "state-machine"],
+	},
+	// --- Risk & Identity ---
+	{
+		id: "n-fraud-engine",
+		type: "service",
+		label: "Fraud Detection Engine",
+		description:
+			"Real-time fraud scoring using ML models, velocity checks, and behavioral analysis",
+		tags: ["fraud", "ml", "risk", "real-time"],
+	},
+	{
+		id: "n-kyc-provider",
+		type: "service",
+		label: "KYC Provider",
+		description: "Know Your Customer identity verification and document validation",
+		tags: ["kyc", "identity", "compliance"],
+	},
+	{
+		id: "n-aml-screening",
+		type: "service",
+		label: "AML Screening",
+		description: "Anti-money laundering screening against sanctions lists and PEP databases",
+		tags: ["aml", "compliance", "screening"],
+	},
+	{
+		id: "n-biometric-auth",
+		type: "service",
+		label: "Biometric Authentication",
+		description: "Fingerprint, face, and voice-based authentication for secure access",
+		tags: ["biometrics", "authentication", "security"],
+	},
+	// --- Networks & Schemes ---
+	{
+		id: "n-visa-network",
+		type: "system",
+		label: "Visa Network",
+		description: "Visa payment network for card authorization, clearing, and settlement",
+		tags: ["network", "cards", "visa", "external"],
+	},
+	{
+		id: "n-mastercard-network",
+		type: "system",
+		label: "Mastercard Network",
+		description: "Mastercard payment network for card authorization, clearing, and settlement",
+		tags: ["network", "cards", "mastercard", "external"],
+	},
+	{
+		id: "n-card-processor",
+		type: "service",
+		label: "Card Processor / Issuer Processor",
+		description: "Card issuing, processing, and BIN management for debit and credit programs",
+		tags: ["cards", "issuing", "processing"],
+	},
+	// --- Rails & Money Movement ---
+	{
+		id: "n-ach-rail",
+		type: "system",
+		label: "ACH Network",
+		description: "Automated Clearing House network for batch and same-day transfers",
+		tags: ["rail", "ach", "batch", "external"],
+	},
+	{
+		id: "n-rtp-rail",
+		type: "system",
+		label: "RTP Network",
+		description: "Real-Time Payments network operated by The Clearing House",
+		tags: ["rail", "rtp", "real-time", "external"],
+	},
+	{
+		id: "n-fednow-rail",
+		type: "system",
+		label: "FedNow Service",
+		description: "Federal Reserve instant payment service for real-time gross settlement",
+		tags: ["rail", "fednow", "real-time", "federal", "external"],
+	},
+	{
+		id: "n-wire-rail",
+		type: "system",
+		label: "Wire Transfer Network",
+		description: "Fedwire and CHIPS networks for high-value wire transfers",
+		tags: ["rail", "wire", "high-value", "external"],
+	},
+	{
+		id: "n-zelle-rail",
+		type: "system",
+		label: "Zelle Network",
+		description: "Zelle P2P payment network for person-to-person transfers",
+		tags: ["rail", "zelle", "p2p", "external"],
+	},
+	{
+		id: "n-clearing-house",
+		type: "service",
+		label: "Clearing House",
+		description: "Clearing and netting service for multi-rail transaction reconciliation",
+		tags: ["clearing", "reconciliation", "settlement"],
+	},
+	{
+		id: "n-settlement-engine",
+		type: "service",
+		label: "Settlement Engine",
+		description: "End-of-day settlement processing and position management",
+		tags: ["settlement", "position", "reconciliation"],
+	},
+	// --- Core / System of Record (expanded) ---
+	{
+		id: "n-deposit-system",
+		type: "system",
+		label: "Deposit System",
+		description: "Core deposit account system managing DDA, savings, and CD products",
+		tags: ["core", "deposits", "system-of-record"],
+	},
+	{
+		id: "n-loan-system",
+		type: "system",
+		label: "Loan System",
+		description: "Loan origination and servicing system for consumer and commercial lending",
+		tags: ["core", "lending", "system-of-record"],
+	},
+	{
+		id: "n-gl-system",
+		type: "system",
+		label: "General Ledger",
+		description: "General ledger and financial accounting system of record",
+		tags: ["core", "accounting", "system-of-record"],
+	},
+	// --- Data & Rewards ---
+	{
+		id: "n-analytics-platform",
+		type: "system",
+		label: "Analytics Platform",
+		description:
+			"Real-time and batch analytics for transaction monitoring and business intelligence",
+		tags: ["analytics", "bi", "monitoring"],
+	},
+	{
+		id: "n-rewards-engine",
+		type: "service",
+		label: "Rewards Engine",
+		description: "Points accrual, redemption, and loyalty program management engine",
+		tags: ["rewards", "loyalty", "points"],
+	},
+	{
+		id: "n-data-warehouse",
+		type: "system",
+		label: "Data Warehouse",
+		description: "Enterprise data warehouse for historical analytics and regulatory reporting",
+		tags: ["data", "warehouse", "reporting"],
+	},
+	{
+		id: "n-event-bus",
+		type: "system",
+		label: "Event Bus / Message Broker",
+		description: "Event-driven messaging infrastructure for async communication across services",
+		tags: ["events", "messaging", "infrastructure", "async"],
+	},
+	// --- Agentic Commerce ---
+	{
+		id: "n-ai-agent",
+		type: "actor",
+		label: "Personal AI Agent",
+		description:
+			"Autonomous AI agent acting on behalf of a customer for payments and banking tasks",
+		tags: ["agent", "ai", "autonomous"],
+	},
+	{
+		id: "n-agent-policy",
+		type: "service",
+		label: "Agent Policy Manager",
+		description: "Policy and permission management for AI agent actions and spending limits",
+		tags: ["agent", "policy", "controls"],
+	},
 ].map((d) => NodeSchema.parse(d));
 
 // --- Edges ---
@@ -345,6 +698,255 @@ export const edges: Edge[] = [
 		targetNodeId: "n-core-ledger",
 		type: "ledger_posting",
 		label: "post entries",
+	},
+	// --- Channel → Gateway ---
+	{
+		id: "e-web-gw",
+		sourceNodeId: "n-web-app",
+		targetNodeId: "n-api-gateway",
+		type: "api_call",
+		label: "requests",
+	},
+	{
+		id: "e-merchant-gw",
+		sourceNodeId: "n-merchant-checkout",
+		targetNodeId: "n-api-gateway",
+		type: "api_call",
+		label: "payment request",
+	},
+	{
+		id: "e-agent-interface-gw",
+		sourceNodeId: "n-agent-interface",
+		targetNodeId: "n-api-gateway",
+		type: "api_call",
+		label: "agent request",
+	},
+	{
+		id: "e-cust-web",
+		sourceNodeId: "n-customer",
+		targetNodeId: "n-web-app",
+		type: "user_interaction",
+		label: "uses",
+	},
+	// --- Agentic Commerce ---
+	{
+		id: "e-agent-interface-agent",
+		sourceNodeId: "n-ai-agent",
+		targetNodeId: "n-agent-interface",
+		type: "user_interaction",
+		label: "interacts via",
+	},
+	{
+		id: "e-agent-policy",
+		sourceNodeId: "n-ai-agent",
+		targetNodeId: "n-agent-policy",
+		type: "service_call",
+		label: "check permissions",
+	},
+	{
+		id: "e-policy-router",
+		sourceNodeId: "n-agent-policy",
+		targetNodeId: "n-payment-router",
+		type: "service_call",
+		label: "authorized request",
+	},
+	// --- Gateway → Orchestration ---
+	{
+		id: "e-gw-router",
+		sourceNodeId: "n-api-gateway",
+		targetNodeId: "n-payment-router",
+		type: "service_call",
+		label: "route payment",
+	},
+	{
+		id: "e-gw-policy",
+		sourceNodeId: "n-api-gateway",
+		targetNodeId: "n-policy-engine",
+		type: "service_call",
+		label: "evaluate policy",
+	},
+	{
+		id: "e-router-workflow",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-workflow-engine",
+		type: "service_call",
+		label: "orchestrate flow",
+	},
+	{
+		id: "e-router-orch",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-payment-orch",
+		type: "service_call",
+		label: "delegate execution",
+	},
+	// --- Orchestration → Risk ---
+	{
+		id: "e-orch-fraud",
+		sourceNodeId: "n-payment-orch",
+		targetNodeId: "n-fraud-engine",
+		type: "service_call",
+		label: "fraud check",
+	},
+	{
+		id: "e-fraud-aml",
+		sourceNodeId: "n-fraud-engine",
+		targetNodeId: "n-aml-screening",
+		type: "dependency",
+		label: "AML screen",
+	},
+	// --- Identity ---
+	{
+		id: "e-identity-kyc",
+		sourceNodeId: "n-identity-svc",
+		targetNodeId: "n-kyc-provider",
+		type: "service_call",
+		label: "verify identity",
+	},
+	{
+		id: "e-identity-biometric",
+		sourceNodeId: "n-identity-svc",
+		targetNodeId: "n-biometric-auth",
+		type: "service_call",
+		label: "biometric check",
+	},
+	// --- Orchestration → Networks ---
+	{
+		id: "e-orch-processor",
+		sourceNodeId: "n-payment-orch",
+		targetNodeId: "n-card-processor",
+		type: "service_call",
+		label: "process card",
+	},
+	{
+		id: "e-processor-visa",
+		sourceNodeId: "n-card-processor",
+		targetNodeId: "n-visa-network",
+		type: "rail_execution",
+		label: "authorize",
+	},
+	{
+		id: "e-processor-mastercard",
+		sourceNodeId: "n-card-processor",
+		targetNodeId: "n-mastercard-network",
+		type: "rail_execution",
+		label: "authorize",
+	},
+	// --- Rails ---
+	{
+		id: "e-router-ach",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-ach-rail",
+		type: "rail_execution",
+		label: "ACH transfer",
+	},
+	{
+		id: "e-router-rtp",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-rtp-rail",
+		type: "rail_execution",
+		label: "RTP transfer",
+	},
+	{
+		id: "e-router-fednow",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-fednow-rail",
+		type: "rail_execution",
+		label: "FedNow transfer",
+	},
+	{
+		id: "e-router-wire",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-wire-rail",
+		type: "rail_execution",
+		label: "wire transfer",
+	},
+	{
+		id: "e-router-zelle",
+		sourceNodeId: "n-payment-router",
+		targetNodeId: "n-zelle-rail",
+		type: "rail_execution",
+		label: "Zelle transfer",
+	},
+	// --- Settlement ---
+	{
+		id: "e-clearing-settlement",
+		sourceNodeId: "n-clearing-house",
+		targetNodeId: "n-settlement-engine",
+		type: "service_call",
+		label: "net positions",
+	},
+	{
+		id: "e-settlement-ledger",
+		sourceNodeId: "n-settlement-engine",
+		targetNodeId: "n-core-ledger",
+		type: "ledger_posting",
+		label: "post settlement",
+	},
+	{
+		id: "e-settlement-gl",
+		sourceNodeId: "n-settlement-engine",
+		targetNodeId: "n-gl-system",
+		type: "ledger_posting",
+		label: "GL entries",
+	},
+	// --- Core systems ---
+	{
+		id: "e-ledger-deposit",
+		sourceNodeId: "n-core-ledger",
+		targetNodeId: "n-deposit-system",
+		type: "dependency",
+		label: "deposit positions",
+	},
+	{
+		id: "e-ledger-loan",
+		sourceNodeId: "n-core-ledger",
+		targetNodeId: "n-loan-system",
+		type: "dependency",
+		label: "loan positions",
+	},
+	{
+		id: "e-ledger-gl",
+		sourceNodeId: "n-core-ledger",
+		targetNodeId: "n-gl-system",
+		type: "ledger_posting",
+		label: "GL sync",
+	},
+	// --- Event Bus ---
+	{
+		id: "e-ledger-event",
+		sourceNodeId: "n-core-ledger",
+		targetNodeId: "n-event-bus",
+		type: "event",
+		label: "transaction events",
+	},
+	{
+		id: "e-payment-event",
+		sourceNodeId: "n-payment-orch",
+		targetNodeId: "n-event-bus",
+		type: "event",
+		label: "payment events",
+	},
+	// --- Event Bus → Data & Rewards ---
+	{
+		id: "e-event-analytics",
+		sourceNodeId: "n-event-bus",
+		targetNodeId: "n-analytics-platform",
+		type: "event",
+		label: "stream events",
+	},
+	{
+		id: "e-event-rewards",
+		sourceNodeId: "n-event-bus",
+		targetNodeId: "n-rewards-engine",
+		type: "event",
+		label: "transaction events",
+	},
+	{
+		id: "e-analytics-warehouse",
+		sourceNodeId: "n-analytics-platform",
+		targetNodeId: "n-data-warehouse",
+		type: "dependency",
+		label: "persist analytics",
 	},
 ].map((d) => EdgeSchema.parse(d));
 
@@ -477,13 +1079,6 @@ export const perspectives: Perspective[] = [
 		type: "architecture",
 		label: "Architecture",
 		description: "System boundaries, services, and dependencies",
-		defaultLayerId: "layer-default",
-	},
-	{
-		id: "persp-provider",
-		type: "provider",
-		label: "Provider",
-		description: "Provider and vendor comparison view",
 		defaultLayerId: "layer-default",
 	},
 	{
@@ -671,6 +1266,111 @@ export const providers: Provider[] = [
 		category: "wallet",
 		tags: ["mobile", "wallet", "tokenization"],
 	},
+	{
+		id: "prov-google-pay",
+		label: "Google Pay",
+		description: "Mobile wallet and payment interface for Android",
+		category: "wallet",
+		tags: ["mobile", "wallet", "tokenization"],
+	},
+	{
+		id: "prov-paze",
+		label: "Paze",
+		description: "Bank-owned digital wallet for online checkout",
+		category: "wallet",
+		tags: ["wallet", "checkout", "bank-owned"],
+	},
+	{
+		id: "prov-ach",
+		label: "ACH",
+		description: "Automated Clearing House network for batch and same-day transfers",
+		category: "rail",
+		tags: ["batch", "account-to-account"],
+	},
+	{
+		id: "prov-zelle",
+		label: "Zelle",
+		description: "P2P payment network operated by Early Warning Services",
+		category: "orchestration",
+		tags: ["p2p", "real-time", "account-to-account"],
+	},
+	{
+		id: "prov-wire",
+		label: "Wire",
+		description: "Fedwire and CHIPS high-value wire transfer networks",
+		category: "rail",
+		tags: ["high-value", "same-day"],
+	},
+	{
+		id: "prov-feedzai",
+		label: "Feedzai",
+		description: "AI-powered fraud detection and financial crime prevention platform",
+		category: "specialist",
+		tags: ["fraud", "ml", "real-time"],
+	},
+	{
+		id: "prov-socure",
+		label: "Socure",
+		description: "Digital identity verification and fraud prevention platform",
+		category: "specialist",
+		tags: ["identity", "kyc", "fraud"],
+	},
+	{
+		id: "prov-plaid",
+		label: "Plaid",
+		description: "Financial data connectivity and account linking infrastructure",
+		category: "infrastructure",
+		tags: ["data", "connectivity", "account-linking"],
+	},
+	{
+		id: "prov-stripe",
+		label: "Stripe",
+		description: "Payment processing and financial infrastructure platform",
+		category: "orchestration",
+		tags: ["payments", "processing", "developer"],
+	},
+	{
+		id: "prov-marqeta",
+		label: "Marqeta",
+		description: "Modern card issuing and payment processing platform",
+		category: "infrastructure",
+		tags: ["cards", "issuing", "modern"],
+	},
+	{
+		id: "prov-galileo",
+		label: "Galileo",
+		description: "Card processing and program management platform",
+		category: "infrastructure",
+		tags: ["cards", "processing", "program-management"],
+	},
+	{
+		id: "prov-fis",
+		label: "FIS",
+		description: "Core banking and payment technology provider",
+		category: "infrastructure",
+		tags: ["core-banking", "payments", "enterprise"],
+	},
+	{
+		id: "prov-fiserv",
+		label: "Fiserv",
+		description: "Financial services technology and core banking provider",
+		category: "infrastructure",
+		tags: ["core-banking", "payments", "enterprise"],
+	},
+	{
+		id: "prov-jack-henry",
+		label: "Jack Henry",
+		description: "Core banking technology provider for community and mid-size banks",
+		category: "infrastructure",
+		tags: ["core-banking", "community", "mid-market"],
+	},
+	{
+		id: "prov-infinant",
+		label: "Infinant",
+		description: "Banking-as-a-service orchestration and embedded finance platform",
+		category: "orchestration",
+		tags: ["baas", "embedded-finance", "orchestration"],
+	},
 ].map((d) => ProviderSchema.parse(d));
 
 // --- Provider Associations ---
@@ -732,6 +1432,111 @@ export const providerAssociations: ProviderAssociation[] = [
 		targetId: "vs-retail-payments",
 		role: "rail_provider",
 	},
+	{
+		id: "pa-google-pay-app",
+		providerId: "prov-google-pay",
+		targetType: "node",
+		targetId: "n-mobile-app",
+		role: "interface_provider",
+	},
+	{
+		id: "pa-paze-checkout",
+		providerId: "prov-paze",
+		targetType: "node",
+		targetId: "n-merchant-checkout",
+		role: "interface_provider",
+	},
+	{
+		id: "pa-ach-rail",
+		providerId: "prov-ach",
+		targetType: "node",
+		targetId: "n-ach-rail",
+		role: "rail_provider",
+	},
+	{
+		id: "pa-zelle-rail",
+		providerId: "prov-zelle",
+		targetType: "node",
+		targetId: "n-zelle-rail",
+		role: "rail_provider",
+	},
+	{
+		id: "pa-wire-rail",
+		providerId: "prov-wire",
+		targetType: "node",
+		targetId: "n-wire-rail",
+		role: "rail_provider",
+	},
+	{
+		id: "pa-feedzai-fraud",
+		providerId: "prov-feedzai",
+		targetType: "capability",
+		targetId: "cap-fraud-detection",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-socure-identity",
+		providerId: "prov-socure",
+		targetType: "capability",
+		targetId: "cap-identity-verification",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-plaid-channels",
+		providerId: "prov-plaid",
+		targetType: "capability",
+		targetId: "cap-digital-channels",
+		role: "data_provider",
+	},
+	{
+		id: "pa-stripe-orchestration",
+		providerId: "prov-stripe",
+		targetType: "capability",
+		targetId: "cap-payment-orchestration",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-marqeta-processor",
+		providerId: "prov-marqeta",
+		targetType: "node",
+		targetId: "n-card-processor",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-galileo-processor",
+		providerId: "prov-galileo",
+		targetType: "node",
+		targetId: "n-card-processor",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-fis-core",
+		providerId: "prov-fis",
+		targetType: "node",
+		targetId: "n-core-ledger",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-fiserv-core",
+		providerId: "prov-fiserv",
+		targetType: "node",
+		targetId: "n-core-ledger",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-jack-henry-core",
+		providerId: "prov-jack-henry",
+		targetType: "node",
+		targetId: "n-deposit-system",
+		role: "technology_provider",
+	},
+	{
+		id: "pa-infinant-orchestration",
+		providerId: "prov-infinant",
+		targetType: "capability",
+		targetId: "cap-payment-orchestration",
+		role: "platform_provider",
+	},
 ].map((d) => ProviderAssociationSchema.parse(d));
 
 // --- Value Streams ---
@@ -754,6 +1559,16 @@ export const valueStreams: ValueStream[] = [
 		capabilityIds: ["cap-account-opening", "cap-onboarding"],
 		journeyIds: ["j-open-savings"],
 		tags: ["accounts", "origination"],
+	},
+	{
+		id: "vs-card-payment",
+		domainId: "dom-payments",
+		label: "Card Payment Processing",
+		description:
+			"End-to-end value stream for card payment authorization, network routing, and settlement",
+		capabilityIds: ["cap-payment-processing", "cap-network-authorization", "cap-settlement"],
+		journeyIds: [],
+		tags: ["payments", "cards", "settlement"],
 	},
 ].map((d) => ValueStreamSchema.parse(d));
 
@@ -798,6 +1613,54 @@ export const processStages: ProcessStage[] = [
 		edgeIds: ["e-payment-ledger"],
 		controlPoints: ["double-entry", "balance-update"],
 	},
+	// --- Card Authorization Process Stages ---
+	{
+		id: "ps-card-1",
+		processId: "proc-card-auth",
+		sequenceNumber: 0,
+		label: "Request Receipt",
+		description: "Receive card authorization request from merchant acquirer or channel",
+		nodeIds: ["n-api-gateway", "n-payment-router"],
+		edgeIds: ["e-gw-router"],
+	},
+	{
+		id: "ps-card-2",
+		processId: "proc-card-auth",
+		sequenceNumber: 1,
+		label: "Fraud Screening",
+		description: "Real-time fraud scoring and AML screening before network routing",
+		nodeIds: ["n-fraud-engine", "n-aml-screening"],
+		edgeIds: ["e-orch-fraud", "e-fraud-aml"],
+		controlPoints: ["fraud-score", "velocity-check", "aml-screening"],
+	},
+	{
+		id: "ps-card-3",
+		processId: "proc-card-auth",
+		sequenceNumber: 2,
+		label: "Network Routing",
+		description: "Route to the appropriate card network (Visa, Mastercard) via issuer processor",
+		nodeIds: ["n-card-processor", "n-visa-network", "n-mastercard-network"],
+		edgeIds: ["e-orch-processor", "e-processor-visa", "e-processor-mastercard"],
+	},
+	{
+		id: "ps-card-4",
+		processId: "proc-card-auth",
+		sequenceNumber: 3,
+		label: "Authorization Decision",
+		description: "Evaluate available balance, credit limit, and policy rules to approve or decline",
+		nodeIds: ["n-policy-engine", "n-core-ledger"],
+		edgeIds: ["e-gw-policy"],
+		controlPoints: ["balance-check", "credit-limit", "policy-evaluation"],
+	},
+	{
+		id: "ps-card-5",
+		processId: "proc-card-auth",
+		sequenceNumber: 4,
+		label: "Response Return",
+		description: "Return authorization response to the network and originating channel",
+		nodeIds: ["n-card-processor", "n-api-gateway"],
+		edgeIds: ["e-orch-processor"],
+	},
 ].map((d) => ProcessStageSchema.parse(d));
 
 // --- Processes ---
@@ -812,21 +1675,37 @@ export const processes: Process[] = [
 		stageIds: ["ps-1", "ps-2", "ps-3", "ps-4"],
 		tags: ["payments", "authorization"],
 	},
+	{
+		id: "proc-card-auth",
+		label: "Card Authorization",
+		description:
+			"Operational process for authorizing a card payment through network and issuer processor",
+		capabilityIds: ["cap-network-authorization"],
+		valueStreamId: "vs-card-payment",
+		stageIds: ["ps-card-1", "ps-card-2", "ps-card-3", "ps-card-4", "ps-card-5"],
+		tags: ["cards", "authorization", "network"],
+	},
 ].map((d) => ProcessSchema.parse(d));
 
 // --- Story Waypoints ---
 
 export const storyWaypoints: StoryWaypoint[] = [
+	// --- Route: How a Payment Flows (sr-payment-flow) ---
 	{
 		id: "sw-1",
 		storyRouteId: "sr-payment-flow",
 		sequenceNumber: 0,
 		title: "The Customer Initiates",
-		keyMessage: "Every payment begins with a customer action in a channel",
-		whyItMatters: "The channel determines which payment interfaces and wallets are available",
+		keyMessage:
+			"Every payment begins with a customer action in a digital channel — mobile, web, or merchant checkout",
+		whyItMatters:
+			"The channel determines which wallets, authentication methods, and payment interfaces are available",
 		focusTargets: [
 			{ type: "node", targetId: "n-customer" },
 			{ type: "node", targetId: "n-mobile-app" },
+			{ type: "node", targetId: "n-web-app" },
+			{ type: "node", targetId: "n-merchant-checkout" },
+			{ type: "edge", targetId: "e-cust-app" },
 		],
 		perspectiveId: "persp-overview",
 	},
@@ -834,12 +1713,17 @@ export const storyWaypoints: StoryWaypoint[] = [
 		id: "sw-2",
 		storyRouteId: "sr-payment-flow",
 		sequenceNumber: 1,
-		title: "The Gateway Routes",
-		keyMessage: "The API gateway identifies the payment context and routes to orchestration",
+		title: "Orchestration Takes Over",
+		keyMessage:
+			"The API gateway hands off to the payment router and policy engine, which decide how the payment should be processed",
+		whyItMatters:
+			"Orchestration is the strategic control point — it determines routing, cost optimization, and fallback paths",
 		focusTargets: [
 			{ type: "node", targetId: "n-api-gateway" },
-			{ type: "node", targetId: "n-payment-orch" },
-			{ type: "edge", targetId: "e-gw-payment" },
+			{ type: "node", targetId: "n-payment-router" },
+			{ type: "node", targetId: "n-policy-engine" },
+			{ type: "edge", targetId: "e-gw-router" },
+			{ type: "edge", targetId: "e-policy-router" },
 		],
 		perspectiveId: "persp-architecture",
 	},
@@ -847,12 +1731,17 @@ export const storyWaypoints: StoryWaypoint[] = [
 		id: "sw-3",
 		storyRouteId: "sr-payment-flow",
 		sequenceNumber: 2,
-		title: "Risk and Decisioning",
-		keyMessage: "Before any money moves, fraud and policy checks determine if the payment proceeds",
-		whyItMatters: "This is where the bank retains critical control over the transaction",
+		title: "Risk and Fraud Decisioning",
+		keyMessage:
+			"Before any money moves, the fraud engine, AML screening, and risk service determine if the payment proceeds",
+		whyItMatters:
+			"This is where the bank retains critical control — blocking fraud while minimizing false declines",
 		focusTargets: [
+			{ type: "node", targetId: "n-fraud-engine" },
+			{ type: "node", targetId: "n-aml-screening" },
 			{ type: "node", targetId: "n-risk-svc" },
-			{ type: "edge", targetId: "e-risk-payment" },
+			{ type: "edge", targetId: "e-orch-fraud" },
+			{ type: "edge", targetId: "e-fraud-aml" },
 			{ type: "process_stage", targetId: "ps-2" },
 		],
 	},
@@ -860,32 +1749,262 @@ export const storyWaypoints: StoryWaypoint[] = [
 		id: "sw-4",
 		storyRouteId: "sr-payment-flow",
 		sequenceNumber: 3,
-		title: "The Network Path",
-		keyMessage: "The payment orchestrator selects the appropriate network or rail for execution",
+		title: "Network and Rail Selection",
+		keyMessage:
+			"The router selects the appropriate network or rail — card schemes for purchases, ACH/RTP/FedNow for transfers",
 		whyItMatters:
-			"This is where schemes like Visa/Mastercard or rails like RTP/FedNow enter the flow",
+			"This is where Visa, Mastercard, RTP, FedNow, and ACH enter the flow, each with different speed, cost, and finality characteristics",
 		focusTargets: [
-			{ type: "node", targetId: "n-payment-orch" },
-			{ type: "node", targetId: "n-payment-rail" },
-			{ type: "edge", targetId: "e-payment-rail" },
+			{ type: "node", targetId: "n-card-processor" },
+			{ type: "node", targetId: "n-visa-network" },
+			{ type: "node", targetId: "n-rtp-rail" },
+			{ type: "node", targetId: "n-ach-rail" },
+			{ type: "edge", targetId: "e-router-ach" },
+			{ type: "edge", targetId: "e-router-rtp" },
+			{ type: "edge", targetId: "e-processor-visa" },
 			{ type: "provider", targetId: "prov-visa" },
+			{ type: "provider", targetId: "prov-rtp" },
 		],
-		perspectiveId: "persp-provider",
+		perspectiveId: "persp-process",
 	},
 	{
 		id: "sw-5",
 		storyRouteId: "sr-payment-flow",
 		sequenceNumber: 4,
-		title: "The Core Records",
+		title: "Settlement and Clearing",
 		keyMessage:
-			"The core ledger is the system of record — this is where the transaction becomes authoritative",
+			"After network authorization, clearing and settlement engines finalize the money movement",
 		whyItMatters:
-			"Regardless of which network or rail was used, the core ledger maintains the bank's truth",
+			"Settlement timing varies dramatically — real-time rails settle instantly while ACH batches settle next day",
+		focusTargets: [
+			{ type: "node", targetId: "n-clearing-house" },
+			{ type: "node", targetId: "n-settlement-engine" },
+			{ type: "edge", targetId: "e-clearing-settlement" },
+			{ type: "edge", targetId: "e-settlement-ledger" },
+		],
+	},
+	{
+		id: "sw-6",
+		storyRouteId: "sr-payment-flow",
+		sequenceNumber: 5,
+		title: "Core Records the Truth",
+		keyMessage:
+			"The core ledger and general ledger are the system of record — this is where the transaction becomes authoritative",
+		whyItMatters:
+			"Regardless of which network or rail was used, the core ledger maintains the bank's single source of truth",
 		focusTargets: [
 			{ type: "node", targetId: "n-core-ledger" },
-			{ type: "edge", targetId: "e-payment-ledger" },
+			{ type: "node", targetId: "n-gl-system" },
+			{ type: "edge", targetId: "e-settlement-gl" },
+			{ type: "edge", targetId: "e-ledger-gl" },
 			{ type: "process_stage", targetId: "ps-4" },
 		],
+		perspectiveId: "persp-architecture",
+	},
+
+	// --- Route: Real-Time Payment: RTP vs FedNow (sr-rtp-vs-fednow) ---
+	{
+		id: "sw-7",
+		storyRouteId: "sr-rtp-vs-fednow",
+		sequenceNumber: 0,
+		title: "Customer Initiates a Transfer",
+		keyMessage: "A customer initiates a person-to-person or account transfer from their mobile app",
+		whyItMatters:
+			"Real-time payments start the same way as any other payment — the difference is in the rail, not the channel",
+		focusTargets: [
+			{ type: "node", targetId: "n-customer" },
+			{ type: "node", targetId: "n-mobile-app" },
+			{ type: "edge", targetId: "e-cust-app" },
+		],
+		perspectiveId: "persp-overview",
+	},
+	{
+		id: "sw-8",
+		storyRouteId: "sr-rtp-vs-fednow",
+		sequenceNumber: 1,
+		title: "Orchestration Routes to Real-Time",
+		keyMessage:
+			"The payment router and policy engine determine the transfer qualifies for a real-time rail instead of batch ACH",
+		whyItMatters:
+			"Routing logic decides between RTP, FedNow, and ACH based on amount limits, recipient capability, and cost",
+		focusTargets: [
+			{ type: "node", targetId: "n-payment-router" },
+			{ type: "node", targetId: "n-policy-engine" },
+			{ type: "edge", targetId: "e-policy-router" },
+			{ type: "edge", targetId: "e-gw-router" },
+		],
+		perspectiveId: "persp-architecture",
+	},
+	{
+		id: "sw-9",
+		storyRouteId: "sr-rtp-vs-fednow",
+		sequenceNumber: 2,
+		title: "The RTP Path",
+		keyMessage:
+			"RTP (Real-Time Payments) is operated by The Clearing House — a bank-owned network processing credit transfers in seconds",
+		whyItMatters:
+			"RTP was first to market, has broader bank coverage, and supports request-for-payment messaging",
+		focusTargets: [
+			{ type: "node", targetId: "n-rtp-rail" },
+			{ type: "edge", targetId: "e-router-rtp" },
+			{ type: "provider", targetId: "prov-rtp" },
+		],
+	},
+	{
+		id: "sw-10",
+		storyRouteId: "sr-rtp-vs-fednow",
+		sequenceNumber: 3,
+		title: "The FedNow Path",
+		keyMessage:
+			"FedNow is the Federal Reserve's instant payment rail — a government-operated alternative ensuring universal access",
+		whyItMatters:
+			"FedNow provides a public-infrastructure alternative that doesn't require membership in a private network",
+		focusTargets: [
+			{ type: "node", targetId: "n-fednow-rail" },
+			{ type: "edge", targetId: "e-router-fednow" },
+			{ type: "provider", targetId: "prov-fednow" },
+		],
+	},
+	{
+		id: "sw-11",
+		storyRouteId: "sr-rtp-vs-fednow",
+		sequenceNumber: 4,
+		title: "Settlement and Clearing",
+		keyMessage:
+			"Both rails settle in real time, but clearing mechanics and finality guarantees differ between them",
+		whyItMatters:
+			"Real-time settlement eliminates credit risk between banks — a fundamental shift from batch processing",
+		focusTargets: [
+			{ type: "node", targetId: "n-settlement-engine" },
+			{ type: "node", targetId: "n-clearing-house" },
+			{ type: "edge", targetId: "e-clearing-settlement" },
+			{ type: "edge", targetId: "e-settlement-ledger" },
+		],
+		perspectiveId: "persp-process",
+	},
+	{
+		id: "sw-12",
+		storyRouteId: "sr-rtp-vs-fednow",
+		sequenceNumber: 5,
+		title: "Core Ledger Records",
+		keyMessage:
+			"The core ledger posts the completed transfer in real time, updating balances immediately",
+		whyItMatters:
+			"Real-time posting to the core ledger means customers see their balance update instantly — no more pending transactions",
+		focusTargets: [
+			{ type: "node", targetId: "n-core-ledger" },
+			{ type: "edge", targetId: "e-settlement-ledger" },
+			{ type: "process_stage", targetId: "ps-4" },
+		],
+	},
+
+	// --- Route: Where Bank Control Changes Hands (sr-bank-control) ---
+	{
+		id: "sw-13",
+		storyRouteId: "sr-bank-control",
+		sequenceNumber: 0,
+		title: "The Bank Starts in Control",
+		keyMessage:
+			"At the core, the bank fully controls its ledger, deposit systems, and account infrastructure",
+		whyItMatters:
+			"The core ledger and deposit system are the bank's sovereign territory — no third party can override them",
+		focusTargets: [
+			{ type: "node", targetId: "n-core-ledger" },
+			{ type: "node", targetId: "n-deposit-system" },
+			{ type: "edge", targetId: "e-ledger-deposit" },
+		],
+		perspectiveId: "persp-overview",
+	},
+	{
+		id: "sw-14",
+		storyRouteId: "sr-bank-control",
+		sequenceNumber: 1,
+		title: "Orchestration as Strategic Control Layer",
+		keyMessage:
+			"The payment router and policy engine are where the bank exercises strategic control over payment flows",
+		whyItMatters:
+			"Banks that own their orchestration layer can optimize routing, manage costs, and enforce business rules without vendor lock-in",
+		focusTargets: [
+			{ type: "node", targetId: "n-payment-router" },
+			{ type: "node", targetId: "n-policy-engine" },
+			{ type: "node", targetId: "n-workflow-engine" },
+			{ type: "edge", targetId: "e-policy-router" },
+			{ type: "edge", targetId: "e-router-workflow" },
+		],
+		perspectiveId: "persp-architecture",
+	},
+	{
+		id: "sw-15",
+		storyRouteId: "sr-bank-control",
+		sequenceNumber: 2,
+		title: "Risk and Identity as Trust Boundary",
+		keyMessage:
+			"Fraud detection and identity verification are where the bank enforces its trust model before money moves",
+		whyItMatters:
+			"Outsourcing risk entirely to third parties means ceding control over who can transact and what gets approved",
+		focusTargets: [
+			{ type: "node", targetId: "n-fraud-engine" },
+			{ type: "node", targetId: "n-risk-svc" },
+			{ type: "node", targetId: "n-identity-svc" },
+			{ type: "edge", targetId: "e-orch-fraud" },
+			{ type: "edge", targetId: "e-identity-risk" },
+			{ type: "provider", targetId: "prov-feedzai" },
+		],
+		perspectiveId: "persp-process",
+	},
+	{
+		id: "sw-16",
+		storyRouteId: "sr-bank-control",
+		sequenceNumber: 3,
+		title: "Control Shifts to Networks and Schemes",
+		keyMessage:
+			"When a payment enters a card network, the bank cedes control to Visa or Mastercard's rules, interchange, and dispute processes",
+		whyItMatters:
+			"Network rules govern authorization, interchange fees, chargeback liability, and settlement timing — the bank must comply",
+		focusTargets: [
+			{ type: "node", targetId: "n-visa-network" },
+			{ type: "node", targetId: "n-mastercard-network" },
+			{ type: "node", targetId: "n-card-processor" },
+			{ type: "edge", targetId: "e-processor-visa" },
+			{ type: "edge", targetId: "e-processor-mastercard" },
+			{ type: "provider", targetId: "prov-visa" },
+			{ type: "provider", targetId: "prov-mastercard" },
+		],
+	},
+	{
+		id: "sw-17",
+		storyRouteId: "sr-bank-control",
+		sequenceNumber: 4,
+		title: "Wallets and Interfaces Add Another Layer",
+		keyMessage:
+			"Digital wallets like Apple Pay and merchant checkouts insert a layer between the bank and the customer",
+		whyItMatters:
+			"When Apple Pay or a merchant checkout owns the customer experience, the bank loses visibility into customer intent and behavior",
+		focusTargets: [
+			{ type: "node", targetId: "n-mobile-app" },
+			{ type: "node", targetId: "n-merchant-checkout" },
+			{ type: "provider", targetId: "prov-apple-pay" },
+			{ type: "provider", targetId: "prov-google-pay" },
+			{ type: "edge", targetId: "e-merchant-gw" },
+		],
+		perspectiveId: "persp-journey",
+	},
+	{
+		id: "sw-18",
+		storyRouteId: "sr-bank-control",
+		sequenceNumber: 5,
+		title: "The System of Record Anchors Truth",
+		keyMessage:
+			"Regardless of how many intermediaries touched the payment, the core ledger and GL remain the bank's authoritative record",
+		whyItMatters:
+			"The bank's ultimate control comes from being the system of record — regulatory reporting, reconciliation, and audit all flow from here",
+		focusTargets: [
+			{ type: "node", targetId: "n-core-ledger" },
+			{ type: "node", targetId: "n-gl-system" },
+			{ type: "edge", targetId: "e-ledger-gl" },
+			{ type: "edge", targetId: "e-settlement-gl" },
+		],
+		perspectiveId: "persp-architecture",
 	},
 ].map((d) => StoryWaypointSchema.parse(d));
 
@@ -899,8 +2018,30 @@ export const storyRoutes: StoryRoute[] = [
 			"Understand how a payment moves through the modern banking stack from customer initiation to core recording",
 		audienceTag: "architecture",
 		overview:
-			"This route walks through a retail payment from the customer's device through orchestration, risk, network selection, and core posting.",
-		waypointIds: ["sw-1", "sw-2", "sw-3", "sw-4", "sw-5"],
+			"This route walks through a retail payment from the customer's device through channels, orchestration, risk, network/rail selection, settlement, and core posting.",
+		waypointIds: ["sw-1", "sw-2", "sw-3", "sw-4", "sw-5", "sw-6"],
 		tags: ["payments", "teaching", "architecture"],
+	},
+	{
+		id: "sr-rtp-vs-fednow",
+		title: "Real-Time Payment: RTP vs FedNow",
+		destinationObjective:
+			"Explain how real-time payments differ from card network flows and compare the two instant payment rails",
+		audienceTag: "architecture",
+		overview:
+			"This route compares the two real-time payment rails in the US — RTP (operated by The Clearing House) and FedNow (operated by the Federal Reserve) — tracing a transfer from initiation through routing, rail-specific processing, settlement, and core posting.",
+		waypointIds: ["sw-7", "sw-8", "sw-9", "sw-10", "sw-11", "sw-12"],
+		tags: ["payments", "real-time", "rails", "comparison"],
+	},
+	{
+		id: "sr-bank-control",
+		title: "Where Bank Control Changes Hands",
+		destinationObjective:
+			"Understand where a bank retains control versus delegates it to networks, schemes, wallets, or orchestration layers",
+		audienceTag: "strategy",
+		overview:
+			"This route traces the boundary between bank-controlled and externally-controlled components in the payment stack — from core systems where the bank has full sovereignty, through orchestration and risk layers, to networks and wallets where control shifts to third parties.",
+		waypointIds: ["sw-13", "sw-14", "sw-15", "sw-16", "sw-17", "sw-18"],
+		tags: ["strategy", "control", "governance", "vendor-management"],
 	},
 ].map((d) => StoryRouteSchema.parse(d));

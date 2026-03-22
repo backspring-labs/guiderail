@@ -305,7 +305,7 @@ describe("Domain → Capability → Journey hierarchy", () => {
 
 describe("0.2.0 entity schemas validate seed data", () => {
 	it("validates all providers", () => {
-		expect(providers.length).toBe(5);
+		expect(providers.length).toBe(20);
 		for (const p of providers) {
 			expect(ProviderSchema.parse(p)).toBeDefined();
 		}
@@ -319,35 +319,35 @@ describe("0.2.0 entity schemas validate seed data", () => {
 	});
 
 	it("validates all value streams", () => {
-		expect(valueStreams.length).toBe(2);
+		expect(valueStreams.length).toBe(3);
 		for (const vs of valueStreams) {
 			expect(ValueStreamSchema.parse(vs)).toBeDefined();
 		}
 	});
 
 	it("validates all processes", () => {
-		expect(processes.length).toBe(1);
+		expect(processes.length).toBe(2);
 		for (const p of processes) {
 			expect(ProcessSchema.parse(p)).toBeDefined();
 		}
 	});
 
 	it("validates all process stages", () => {
-		expect(processStages.length).toBe(4);
+		expect(processStages.length).toBe(9);
 		for (const ps of processStages) {
 			expect(ProcessStageSchema.parse(ps)).toBeDefined();
 		}
 	});
 
 	it("validates all story routes", () => {
-		expect(storyRoutes.length).toBe(1);
+		expect(storyRoutes.length).toBe(3);
 		for (const sr of storyRoutes) {
 			expect(StoryRouteSchema.parse(sr)).toBeDefined();
 		}
 	});
 
 	it("validates all story waypoints", () => {
-		expect(storyWaypoints.length).toBe(5);
+		expect(storyWaypoints.length).toBe(18);
 		for (const sw of storyWaypoints) {
 			expect(StoryWaypointSchema.parse(sw)).toBeDefined();
 		}

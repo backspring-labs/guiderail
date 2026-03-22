@@ -1,6 +1,7 @@
 import { edgeTypes } from "@/components/canvas/edges/edge-types.js";
 import { nodeTypes } from "@/components/canvas/nodes/node-types.js";
 import { Breadcrumb } from "@/components/navigation/Breadcrumb.js";
+import { SearchPalette } from "@/components/navigation/SearchPalette.js";
 import { StoryRouteBar } from "@/components/route/StoryRouteBar.js";
 import { useInitializeContext, useNavigation } from "@/hooks/use-context-machine.js";
 import { usePerspectiveProvider } from "@/hooks/use-perspective-provider.js";
@@ -15,7 +16,7 @@ import {
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LeftPanel } from "./LeftPanel.js";
 import { RightPanel } from "./RightPanel.js";
 import { TopBar } from "./TopBar.js";
@@ -23,8 +24,21 @@ import { TopBar } from "./TopBar.js";
 export function AppShell() {
 	useInitializeContext();
 	const { nav, graph, isReady, send } = useNavigation();
-	const { rfNodes, rfEdges } = usePerspectiveProvider(nav, graph);
+	const { rfNodes, rfEdges, layoutLoading } = usePerspectiveProvider(nav, graph);
 	const setRightPanelOpen = useUIStore((s) => s.setRightPanelOpen);
+	const [searchOpen, setSearchOpen] = useState(false);
+
+	// Cmd+K / Ctrl+K keyboard shortcut for search
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+				e.preventDefault();
+				setSearchOpen(true);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
 
 	const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges);
@@ -175,6 +189,16 @@ export function AppShell() {
 					/>
 				)}
 			</div>
+			<SearchPalette
+				open={searchOpen}
+				onClose={() => setSearchOpen(false)}
+				onSelectDomain={(id) => send({ type: "SELECT_DOMAIN", domainId: id })}
+				onSelectCapability={(id) => send({ type: "SELECT_CAPABILITY", capabilityId: id })}
+				onSelectNode={(id) => send({ type: "SELECT_NODE", nodeId: id })}
+				onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
+				onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
+				onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
+			/>
 		</div>
 	);
 }

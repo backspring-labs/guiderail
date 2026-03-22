@@ -4,6 +4,7 @@
 @import "./layout.css";
 @import "./detail.css";
 @import "./story-route.css";
+@import "./search.css";
 
 *,
 *::before,

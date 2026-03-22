@@ -153,7 +153,7 @@ describe("MockContentRepoAdapter", () => {
 	it("lists domains", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const domains = await adapter.listDomains();
-		expect(domains.length).toBe(3);
+		expect(domains.length).toBe(9);
 		for (const d of domains) {
 			expect(EntityManifestSchema.parse(d)).toBeDefined();
 		}
@@ -162,13 +162,13 @@ describe("MockContentRepoAdapter", () => {
 	it("lists capabilities", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const caps = await adapter.listCapabilities();
-		expect(caps.length).toBe(6);
+		expect(caps.length).toBe(16);
 	});
 
 	it("lists entities (nodes)", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const entities = await adapter.listEntities();
-		expect(entities.length).toBe(10);
+		expect(entities.length).toBe(39);
 	});
 
 	it("lists research", async () => {

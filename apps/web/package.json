@@ -1,6 +1,6 @@
 {
 	"name": "@guiderail/web",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "GuideRail web UI — terrain canvas, detail panels, guided route bar",
 	"type": "module",
 	"license": "MIT",
@@ -19,6 +19,7 @@
 		"@guiderail/core": "workspace:*",
 		"@xstate/react": "^5.0.0",
 		"@xyflow/react": "^12.0.0",
+		"elkjs": "^0.11.1",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
 		"xstate": "^5.19.0",
