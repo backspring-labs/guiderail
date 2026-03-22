@@ -1,0 +1,120 @@
+/* Custom terrain node styles */
+.terrain-node {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 16px;
+	min-width: 160px;
+	min-height: 60px;
+	border: 2px solid;
+	border-radius: 8px;
+	background: var(--color-bg-panel);
+	color: var(--color-text);
+	font-size: var(--font-size-base);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	transition: opacity 0.3s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.terrain-node--actor {
+	border-color: var(--color-node-actor);
+	border-radius: 24px;
+}
+
+.terrain-node--service {
+	border-color: var(--color-node-service);
+}
+
+.terrain-node--system {
+	border-color: var(--color-node-system);
+	border-radius: 4px;
+	border-width: 3px;
+}
+
+.terrain-node--screen {
+	border-color: var(--color-node-screen);
+	border-radius: 12px;
+}
+
+.terrain-node__content {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.terrain-node__icon {
+	font-size: 1.1rem;
+	flex-shrink: 0;
+}
+
+.terrain-node__label {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Provider badges */
+.terrain-node__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+}
+
+.terrain-node__badge {
+	font-size: 10px;
+	padding: 1px 6px;
+	border-radius: 8px;
+	background: var(--color-provider-default);
+	color: var(--color-bg);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.terrain-node__badge[data-category="scheme"] {
+	background: var(--color-provider-scheme);
+}
+
+.terrain-node__badge[data-category="rail"] {
+	background: var(--color-provider-rail);
+}
+
+.terrain-node__badge[data-category="wallet"] {
+	background: var(--color-provider-wallet);
+}
+
+.terrain-node__badge[data-category="network"] {
+	background: var(--color-provider-network);
+}
+
+.terrain-node__badge--overflow {
+	background: var(--color-bg-surface);
+	color: var(--color-text-secondary);
+}
+
+/* Edge label styles */
+.terrain-edge__label {
+	font-size: var(--font-size-sm);
+	color: var(--color-text-secondary);
+	background: var(--color-bg);
+	padding: 2px 6px;
+	border-radius: 4px;
+	white-space: nowrap;
+}
+
+/* React Flow handle overrides */
+.react-flow__handle {
+	width: 6px;
+	height: 6px;
+	background: var(--color-border);
+	border: none;
+}
+
+/* Highlighted state (journey focus targets) */
+.terrain-node--highlighted {
+	box-shadow: 0 0 0 3px var(--color-highlighted), 0 0 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Selection ring */
+.react-flow__node.selected .terrain-node {
+	box-shadow: 0 0 0 3px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.3);
+}

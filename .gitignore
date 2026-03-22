@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-node/
+coverage/
+storybook-static/
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*
+.turbo

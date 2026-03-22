@@ -1,0 +1,60 @@
+# GuideRail
+
+Guided architecture navigation from business understanding to code reality. A pnpm + Turborepo monorepo.
+
+## Commands (from root)
+
+```bash
+pnpm install        # install all workspace dependencies
+pnpm dev            # start web dev server (turbo)
+pnpm build          # build all packages (turbo, core first)
+pnpm test           # run all tests (turbo)
+pnpm check          # biome check all packages (turbo)
+pnpm check:fix      # biome auto-fix all packages (turbo)
+```
+
+## Packages
+
+| Package | Path | Description |
+|---------|------|-------------|
+| `@guiderail/core` | `packages/core/` | Headless kernel — domain model, state machines, context sync, graph queries |
+| `@guiderail/web` | `apps/web/` | React UI — terrain canvas, detail panels, guided route bar |
+
+## Architecture
+
+- **@guiderail/core** owns all domain logic, navigation state, and graph operations. No UI, no React. Pure TypeScript + Zod + XState.
+- **@guiderail/web** owns rendering, layout, and UX. Consumes core via workspace dependency.
+- Dependency direction: `web → core` only. Core never imports from web.
+
+## Key Design Rules
+
+1. **Context Machine is single authority.** All nav state reads from `snapshot.context.nav`. All mutations via `send(event)`.
+
+2. **Kernel vs UI authority.** The Context Machine remains the single source of truth for route, process, value stream, and navigation state. The UI derives renderable presentation state but must not recreate kernel semantics.
+
+3. **Zustand owns UI-only state.** Panel visibility, animation flags, hover state. Never canonical navigation state.
+
+4. **React Flow is render-only.** Node and edge types are delivery structures for rendering, not semantic truth.
+
+5. **No domain-model renaming from package renames.** The `mode: "viewscape" | "guiderail"` enum values are domain concepts, not package names.
+
+6. **`@seed` is a temporary convenience.** The web app imports seed data from core's test-fixtures via a path alias. This is a development bridge, not a permanent content contract.
+
+## TypeScript Ownership
+
+- TypeScript tool is a root-level shared devDependency.
+- tsconfig ownership is package-local. Each package has its own tsconfig.json.
+- Package build scripts invoke their own local tsconfig paths.
+
+## Workspace Structure
+
+```
+guiderail/
+├── packages/
+│   └── core/     ← @guiderail/core (headless kernel)
+├── apps/
+│   └── web/      ← @guiderail/web (React UI)
+├── pnpm-workspace.yaml
+├── turbo.json
+└── package.json  ← root workspace
+```

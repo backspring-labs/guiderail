@@ -1,0 +1,31 @@
+@import "./variables.css";
+@import "@xyflow/react/dist/style.css";
+@import "./react-flow.css";
+@import "./layout.css";
+@import "./detail.css";
+@import "./story-route.css";
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html,
+body,
+#root {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+body {
+	font-family: var(--font-family);
+	font-size: var(--font-size-base);
+	color: var(--color-text);
+	background-color: var(--color-bg);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}

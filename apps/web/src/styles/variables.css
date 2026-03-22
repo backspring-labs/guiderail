@@ -1,0 +1,46 @@
+:root {
+	/* Node type colors */
+	--color-node-actor: #3b82f6;
+	--color-node-service: #10b981;
+	--color-node-system: #8b5cf6;
+	--color-node-screen: #f59e0b;
+
+	/* Provider category colors */
+	--color-provider-scheme: #60a5fa;
+	--color-provider-rail: #34d399;
+	--color-provider-wallet: #fbbf24;
+	--color-provider-network: #a78bfa;
+	--color-provider-default: #94a3b8;
+
+	/* Edge type colors */
+	--color-edge-default: #64748b;
+	--color-edge-service-call: #3b82f6;
+	--color-edge-dependency: #94a3b8;
+	--color-edge-event: #10b981;
+	--color-edge-ledger: #8b5cf6;
+
+	/* State colors */
+	--color-selected: #2563eb;
+	--color-highlighted: #f59e0b;
+	--color-dimmed-opacity: 0.2;
+
+	/* Layout */
+	--top-bar-height: 48px;
+	--panel-width-default: 280px;
+	--panel-min-width: 200px;
+	--panel-max-width: 400px;
+
+	/* Typography */
+	--font-family: system-ui, -apple-system, sans-serif;
+	--font-size-sm: 0.75rem;
+	--font-size-base: 0.875rem;
+	--font-size-lg: 1rem;
+
+	/* Surface colors */
+	--color-bg: #0f172a;
+	--color-bg-panel: #1e293b;
+	--color-bg-surface: #334155;
+	--color-text: #f1f5f9;
+	--color-text-secondary: #94a3b8;
+	--color-border: #475569;
+}

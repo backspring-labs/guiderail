@@ -1,0 +1,24 @@
+{
+	"name": "guiderail",
+	"private": true,
+	"description": "GuideRail — guided architecture navigation from business understanding to code reality",
+	"license": "MIT",
+	"type": "module",
+	"packageManager": "pnpm@10.32.1",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "turbo build",
+		"test": "turbo test",
+		"check": "turbo check",
+		"dev": "turbo dev",
+		"check:fix": "turbo check:fix"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"lefthook": "^1.11.0",
+		"turbo": "^2.0.0",
+		"typescript": "^5.7.0"
+	}
+}

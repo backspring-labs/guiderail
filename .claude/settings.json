@@ -1,0 +1,19 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(pnpm install)",
+			"Bash(pnpm dev)",
+			"Bash(pnpm build)",
+			"Bash(pnpm test)",
+			"Bash(pnpm test:*)",
+			"Bash(pnpm check)",
+			"Bash(pnpm check:fix)",
+			"Bash(pnpm preview)",
+			"Bash(pnpm storybook)",
+			"Bash(npx tsc*)",
+			"Bash(npx turbo*)",
+			"Bash(npx lefthook*)",
+			"Bash(cd /Users/jladd/Code/guiderail*)"
+		]
+	}
+}
