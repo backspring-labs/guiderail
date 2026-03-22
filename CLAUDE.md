@@ -54,7 +54,15 @@ guiderail/
 │   └── core/     ← @guiderail/core (headless kernel)
 ├── apps/
 │   └── web/      ← @guiderail/web (React UI)
+├── docs/
+│   ├── ideas/    ← product ideas and concept docs
+│   ├── prds/     ← product requirements documents
+│   └── plans/    ← implementation plans by version
 ├── pnpm-workspace.yaml
 ├── turbo.json
 └── package.json  ← root workspace
 ```
+
+## Documentation
+
+All product thinking, PRDs, and implementation plans live in `docs/` and are versioned with the code. This is the operational home of product evolution.
