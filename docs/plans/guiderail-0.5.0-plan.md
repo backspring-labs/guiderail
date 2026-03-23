@@ -29,6 +29,7 @@ GuideRail 0.5.0 proves that each perspective renders with a canvas tailored to i
 - **Content loading from files** — JSON/YAML import for seed-like content without recompiling
 - **Bounded canvas entry** — each perspective enters through a summarized state with progressive expansion
 - **Expanded seed data** — more journeys, deployment metadata, component relationships
+- **Mobile screen preview (stretch)** — right panel shows a mobile screen render when a screen-type node is selected, keeping the customer's experience visible during Process/Sequence navigation. See `docs/ideas/mobile-screen-preview-idea.md`.
 
 ### What 0.5.0 explicitly defers
 
@@ -38,6 +39,7 @@ GuideRail 0.5.0 proves that each perspective renders with a canvas tailored to i
 - Guided Tour participant model (presenter + followers)
 - Evidence Mode as a dedicated experience
 - Truth acquisition automation (derived truth, proposed truth)
+- Full mobile screen preview with real mockup assets (0.5.0 stretch establishes mapping, 0.6.0 adds real screen content)
 - OpenTelemetry / runtime trace ingestion
 - bpmn-js, Tiptap, Playwright, Next.js
 
