@@ -1,12 +1,13 @@
 import { edgeTypes } from "@/components/canvas/edges/edge-types.js";
 import { nodeTypes } from "@/components/canvas/nodes/node-types.js";
-import { Breadcrumb } from "@/components/navigation/Breadcrumb.js";
+import { ContextBar } from "@/components/navigation/ContextBar.js";
 import { SearchPalette } from "@/components/navigation/SearchPalette.js";
 import { StoryRouteBar } from "@/components/route/StoryRouteBar.js";
 import { useInitializeContext, useNavigation } from "@/hooks/use-context-machine.js";
 import { usePerspectiveProvider } from "@/hooks/use-perspective-provider.js";
 import { seedSteps, seedStoryRoutes, seedStoryWaypoints } from "@/store/seed-loader.js";
 import { useUIStore } from "@/store/ui-store.js";
+import type { Edge as RFEdge, Node as RFNode } from "@xyflow/react";
 import {
 	Background,
 	BackgroundVariant,
@@ -16,7 +17,7 @@ import {
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { LeftPanel } from "./LeftPanel.js";
 import { RightPanel } from "./RightPanel.js";
 import { TopBar } from "./TopBar.js";
@@ -24,7 +25,7 @@ import { TopBar } from "./TopBar.js";
 export function AppShell() {
 	useInitializeContext();
 	const { nav, graph, isReady, send } = useNavigation();
-	const { rfNodes, rfEdges, layoutLoading } = usePerspectiveProvider(nav, graph);
+	const { rfNodes, rfEdges, layoutLoading, swimLanes } = usePerspectiveProvider(nav, graph);
 	const setRightPanelOpen = useUIStore((s) => s.setRightPanelOpen);
 	const [searchOpen, setSearchOpen] = useState(false);
 
@@ -40,16 +41,16 @@ export function AppShell() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 
-	const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes);
-	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges);
+	const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes as RFNode[]);
+	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges as RFEdge[]);
 
 	// Sync projected nodes/edges into React Flow state when they change
 	useEffect(() => {
-		setNodes(rfNodes);
+		setNodes(rfNodes as RFNode[]);
 	}, [rfNodes, setNodes]);
 
 	useEffect(() => {
-		setEdges(rfEdges);
+		setEdges(rfEdges as RFEdge[]);
 	}, [rfEdges, setEdges]);
 
 	// Auto-open right panel on selection or focused context, auto-close on clear
@@ -94,7 +95,7 @@ export function AppShell() {
 				activePerspectiveId={nav.activePerspectiveId}
 				onSwitchPerspective={(id) => send({ type: "SWITCH_PERSPECTIVE", perspectiveId: id })}
 			/>
-			<Breadcrumb
+			<ContextBar
 				activeDomainId={nav.activeDomainId}
 				activeCapabilityId={nav.activeCapabilityId}
 				activeJourneyId={nav.activeJourneyId}
@@ -103,9 +104,12 @@ export function AppShell() {
 				activeValueStreamId={nav.activeValueStreamId}
 				activeProcessId={nav.activeProcessId}
 				activeStoryRouteId={nav.activeStoryRouteId}
+				activePerspectiveId={nav.activePerspectiveId}
+				activeCanvasMode={nav.activeCanvasMode}
 				routeState={nav.routeState}
 				onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				onClearCapability={() => send({ type: "CLEAR_CAPABILITY" })}
+				onSwitchCanvasMode={(mode) => send({ type: "SWITCH_CANVAS_MODE", canvasMode: mode })}
 			/>
 			<div className="app-shell__body">
 				<LeftPanel
@@ -156,6 +160,9 @@ export function AppShell() {
 									service: "#10b981",
 									system: "#8b5cf6",
 									screen: "#f59e0b",
+									bpmn_task: "#10b981",
+									bpmn_event: "#6366f1",
+									bpmn_gateway: "#f59e0b",
 								};
 								return colors[type] ?? "#64748b";
 							}}

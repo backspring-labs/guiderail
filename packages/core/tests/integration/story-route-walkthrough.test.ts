@@ -64,7 +64,7 @@ describe("Story Route Walkthrough — full lifecycle with pause/return", () => {
 		expect(nav(actor).activeCapabilityId).toBe("cap-payment-processing");
 
 		// 3. First waypoint applies its perspective (persp-overview)
-		expect(nav(actor).activePerspectiveId).toBe("persp-overview");
+		expect(nav(actor).activePerspectiveId).toBe("persp-landscape");
 
 		// 4. NEXT_WAYPOINT — advance to waypoint 1
 		actor.send({ type: "NEXT_WAYPOINT" });
@@ -87,12 +87,12 @@ describe("Story Route Walkthrough — full lifecycle with pause/return", () => {
 
 		// 7. Freely explore during pause
 		actor.send({ type: "SELECT_DOMAIN", domainId: "dom-accounts" });
+		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-landscape" });
 		actor.send({ type: "SELECT_NODE", nodeId: "n-customer" });
-		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-overview" });
 		// Temporary exploration changes nav state
 		expect(nav(actor).activeDomainId).toBe("dom-accounts");
 		expect(nav(actor).selectedNodeId).toBe("n-customer");
-		expect(nav(actor).activePerspectiveId).toBe("persp-overview");
+		expect(nav(actor).activePerspectiveId).toBe("persp-landscape");
 		// Route is still paused, not lost
 		expect(nav(actor).activeStoryRouteId).toBe("sr-payment-flow");
 		expect(nav(actor).routeState).toBe("paused");

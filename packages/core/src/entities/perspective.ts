@@ -1,13 +1,12 @@
 import { z } from "zod";
 
 export const PerspectiveTypeSchema = z.enum([
-	"overview",
-	"architecture",
-	"provider",
-	"process",
+	"landscape",
 	"journey",
+	"process",
+	"architecture",
+	"system",
 	"sequence",
-	"control",
 ]);
 
 export const PerspectiveSchema = z.object({

@@ -1,6 +1,6 @@
 {
 	"name": "@guiderail/web",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "GuideRail web UI — terrain canvas, detail panels, guided route bar",
 	"type": "module",
 	"license": "MIT",

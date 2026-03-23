@@ -3,11 +3,12 @@ import { createActor } from "xstate";
 import { perspectiveMachine } from "../../src/machines/perspective.machine.js";
 
 const perspectiveIds = [
-	"persp-overview",
-	"persp-architecture",
-	"persp-provider",
-	"persp-process",
+	"persp-landscape",
 	"persp-journey",
+	"persp-process",
+	"persp-architecture",
+	"persp-system",
+	"persp-sequence",
 ];
 
 function createPersp() {
@@ -26,7 +27,7 @@ describe("Perspective Machine", () => {
 		const actor = createPersp();
 		const snap = actor.getSnapshot();
 		expect(snap.context.availablePerspectiveIds).toEqual(perspectiveIds);
-		expect(snap.context.activePerspectiveId).toBe("persp-overview");
+		expect(snap.context.activePerspectiveId).toBe("persp-landscape");
 	});
 
 	it("PERSPECTIVES_LOADED preserves current perspective if still valid", () => {
@@ -50,23 +51,23 @@ describe("Perspective Machine", () => {
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-architecture" });
 		const snap = actor.getSnapshot();
 		expect(snap.context.activePerspectiveId).toBe("persp-architecture");
-		expect(snap.context.previousPerspectiveId).toBe("persp-overview");
+		expect(snap.context.previousPerspectiveId).toBe("persp-landscape");
 	});
 
 	it("SWITCH_PERSPECTIVE is guarded for invalid perspective", () => {
 		const actor = createPersp();
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-nonexistent" });
-		expect(actor.getSnapshot().context.activePerspectiveId).toBe("persp-overview");
+		expect(actor.getSnapshot().context.activePerspectiveId).toBe("persp-landscape");
 	});
 
 	it("multiple perspective switches track previous correctly", () => {
 		const actor = createPersp();
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-architecture" });
-		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-provider" });
+		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-system" });
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-process" });
 		const snap = actor.getSnapshot();
 		expect(snap.context.activePerspectiveId).toBe("persp-process");
-		expect(snap.context.previousPerspectiveId).toBe("persp-provider");
+		expect(snap.context.previousPerspectiveId).toBe("persp-system");
 	});
 
 	it("switching perspective does NOT affect machine state (always active)", () => {

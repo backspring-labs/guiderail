@@ -1,0 +1,185 @@
+import {
+	seedCapabilities,
+	seedDomains,
+	seedJourneys,
+	seedPerspectives,
+	seedProcesses,
+	seedStoryRoutes,
+	seedValueStreams,
+} from "@/store/seed-loader.js";
+
+const PROCESS_CANVAS_MODES = [
+	{ id: "operational", label: "Operational" },
+	{ id: "activity", label: "Decision" },
+	{ id: "risk_controls", label: "Controls" },
+];
+
+interface ContextBarProps {
+	activeDomainId: string | null;
+	activeCapabilityId: string | null;
+	activeJourneyId: string | null;
+	activeStepIndex: number | null;
+	totalSteps: number;
+	activeValueStreamId: string | null;
+	activeProcessId: string | null;
+	activeStoryRouteId: string | null;
+	activePerspectiveId: string;
+	activeCanvasMode: string | null;
+	routeState: "inactive" | "active" | "paused";
+	onClearDomain: () => void;
+	onClearCapability: () => void;
+	onSwitchCanvasMode: (mode: string) => void;
+}
+
+export function ContextBar(props: ContextBarProps) {
+	const perspectiveType =
+		seedPerspectives.find((p) => p.id === props.activePerspectiveId)?.type ?? "landscape";
+
+	return (
+		<div className="context-bar">
+			<BreadcrumbTrail
+				activeDomainId={props.activeDomainId}
+				activeCapabilityId={props.activeCapabilityId}
+				activeJourneyId={props.activeJourneyId}
+				activeStepIndex={props.activeStepIndex}
+				totalSteps={props.totalSteps}
+				activeValueStreamId={props.activeValueStreamId}
+				activeProcessId={props.activeProcessId}
+				activeStoryRouteId={props.activeStoryRouteId}
+				routeState={props.routeState}
+				onClearDomain={props.onClearDomain}
+				onClearCapability={props.onClearCapability}
+			/>
+			{perspectiveType === "process" && (
+				<CanvasModeSwitcher
+					activeCanvasMode={props.activeCanvasMode}
+					onSwitchCanvasMode={props.onSwitchCanvasMode}
+				/>
+			)}
+		</div>
+	);
+}
+
+interface BreadcrumbTrailProps {
+	activeDomainId: string | null;
+	activeCapabilityId: string | null;
+	activeJourneyId: string | null;
+	activeStepIndex: number | null;
+	totalSteps: number;
+	activeValueStreamId: string | null;
+	activeProcessId: string | null;
+	activeStoryRouteId: string | null;
+	routeState: "inactive" | "active" | "paused";
+	onClearDomain: () => void;
+	onClearCapability: () => void;
+}
+
+function BreadcrumbTrail(props: BreadcrumbTrailProps) {
+	const domain = props.activeDomainId
+		? seedDomains.find((d) => d.id === props.activeDomainId)
+		: null;
+	const capability = props.activeCapabilityId
+		? seedCapabilities.find((c) => c.id === props.activeCapabilityId)
+		: null;
+	const journey = props.activeJourneyId
+		? seedJourneys.find((j) => j.id === props.activeJourneyId)
+		: null;
+	const valueStream = props.activeValueStreamId
+		? seedValueStreams.find((vs) => vs.id === props.activeValueStreamId)
+		: null;
+	const process = props.activeProcessId
+		? seedProcesses.find((p) => p.id === props.activeProcessId)
+		: null;
+	const storyRoute = props.activeStoryRouteId
+		? seedStoryRoutes.find((sr) => sr.id === props.activeStoryRouteId)
+		: null;
+
+	return (
+		<div className="context-bar__breadcrumb">
+			<button type="button" className="context-bar__segment" onClick={props.onClearDomain}>
+				All Domains
+			</button>
+			{domain && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<button type="button" className="context-bar__segment" onClick={props.onClearCapability}>
+						{domain.label}
+					</button>
+				</>
+			)}
+			{valueStream && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<span className="context-bar__segment context-bar__segment--value-stream">
+						{valueStream.label}
+					</span>
+				</>
+			)}
+			{capability && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<span className="context-bar__segment context-bar__segment--current">
+						{capability.label}
+					</span>
+				</>
+			)}
+			{process && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<span className="context-bar__segment context-bar__segment--process">
+						{process.label}
+					</span>
+				</>
+			)}
+			{journey && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<span className="context-bar__segment context-bar__segment--journey">
+						{journey.label}
+						{props.activeStepIndex != null && (
+							<span className="context-bar__step-count">
+								{" "}
+								(Step {props.activeStepIndex + 1}/{props.totalSteps})
+							</span>
+						)}
+					</span>
+				</>
+			)}
+			{storyRoute && props.routeState !== "inactive" && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<span className="context-bar__segment context-bar__segment--route">
+						<span
+							className={`context-bar__route-state ${props.routeState === "paused" ? "context-bar__route-state--paused" : "context-bar__route-state--active"}`}
+						/>
+						{storyRoute.title}
+					</span>
+				</>
+			)}
+		</div>
+	);
+}
+
+interface CanvasModeSwitcherProps {
+	activeCanvasMode: string | null;
+	onSwitchCanvasMode: (mode: string) => void;
+}
+
+function CanvasModeSwitcher({ activeCanvasMode, onSwitchCanvasMode }: CanvasModeSwitcherProps) {
+	const currentMode = activeCanvasMode ?? "operational";
+
+	return (
+		<div className="context-bar__canvas-modes">
+			{PROCESS_CANVAS_MODES.map((mode) => (
+				<button
+					key={mode.id}
+					type="button"
+					className={`context-bar__canvas-mode ${currentMode === mode.id ? "context-bar__canvas-mode--active" : ""}`}
+					onClick={() => onSwitchCanvasMode(mode.id)}
+				>
+					{mode.label}
+				</button>
+			))}
+		</div>
+	);
+}

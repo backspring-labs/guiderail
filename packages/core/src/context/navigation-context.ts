@@ -27,6 +27,8 @@ export const NavigationContextSchema = z.object({
 	activeStoryRouteId: z.string().nullable().default(null),
 	activeWaypointIndex: z.number().int().nullable().default(null),
 	routeState: RouteStateSchema.default("inactive"),
+	// 0.4.0 additions
+	activeCanvasMode: z.string().nullable().default(null),
 });
 
 export type NavigationContext = z.infer<typeof NavigationContextSchema>;
@@ -49,5 +51,6 @@ export function createInitialNavigationContext(perspectiveId: string): Navigatio
 		activeStoryRouteId: null,
 		activeWaypointIndex: null,
 		routeState: "inactive",
+		activeCanvasMode: null,
 	};
 }

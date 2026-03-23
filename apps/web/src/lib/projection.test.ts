@@ -76,7 +76,7 @@ const graph = createGraph(
 );
 
 function baseCtx(overrides: Partial<NavigationContext> = {}): NavigationContext {
-	return { ...createInitialNavigationContext("persp-overview"), ...overrides };
+	return { ...createInitialNavigationContext("persp-landscape"), ...overrides };
 }
 
 describe("getVisibleNodeIds", () => {

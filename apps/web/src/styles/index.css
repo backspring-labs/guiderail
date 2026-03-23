@@ -5,6 +5,9 @@
 @import "./detail.css";
 @import "./story-route.css";
 @import "./search.css";
+@import "./bpmn.css";
+@import "./control.css";
+@import "./sequence.css";
 
 *,
 *::before,

@@ -80,3 +80,20 @@ export type { StoryRoute } from "./story-route.js";
 
 export { StoryWaypointSchema } from "./story-waypoint.js";
 export type { StoryWaypoint } from "./story-waypoint.js";
+
+export { ProcessCanvasModeSchema, CanvasModeSchema } from "./canvas-mode.js";
+export type { ProcessCanvasMode, CanvasMode } from "./canvas-mode.js";
+
+export { InterfaceProtocolSchema, InterfaceSchema } from "./interface.js";
+export type { InterfaceProtocol, Interface } from "./interface.js";
+
+export { MessageTypeSchema, MessageSchema } from "./message.js";
+export type { MessageType, Message } from "./message.js";
+
+export {
+	ControlSeveritySchema,
+	ControlTypeSchema,
+	ControlStatusSchema,
+	ControlPointSchema,
+} from "./control-point.js";
+export type { ControlSeverity, ControlType, ControlStatus, ControlPoint } from "./control-point.js";

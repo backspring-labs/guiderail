@@ -2,16 +2,22 @@ import { AnnotationSchema } from "../entities/annotation.js";
 import type { Annotation } from "../entities/annotation.js";
 import { CapabilitySchema } from "../entities/capability.js";
 import type { Capability } from "../entities/capability.js";
+import { ControlPointSchema } from "../entities/control-point.js";
+import type { ControlPoint } from "../entities/control-point.js";
 import { DomainSchema } from "../entities/domain.js";
 import type { Domain } from "../entities/domain.js";
 import { EdgeSchema } from "../entities/edge.js";
 import type { Edge } from "../entities/edge.js";
 import { EvidenceRefSchema } from "../entities/evidence-ref.js";
 import type { EvidenceRef } from "../entities/evidence-ref.js";
+import { InterfaceSchema } from "../entities/interface.js";
+import type { Interface } from "../entities/interface.js";
 import { JourneySchema } from "../entities/journey.js";
 import type { Journey } from "../entities/journey.js";
 import { LayerSchema } from "../entities/layer.js";
 import type { Layer } from "../entities/layer.js";
+import { MessageSchema } from "../entities/message.js";
+import type { Message } from "../entities/message.js";
 import { NodeSchema } from "../entities/node.js";
 import type { Node } from "../entities/node.js";
 import { PerspectiveSchema } from "../entities/perspective.js";
@@ -270,7 +276,7 @@ export const nodes: Node[] = [
 		description: "Retail banking customer",
 		tags: ["external"],
 		layoutByPerspective: {
-			"persp-overview": { x: 0, y: 200 },
+			"persp-landscape": { x: 0, y: 200 },
 			"persp-architecture": { x: 0, y: 200 },
 			"persp-process": { x: 0, y: 0 },
 			"persp-journey": { x: 0, y: 0 },
@@ -284,7 +290,7 @@ export const nodes: Node[] = [
 		description: "Customer-facing mobile application",
 		tags: ["channel", "mobile"],
 		layoutByPerspective: {
-			"persp-overview": { x: 300, y: 200 },
+			"persp-landscape": { x: 300, y: 200 },
 			"persp-architecture": { x: 300, y: 200 },
 			"persp-process": { x: 300, y: 0 },
 			"persp-journey": { x: 300, y: 0 },
@@ -298,7 +304,7 @@ export const nodes: Node[] = [
 		description: "Central API gateway and routing layer",
 		tags: ["infrastructure", "orchestration"],
 		layoutByPerspective: {
-			"persp-overview": { x: 600, y: 200 },
+			"persp-landscape": { x: 600, y: 200 },
 			"persp-architecture": { x: 600, y: 200 },
 			"persp-process": { x: 600, y: 0 },
 			"persp-journey": { x: 600, y: 0 },
@@ -312,7 +318,7 @@ export const nodes: Node[] = [
 		description: "Identity verification and KYC processing",
 		tags: ["identity", "kyc", "security"],
 		layoutByPerspective: {
-			"persp-overview": { x: 950, y: 0 },
+			"persp-landscape": { x: 950, y: 0 },
 			"persp-architecture": { x: 950, y: 0 },
 			"persp-process": { x: 0, y: 150 },
 			"persp-journey": { x: 0, y: 150 },
@@ -326,7 +332,7 @@ export const nodes: Node[] = [
 		description: "Fraud detection, risk scoring, and policy evaluation",
 		tags: ["risk", "fraud", "decisioning"],
 		layoutByPerspective: {
-			"persp-overview": { x: 950, y: 150 },
+			"persp-landscape": { x: 950, y: 150 },
 			"persp-architecture": { x: 950, y: 150 },
 			"persp-process": { x: 300, y: 150 },
 			"persp-journey": { x: 300, y: 150 },
@@ -340,7 +346,7 @@ export const nodes: Node[] = [
 		description: "Account lifecycle management",
 		tags: ["accounts", "core"],
 		layoutByPerspective: {
-			"persp-overview": { x: 950, y: 300 },
+			"persp-landscape": { x: 950, y: 300 },
 			"persp-architecture": { x: 950, y: 300 },
 			"persp-process": { x: 600, y: 150 },
 			"persp-journey": { x: 600, y: 150 },
@@ -354,7 +360,7 @@ export const nodes: Node[] = [
 		description: "Double-entry ledger and system of record",
 		tags: ["core", "ledger", "system-of-record"],
 		layoutByPerspective: {
-			"persp-overview": { x: 1300, y: 250 },
+			"persp-landscape": { x: 1300, y: 250 },
 			"persp-architecture": { x: 1300, y: 250 },
 			"persp-process": { x: 900, y: 100 },
 			"persp-journey": { x: 900, y: 100 },
@@ -368,7 +374,7 @@ export const nodes: Node[] = [
 		description: "Customer notifications and alerts",
 		tags: ["notifications", "messaging"],
 		layoutByPerspective: {
-			"persp-overview": { x: 1300, y: 400 },
+			"persp-landscape": { x: 1300, y: 400 },
 			"persp-architecture": { x: 1300, y: 400 },
 			"persp-process": { x: 900, y: 250 },
 			"persp-journey": { x: 900, y: 250 },
@@ -382,7 +388,7 @@ export const nodes: Node[] = [
 		description: "Payment routing and orchestration",
 		tags: ["payments", "orchestration"],
 		layoutByPerspective: {
-			"persp-overview": { x: 950, y: 450 },
+			"persp-landscape": { x: 950, y: 450 },
 			"persp-architecture": { x: 950, y: 450 },
 			"persp-process": { x: 300, y: 300 },
 			"persp-provider": { x: 950, y: 450 },
@@ -395,7 +401,7 @@ export const nodes: Node[] = [
 		description: "External payment network interface (ACH, RTP, FedNow)",
 		tags: ["payments", "rails", "external"],
 		layoutByPerspective: {
-			"persp-overview": { x: 1300, y: 500 },
+			"persp-landscape": { x: 1300, y: 500 },
 			"persp-architecture": { x: 1300, y: 500 },
 			"persp-process": { x: 600, y: 300 },
 			"persp-provider": { x: 1300, y: 500 },
@@ -1068,18 +1074,18 @@ export const journeys: Journey[] = [
 
 export const perspectives: Perspective[] = [
 	{
-		id: "persp-overview",
-		type: "overview",
-		label: "Overview",
-		description: "High-level view of all domains and systems",
+		id: "persp-landscape",
+		type: "landscape",
+		label: "Landscape",
+		description: "Broad terrain, domains, capabilities, and cross-domain relationships",
 		defaultLayerId: "layer-default",
 	},
 	{
-		id: "persp-architecture",
-		type: "architecture",
-		label: "Architecture",
-		description: "System boundaries, services, and dependencies",
-		defaultLayerId: "layer-default",
+		id: "persp-journey",
+		type: "journey",
+		label: "Journey",
+		description: "User journey step-by-step traversal",
+		defaultLayerId: "layer-journey",
 	},
 	{
 		id: "persp-process",
@@ -1089,11 +1095,25 @@ export const perspectives: Perspective[] = [
 		defaultLayerId: "layer-process",
 	},
 	{
-		id: "persp-journey",
-		type: "journey",
-		label: "Journey",
-		description: "User journey step-by-step traversal",
-		defaultLayerId: "layer-journey",
+		id: "persp-architecture",
+		type: "architecture",
+		label: "Architecture",
+		description: "System boundaries, services, and dependencies",
+		defaultLayerId: "layer-default",
+	},
+	{
+		id: "persp-system",
+		type: "system",
+		label: "System",
+		description: "Scenario-scoped participating systems and interfaces",
+		defaultLayerId: "layer-default",
+	},
+	{
+		id: "persp-sequence",
+		type: "sequence",
+		label: "Sequence",
+		description: "Runtime call flow between participating interfaces",
+		defaultLayerId: "layer-default",
 	},
 ].map((d) => PerspectiveSchema.parse(d));
 
@@ -1204,6 +1224,46 @@ export const annotations: Annotation[] = [
 		author: "system",
 		createdAt: "2026-01-15T10:00:00Z",
 	},
+	{
+		id: "ann-4",
+		targetType: "node",
+		targetId: "n-fraud-engine",
+		type: "control_note",
+		content:
+			"Fraud engine must score all transactions in under 100ms. Scores above the configured threshold trigger automatic decline. Threshold is configurable per merchant category.",
+		author: "system",
+		createdAt: "2026-03-15T10:00:00Z",
+	},
+	{
+		id: "ann-5",
+		targetType: "node",
+		targetId: "n-aml-screening",
+		type: "risk_note",
+		content:
+			"AML screening checks against OFAC, EU, and UN sanctions lists. Positive matches require manual review before processing continues.",
+		author: "system",
+		createdAt: "2026-03-15T10:00:00Z",
+	},
+	{
+		id: "ann-6",
+		targetType: "node",
+		targetId: "n-policy-engine",
+		type: "control_note",
+		content:
+			"Policy engine evaluates issuer-specific rules including merchant category blocks, geographic restrictions, and time-of-day limits.",
+		author: "system",
+		createdAt: "2026-03-15T10:00:00Z",
+	},
+	{
+		id: "ann-7",
+		targetType: "node",
+		targetId: "n-payment-orch",
+		type: "risk_note",
+		content:
+			"Orchestration layer is the single point of authorization decision aggregation. All risk, policy, and balance decisions must converge here before network authorization.",
+		author: "system",
+		createdAt: "2026-03-15T10:00:00Z",
+	},
 ].map((d) => AnnotationSchema.parse(d));
 
 // --- Evidence Refs ---
@@ -1225,6 +1285,32 @@ export const evidenceRefs: EvidenceRef[] = [
 			"Regulatory framework governing savings account origination and initial deposit requirements.",
 		accessClassification: "internal",
 		relatedEntityIds: ["n-account-svc", "n-core-ledger", "cap-account-opening"],
+	},
+	{
+		id: "ev-fraud-policy",
+		title: "Fraud Detection Policy & Thresholds",
+		type: "control_evidence",
+		summary: "Documented fraud scoring thresholds, velocity limits, and escalation procedures.",
+		accessClassification: "internal",
+		relatedEntityIds: ["n-fraud-engine", "cp-fraud-score", "cp-fraud-check"],
+	},
+	{
+		id: "ev-aml-compliance",
+		title: "AML/BSA Compliance Program",
+		type: "control_evidence",
+		summary:
+			"Anti-money laundering program documentation including sanctions screening procedures.",
+		accessClassification: "restricted",
+		relatedEntityIds: ["n-aml-screening", "cp-aml-screening"],
+	},
+	{
+		id: "ev-sox-ledger",
+		title: "SOX Ledger Controls",
+		type: "control_evidence",
+		summary:
+			"Sarbanes-Oxley documentation for double-entry ledger controls and balance reconciliation.",
+		accessClassification: "internal",
+		relatedEntityIds: ["n-core-ledger", "cp-double-entry", "cp-balance-update"],
 	},
 ].map((d) => EvidenceRefSchema.parse(d));
 
@@ -1663,6 +1749,503 @@ export const processStages: ProcessStage[] = [
 	},
 ].map((d) => ProcessStageSchema.parse(d));
 
+// --- Control Points ---
+
+export const controlPoints: ControlPoint[] = [
+	// Payment Authorization (proc-payment-auth) controls
+	{
+		id: "cp-fraud-check",
+		label: "Fraud Check",
+		processStageId: "ps-2",
+		severity: "critical",
+		controlType: "preventive",
+		status: "active",
+		description: "Real-time fraud scoring against transaction patterns",
+		regulatoryRef: "BSA/AML §5318",
+	},
+	{
+		id: "cp-velocity-limit",
+		label: "Velocity Limit",
+		processStageId: "ps-2",
+		severity: "critical",
+		controlType: "detective",
+		status: "active",
+		description: "Transaction velocity and frequency monitoring",
+	},
+	{
+		id: "cp-policy-compliance",
+		label: "Policy Compliance",
+		processStageId: "ps-2",
+		severity: "warning",
+		controlType: "preventive",
+		status: "active",
+		description: "Regulatory policy rule evaluation",
+	},
+	{
+		id: "cp-double-entry",
+		label: "Double-Entry Validation",
+		processStageId: "ps-4",
+		severity: "critical",
+		controlType: "preventive",
+		status: "active",
+		description: "Every debit must have a corresponding credit entry",
+		regulatoryRef: "GAAP/SOX",
+	},
+	{
+		id: "cp-balance-update",
+		label: "Balance Reconciliation",
+		processStageId: "ps-4",
+		severity: "warning",
+		controlType: "detective",
+		status: "active",
+		description: "Running balance verified after posting",
+	},
+	// Card Authorization (proc-card-auth) controls
+	{
+		id: "cp-fraud-score",
+		label: "Fraud Score Gate",
+		processStageId: "ps-card-2",
+		severity: "critical",
+		controlType: "preventive",
+		status: "active",
+		description: "ML-based fraud scoring with configurable threshold",
+		regulatoryRef: "PCI-DSS §6.5",
+	},
+	{
+		id: "cp-velocity-check",
+		label: "Velocity Check",
+		processStageId: "ps-card-2",
+		severity: "critical",
+		controlType: "detective",
+		status: "active",
+		description: "Card-level velocity monitoring across channels",
+	},
+	{
+		id: "cp-aml-screening",
+		label: "AML Screening",
+		processStageId: "ps-card-2",
+		severity: "critical",
+		controlType: "preventive",
+		status: "active",
+		description: "Anti-money laundering watchlist screening",
+		regulatoryRef: "BSA/AML §5318(h)",
+	},
+	{
+		id: "cp-balance-check",
+		label: "Balance Sufficiency",
+		processStageId: "ps-card-4",
+		severity: "warning",
+		controlType: "preventive",
+		status: "active",
+		description: "Verify available balance covers the authorization amount",
+	},
+	{
+		id: "cp-credit-limit",
+		label: "Credit Limit Check",
+		processStageId: "ps-card-4",
+		severity: "warning",
+		controlType: "preventive",
+		status: "active",
+		description: "Verify authorization does not exceed credit limit",
+	},
+	{
+		id: "cp-policy-eval",
+		label: "Policy Evaluation",
+		processStageId: "ps-card-4",
+		severity: "info",
+		controlType: "detective",
+		status: "active",
+		description: "Custom issuer policy rules (merchant category, geography, time-of-day)",
+	},
+].map((d) => ControlPointSchema.parse(d));
+
+// --- BPMN Nodes (Payment Authorization Process Flow) ---
+
+export const bpmnNodes: Node[] = [
+	{
+		id: "bpmn-start",
+		type: "bpmn_event",
+		label: "Payment Initiated",
+		metadata: { swimLane: "Customer", eventKind: "start" },
+	},
+	{
+		id: "bpmn-route-payment",
+		type: "bpmn_task",
+		label: "Route Payment",
+		metadata: { swimLane: "Orchestration", terrainNodeId: "n-payment-orch" },
+	},
+	{
+		id: "bpmn-fork-risk",
+		type: "bpmn_gateway",
+		label: "Parallel Risk Checks",
+		metadata: { swimLane: "Orchestration", gatewayKind: "parallel" },
+	},
+	{
+		id: "bpmn-check-fraud",
+		type: "bpmn_task",
+		label: "Check Fraud Score",
+		metadata: { swimLane: "Risk & Identity", terrainNodeId: "n-fraud-engine" },
+	},
+	{
+		id: "bpmn-screen-aml",
+		type: "bpmn_task",
+		label: "Screen AML",
+		metadata: { swimLane: "Risk & Identity", terrainNodeId: "n-aml-screening" },
+	},
+	{
+		id: "bpmn-join-risk",
+		type: "bpmn_gateway",
+		label: "Risk Results",
+		metadata: { swimLane: "Orchestration", gatewayKind: "parallel" },
+	},
+	{
+		id: "bpmn-fraud-ok",
+		type: "bpmn_gateway",
+		label: "Fraud Acceptable?",
+		metadata: { swimLane: "Orchestration", gatewayKind: "exclusive" },
+	},
+	{
+		id: "bpmn-eval-policy",
+		type: "bpmn_task",
+		label: "Evaluate Policy",
+		metadata: { swimLane: "Orchestration", terrainNodeId: "n-policy-engine" },
+	},
+	{
+		id: "bpmn-check-funds",
+		type: "bpmn_task",
+		label: "Check Funds",
+		metadata: { swimLane: "Core Banking", terrainNodeId: "n-core-ledger" },
+	},
+	{
+		id: "bpmn-funds-ok",
+		type: "bpmn_gateway",
+		label: "Sufficient Funds?",
+		metadata: { swimLane: "Core Banking", gatewayKind: "exclusive" },
+	},
+	{
+		id: "bpmn-authorize-network",
+		type: "bpmn_task",
+		label: "Authorize Network",
+		metadata: { swimLane: "Networks", terrainNodeId: "n-visa-network" },
+	},
+	{
+		id: "bpmn-post-ledger",
+		type: "bpmn_task",
+		label: "Post Ledger Entry",
+		metadata: { swimLane: "Core Banking", terrainNodeId: "n-core-ledger" },
+	},
+	{
+		id: "bpmn-end-authorized",
+		type: "bpmn_event",
+		label: "Payment Authorized",
+		metadata: { swimLane: "Orchestration", eventKind: "end" },
+	},
+	{
+		id: "bpmn-end-declined",
+		type: "bpmn_event",
+		label: "Payment Declined",
+		metadata: { swimLane: "Orchestration", eventKind: "end" },
+	},
+].map((d) => NodeSchema.parse(d));
+
+// --- BPMN Edges ---
+
+export const bpmnEdges: Edge[] = [
+	{
+		id: "be-start-route",
+		sourceNodeId: "bpmn-start",
+		targetNodeId: "bpmn-route-payment",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-route-fork",
+		sourceNodeId: "bpmn-route-payment",
+		targetNodeId: "bpmn-fork-risk",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-fork-fraud",
+		sourceNodeId: "bpmn-fork-risk",
+		targetNodeId: "bpmn-check-fraud",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-fork-aml",
+		sourceNodeId: "bpmn-fork-risk",
+		targetNodeId: "bpmn-screen-aml",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-fraud-join",
+		sourceNodeId: "bpmn-check-fraud",
+		targetNodeId: "bpmn-join-risk",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-aml-join",
+		sourceNodeId: "bpmn-screen-aml",
+		targetNodeId: "bpmn-join-risk",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-join-gate",
+		sourceNodeId: "bpmn-join-risk",
+		targetNodeId: "bpmn-fraud-ok",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-fraud-yes",
+		sourceNodeId: "bpmn-fraud-ok",
+		targetNodeId: "bpmn-eval-policy",
+		type: "yes_branch",
+		label: "Yes",
+	},
+	{
+		id: "be-fraud-no",
+		sourceNodeId: "bpmn-fraud-ok",
+		targetNodeId: "bpmn-end-declined",
+		type: "no_branch",
+		label: "No",
+	},
+	{
+		id: "be-policy-funds",
+		sourceNodeId: "bpmn-eval-policy",
+		targetNodeId: "bpmn-check-funds",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-funds-gate",
+		sourceNodeId: "bpmn-check-funds",
+		targetNodeId: "bpmn-funds-ok",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-funds-yes",
+		sourceNodeId: "bpmn-funds-ok",
+		targetNodeId: "bpmn-authorize-network",
+		type: "yes_branch",
+		label: "Yes",
+	},
+	{
+		id: "be-funds-no",
+		sourceNodeId: "bpmn-funds-ok",
+		targetNodeId: "bpmn-end-declined",
+		type: "no_branch",
+		label: "No",
+	},
+	{
+		id: "be-network-ledger",
+		sourceNodeId: "bpmn-authorize-network",
+		targetNodeId: "bpmn-post-ledger",
+		type: "bpmn_flow",
+	},
+	{
+		id: "be-ledger-end",
+		sourceNodeId: "bpmn-post-ledger",
+		targetNodeId: "bpmn-end-authorized",
+		type: "bpmn_flow",
+	},
+].map((d) => EdgeSchema.parse(d));
+
+// --- Interfaces (Sequence Perspective) ---
+
+export const interfaces: Interface[] = [
+	{
+		id: "iface-mobile",
+		nodeId: "n-mobile-app",
+		label: "Mobile App API",
+		protocol: "rest",
+		description: "Customer-facing mobile application",
+	},
+	{
+		id: "iface-gateway",
+		nodeId: "n-api-gateway",
+		label: "Payment Gateway",
+		protocol: "rest",
+		description: "API gateway for payment request ingress",
+	},
+	{
+		id: "iface-orch",
+		nodeId: "n-payment-orch",
+		label: "Orchestration Service",
+		protocol: "grpc",
+		description: "Payment orchestration and routing engine",
+	},
+	{
+		id: "iface-fraud",
+		nodeId: "n-fraud-engine",
+		label: "Fraud Engine API",
+		protocol: "grpc",
+		description: "Real-time fraud scoring service",
+	},
+	{
+		id: "iface-aml",
+		nodeId: "n-aml-screening",
+		label: "AML Screening API",
+		protocol: "grpc",
+		description: "Anti-money laundering watchlist screening",
+	},
+	{
+		id: "iface-policy",
+		nodeId: "n-policy-engine",
+		label: "Policy Engine API",
+		protocol: "grpc",
+		description: "Issuer policy rule evaluation",
+	},
+	{
+		id: "iface-network",
+		nodeId: "n-visa-network",
+		label: "Network Gateway",
+		protocol: "rest",
+		description: "Card network authorization interface",
+	},
+	{
+		id: "iface-ledger",
+		nodeId: "n-core-ledger",
+		label: "Core Ledger API",
+		protocol: "grpc",
+		description: "Double-entry ledger posting service",
+	},
+].map((d) => InterfaceSchema.parse(d));
+
+// --- Messages (Sequence Perspective) ---
+
+export const messages: Message[] = [
+	{
+		id: "msg-1",
+		sequenceNumber: 0,
+		sourceInterfaceId: "iface-mobile",
+		targetInterfaceId: "iface-gateway",
+		type: "request",
+		label: "POST /authorize",
+		description: "Customer initiates a payment authorization",
+		payloadSummary: "{ amount, currency, merchantId, cardToken }",
+	},
+	{
+		id: "msg-2",
+		sequenceNumber: 1,
+		sourceInterfaceId: "iface-gateway",
+		targetInterfaceId: "iface-orch",
+		type: "request",
+		label: "Forward Authorization",
+		description: "Gateway routes the request to orchestration",
+	},
+	{
+		id: "msg-3",
+		sequenceNumber: 2,
+		sourceInterfaceId: "iface-orch",
+		targetInterfaceId: "iface-fraud",
+		type: "request",
+		label: "Check Fraud Score",
+		description: "Orchestration requests real-time fraud scoring",
+	},
+	{
+		id: "msg-4",
+		sequenceNumber: 3,
+		sourceInterfaceId: "iface-fraud",
+		targetInterfaceId: "iface-orch",
+		type: "response",
+		label: "Fraud Result",
+		description: "Fraud engine returns score and recommendation",
+		payloadSummary: "{ score: 0.12, recommendation: 'approve' }",
+	},
+	{
+		id: "msg-5",
+		sequenceNumber: 4,
+		sourceInterfaceId: "iface-orch",
+		targetInterfaceId: "iface-aml",
+		type: "request",
+		label: "Screen AML",
+		description: "Orchestration requests AML/sanctions screening",
+	},
+	{
+		id: "msg-6",
+		sequenceNumber: 5,
+		sourceInterfaceId: "iface-aml",
+		targetInterfaceId: "iface-orch",
+		type: "response",
+		label: "AML Result",
+		description: "AML screening returns clear/match result",
+		payloadSummary: "{ status: 'clear' }",
+	},
+	{
+		id: "msg-7",
+		sequenceNumber: 6,
+		sourceInterfaceId: "iface-orch",
+		targetInterfaceId: "iface-policy",
+		type: "request",
+		label: "Evaluate Policy",
+		description: "Orchestration requests issuer policy evaluation",
+	},
+	{
+		id: "msg-8",
+		sequenceNumber: 7,
+		sourceInterfaceId: "iface-policy",
+		targetInterfaceId: "iface-orch",
+		type: "response",
+		label: "Policy Result",
+		description: "Policy engine returns rule evaluation result",
+		payloadSummary: "{ approved: true, appliedRules: ['geo-ok', 'mcc-ok'] }",
+	},
+	{
+		id: "msg-9",
+		sequenceNumber: 8,
+		sourceInterfaceId: "iface-orch",
+		targetInterfaceId: "iface-network",
+		type: "request",
+		label: "Network Authorize",
+		description: "Orchestration sends authorization to card network",
+	},
+	{
+		id: "msg-10",
+		sequenceNumber: 9,
+		sourceInterfaceId: "iface-network",
+		targetInterfaceId: "iface-orch",
+		type: "response",
+		label: "Network Response",
+		description: "Card network returns authorization decision",
+		payloadSummary: "{ authCode: 'A12345', approved: true }",
+	},
+	{
+		id: "msg-11",
+		sequenceNumber: 10,
+		sourceInterfaceId: "iface-orch",
+		targetInterfaceId: "iface-ledger",
+		type: "request",
+		label: "Post Ledger Entry",
+		description: "Orchestration posts the authorized transaction to the ledger",
+	},
+	{
+		id: "msg-12",
+		sequenceNumber: 11,
+		sourceInterfaceId: "iface-ledger",
+		targetInterfaceId: "iface-orch",
+		type: "response",
+		label: "Ledger Confirmation",
+		description: "Ledger confirms double-entry posting",
+		payloadSummary: "{ journalId: 'JRN-98765', balanced: true }",
+	},
+	{
+		id: "msg-13",
+		sequenceNumber: 12,
+		sourceInterfaceId: "iface-orch",
+		targetInterfaceId: "iface-gateway",
+		type: "response",
+		label: "Authorization Response",
+		description: "Orchestration returns final authorization result",
+	},
+	{
+		id: "msg-14",
+		sequenceNumber: 13,
+		sourceInterfaceId: "iface-gateway",
+		targetInterfaceId: "iface-mobile",
+		type: "response",
+		label: "Response to Client",
+		description: "Gateway returns authorization result to the customer",
+		payloadSummary: "{ approved: true, authCode: 'A12345' }",
+	},
+].map((d) => MessageSchema.parse(d));
+
 // --- Processes ---
 
 export const processes: Process[] = [
@@ -1707,7 +2290,7 @@ export const storyWaypoints: StoryWaypoint[] = [
 			{ type: "node", targetId: "n-merchant-checkout" },
 			{ type: "edge", targetId: "e-cust-app" },
 		],
-		perspectiveId: "persp-overview",
+		perspectiveId: "persp-landscape",
 	},
 	{
 		id: "sw-2",
@@ -1816,7 +2399,7 @@ export const storyWaypoints: StoryWaypoint[] = [
 			{ type: "node", targetId: "n-mobile-app" },
 			{ type: "edge", targetId: "e-cust-app" },
 		],
-		perspectiveId: "persp-overview",
+		perspectiveId: "persp-landscape",
 	},
 	{
 		id: "sw-8",
@@ -1913,7 +2496,7 @@ export const storyWaypoints: StoryWaypoint[] = [
 			{ type: "node", targetId: "n-deposit-system" },
 			{ type: "edge", targetId: "e-ledger-deposit" },
 		],
-		perspectiveId: "persp-overview",
+		perspectiveId: "persp-landscape",
 	},
 	{
 		id: "sw-14",
@@ -2006,6 +2589,184 @@ export const storyWaypoints: StoryWaypoint[] = [
 		],
 		perspectiveId: "persp-architecture",
 	},
+	// --- Route 4: From Landscape to Sequence — The Full Descent ---
+	{
+		id: "sw-19",
+		storyRouteId: "sr-full-descent",
+		sequenceNumber: 0,
+		title: "The Payments Landscape",
+		keyMessage:
+			"We start at the broadest view — the fintech landscape. Payments sits among nine domains that together compose a modern banking platform.",
+		focusTargets: [{ type: "node", targetId: "n-payment-orch" }],
+		perspectiveId: "persp-landscape",
+	},
+	{
+		id: "sw-20",
+		storyRouteId: "sr-full-descent",
+		sequenceNumber: 1,
+		title: "The Customer's Journey",
+		keyMessage:
+			"From the customer's perspective, a payment starts with a tap. The journey traces the user's experience from initiation to confirmation.",
+		focusTargets: [
+			{ type: "node", targetId: "n-mobile-app" },
+			{ type: "node", targetId: "n-customer" },
+		],
+		perspectiveId: "persp-journey",
+	},
+	{
+		id: "sw-21",
+		storyRouteId: "sr-full-descent",
+		sequenceNumber: 2,
+		title: "The Operational Process",
+		keyMessage:
+			"Behind the tap, a BPMN process flow orchestrates fraud checks, policy evaluation, network authorization, and ledger posting across multiple swim lanes.",
+		focusTargets: [{ type: "node", targetId: "n-payment-orch" }],
+		perspectiveId: "persp-process",
+	},
+	{
+		id: "sw-22",
+		storyRouteId: "sr-full-descent",
+		sequenceNumber: 3,
+		title: "The Technical Architecture",
+		keyMessage:
+			"Each process task maps to a real system. The architecture view shows how services, gateways, and external networks connect.",
+		focusTargets: [
+			{ type: "node", targetId: "n-api-gateway" },
+			{ type: "node", targetId: "n-fraud-engine" },
+			{ type: "node", targetId: "n-core-ledger" },
+		],
+		perspectiveId: "persp-architecture",
+	},
+	{
+		id: "sw-23",
+		storyRouteId: "sr-full-descent",
+		sequenceNumber: 4,
+		title: "The Participating Systems",
+		keyMessage:
+			"Not all systems participate in every flow. The System view filters to just the cast of characters for this payment authorization.",
+		focusTargets: [
+			{ type: "node", targetId: "n-fraud-engine" },
+			{ type: "node", targetId: "n-policy-engine" },
+			{ type: "node", targetId: "n-core-ledger" },
+		],
+		perspectiveId: "persp-system",
+	},
+	{
+		id: "sw-24",
+		storyRouteId: "sr-full-descent",
+		sequenceNumber: 5,
+		title: "The Runtime Sequence",
+		keyMessage:
+			"At the deepest level, we see exactly what calls what. Each message in the sequence diagram represents a real API interaction — request and response, in order.",
+		focusTargets: [{ type: "interface", targetId: "iface-orch" }],
+		perspectiveId: "persp-sequence",
+	},
+	// --- Route 5: The Runtime Call Sequence ---
+	{
+		id: "sw-25",
+		storyRouteId: "sr-call-sequence",
+		sequenceNumber: 0,
+		title: "The Authorization Request",
+		keyMessage:
+			"A payment authorization begins when the mobile app sends a POST /authorize request through the API gateway to the orchestration service.",
+		focusTargets: [
+			{ type: "interface", targetId: "iface-mobile" },
+			{ type: "interface", targetId: "iface-gateway" },
+		],
+		perspectiveId: "persp-sequence",
+	},
+	{
+		id: "sw-26",
+		storyRouteId: "sr-call-sequence",
+		sequenceNumber: 1,
+		title: "Fraud and AML Screening",
+		keyMessage:
+			"The orchestration service calls the fraud engine and AML screening in sequence. Each returns a score or status that gates further processing.",
+		focusTargets: [
+			{ type: "interface", targetId: "iface-fraud" },
+			{ type: "interface", targetId: "iface-aml" },
+		],
+		perspectiveId: "persp-sequence",
+	},
+	{
+		id: "sw-27",
+		storyRouteId: "sr-call-sequence",
+		sequenceNumber: 2,
+		title: "Where the Fraud Engine Lives",
+		keyMessage:
+			"Stepping out of the sequence view, here is where the fraud engine sits in the broader architecture — connected to the orchestration layer and risk domain.",
+		whyItMatters:
+			"Understanding the structural context helps explain why this service has the dependencies it does.",
+		focusTargets: [{ type: "node", targetId: "n-fraud-engine" }],
+		perspectiveId: "persp-architecture",
+	},
+	{
+		id: "sw-28",
+		storyRouteId: "sr-call-sequence",
+		sequenceNumber: 3,
+		title: "Policy and Network Authorization",
+		keyMessage:
+			"Back in the sequence, the orchestration evaluates issuer policy rules, then sends the authorization to the card network. The network returns an auth code.",
+		focusTargets: [
+			{ type: "interface", targetId: "iface-policy" },
+			{ type: "interface", targetId: "iface-network" },
+		],
+		perspectiveId: "persp-sequence",
+	},
+	{
+		id: "sw-29",
+		storyRouteId: "sr-call-sequence",
+		sequenceNumber: 4,
+		title: "Ledger Posting and Response",
+		keyMessage:
+			"The authorized transaction is posted to the core ledger with double-entry validation. The response flows back through the gateway to the customer's device.",
+		focusTargets: [
+			{ type: "interface", targetId: "iface-ledger" },
+			{ type: "interface", targetId: "iface-mobile" },
+		],
+		perspectiveId: "persp-sequence",
+	},
+	// --- Route 6: Process Modes — Three Views of One Flow ---
+	{
+		id: "sw-30",
+		storyRouteId: "sr-process-modes",
+		sequenceNumber: 0,
+		title: "The Operational Flow",
+		keyMessage:
+			"In Operational mode, the Process perspective shows the BPMN flow — how work moves across swim lanes from customer initiation through risk, orchestration, and core banking.",
+		focusTargets: [{ type: "node", targetId: "n-payment-orch" }],
+		perspectiveId: "persp-process",
+	},
+	{
+		id: "sw-31",
+		storyRouteId: "sr-process-modes",
+		sequenceNumber: 1,
+		title: "Decision Gates",
+		keyMessage:
+			"Switch to Decision mode. The same flow, but now the gateway decisions are emphasized — fraud acceptable? sufficient funds? These are the gates that determine the outcome.",
+		focusTargets: [{ type: "node", targetId: "n-fraud-engine" }],
+		perspectiveId: "persp-process",
+	},
+	{
+		id: "sw-32",
+		storyRouteId: "sr-process-modes",
+		sequenceNumber: 2,
+		title: "Risk Controls",
+		keyMessage:
+			"Switch to Controls mode. The same flow again, but now you see where regulatory controls apply — critical fraud scoring, AML screening, double-entry ledger validation.",
+		focusTargets: [{ type: "node", targetId: "n-core-ledger" }],
+		perspectiveId: "persp-process",
+	},
+	{
+		id: "sw-33",
+		storyRouteId: "sr-process-modes",
+		sequenceNumber: 3,
+		title: "Three Lenses, One Flow",
+		keyMessage:
+			"Operational, Decision, and Controls are three views of the same process. The topology never changes — only the emphasis. This is what canvas modes are for.",
+		focusTargets: [{ type: "node", targetId: "n-payment-orch" }],
+		perspectiveId: "persp-process",
+	},
 ].map((d) => StoryWaypointSchema.parse(d));
 
 // --- Story Routes ---
@@ -2043,5 +2804,38 @@ export const storyRoutes: StoryRoute[] = [
 			"This route traces the boundary between bank-controlled and externally-controlled components in the payment stack — from core systems where the bank has full sovereignty, through orchestration and risk layers, to networks and wallets where control shifts to third parties.",
 		waypointIds: ["sw-13", "sw-14", "sw-15", "sw-16", "sw-17", "sw-18"],
 		tags: ["strategy", "control", "governance", "vendor-management"],
+	},
+	{
+		id: "sr-full-descent",
+		title: "From Landscape to Sequence — The Full Descent",
+		destinationObjective:
+			"Experience the same payment authorization moment through every perspective in the progression — from broad landscape to runtime call sequence",
+		audienceTag: "teaching",
+		overview:
+			"This route demonstrates the 6-perspective progression by showing the same payment authorization at each level of understanding: landscape, journey, process, architecture, system, and sequence.",
+		waypointIds: ["sw-19", "sw-20", "sw-21", "sw-22", "sw-23", "sw-24"],
+		tags: ["teaching", "progression", "perspectives"],
+	},
+	{
+		id: "sr-call-sequence",
+		title: "The Runtime Call Sequence",
+		destinationObjective:
+			"Understand the exact API call sequence when a payment is authorized — every request, response, and service interaction",
+		audienceTag: "architecture",
+		overview:
+			"This route walks through the payment authorization sequence diagram, showing each service-to-service call in order. One waypoint steps into the Architecture view to show where a key service lives in the broader landscape.",
+		waypointIds: ["sw-25", "sw-26", "sw-27", "sw-28", "sw-29"],
+		tags: ["sequence", "runtime", "api", "payments"],
+	},
+	{
+		id: "sr-process-modes",
+		title: "Process Modes — Three Views of One Flow",
+		destinationObjective:
+			"See how canvas modes reveal different truths about the same process without changing the topology",
+		audienceTag: "teaching",
+		overview:
+			"This route stays on the Process perspective and toggles between Operational, Decision, and Controls modes — demonstrating that the same BPMN flow can be viewed through three different emphases.",
+		waypointIds: ["sw-30", "sw-31", "sw-32", "sw-33"],
+		tags: ["teaching", "canvas-modes", "process"],
 	},
 ].map((d) => StoryRouteSchema.parse(d));

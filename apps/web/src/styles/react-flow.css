@@ -118,3 +118,42 @@
 .react-flow__node.selected .terrain-node {
 	box-shadow: 0 0 0 3px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
+/* Sequence diagram: strip default node chrome from message nodes */
+.react-flow__node-sequence_message {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	border-radius: 0;
+}
+
+.react-flow__node-sequence_message.selected {
+	outline: none;
+	background: transparent;
+}
+
+/* Sequence diagram: selected message highlight */
+.react-flow__node-sequence_message.selected .sequence-message__line {
+	border-top-width: 3px;
+	border-color: var(--color-selected);
+}
+
+.react-flow__node-sequence_message.selected .sequence-message__label {
+	color: var(--color-selected);
+	font-weight: 600;
+}
+
+/* Sequence diagram: lifeline selection highlight */
+.react-flow__node-lifeline.selected .lifeline-node__header {
+	border-color: var(--color-selected);
+	box-shadow: 0 0 0 2px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Sequence diagram: strip default chrome from lifeline nodes */
+.react-flow__node-lifeline {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+}

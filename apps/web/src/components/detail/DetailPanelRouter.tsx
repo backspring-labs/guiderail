@@ -13,6 +13,7 @@ import { DomainDetailPanel } from "./DomainDetailPanel.js";
 import { EdgeDetailPanel } from "./EdgeDetailPanel.js";
 import { NodeDetailPanel } from "./NodeDetailPanel.js";
 import { ProcessDetailPanel } from "./ProcessDetailPanel.js";
+import { SequenceDetailPanel } from "./SequenceDetailPanel.js";
 import { ValueStreamDetailPanel } from "./ValueStreamDetailPanel.js";
 
 interface DetailPanelRouterProps {
@@ -47,6 +48,19 @@ function resolveSelectedNode(
 	onSelectEdge: (id: string) => void,
 ): ReactNode | null {
 	if (!nav.selectedNodeId) return null;
+
+	// Sequence diagram nodes (lifelines and messages)
+	if (nav.selectedNodeId.startsWith("lifeline-") || nav.selectedNodeId.startsWith("msg-node-")) {
+		return (
+			<SequenceDetailPanel
+				selectedNodeId={nav.selectedNodeId}
+				graph={graph}
+				onSelectNode={onSelectNode}
+			/>
+		);
+	}
+
+	// Terrain nodes
 	const node = getNode(graph, nav.selectedNodeId);
 	if (!node) return null;
 	return (

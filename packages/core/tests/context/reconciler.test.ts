@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createInitialNavigationContext } from "../../src/context/navigation-context.js";
 import {
+	reconcileCanvasModeSwitch,
 	reconcileCapabilitySwitch,
 	reconcileDomainSwitch,
 	reconcileJourneyDeselection,
@@ -36,7 +37,7 @@ const journey = journeys[0]!;
 const journeySteps = steps.filter((s) => s.journeyId === journey.id);
 
 function baseCtx() {
-	return createInitialNavigationContext("persp-overview");
+	return createInitialNavigationContext("persp-landscape");
 }
 
 describe("reconcileDomainSwitch", () => {
@@ -381,8 +382,8 @@ describe("reconcileStoryRouteStart", () => {
 
 	it("applies first waypoint perspective if present", () => {
 		const result = reconcileStoryRouteStart(baseCtx(), storyRoute, routeWaypoints, graph);
-		// First waypoint (sw-1) has perspectiveId: "persp-overview"
-		expect(result.activePerspectiveId).toBe("persp-overview");
+		// First waypoint (sw-1) has perspectiveId: "persp-landscape"
+		expect(result.activePerspectiveId).toBe("persp-landscape");
 	});
 
 	it("does not clear domain/capability", () => {
@@ -464,7 +465,7 @@ describe("reconcileRouteResume", () => {
 			routeState: "paused" as const,
 			activeStoryRouteId: "sr-payment-flow",
 			selectedNodeId: "n-customer",
-			activePerspectiveId: "persp-overview",
+			activePerspectiveId: "persp-landscape",
 		};
 		const result = reconcileRouteResume(currentCtx, savedSnapshot);
 		expect(result.routeState).toBe("active");
@@ -495,5 +496,71 @@ describe("reconcileRouteEnd", () => {
 		expect(result.activeDomainId).toBe("dom-payments");
 		expect(result.activeCapabilityId).toBe("cap-payment-processing");
 		expect(result.activePerspectiveId).toBe("persp-architecture");
+	});
+});
+
+describe("reconcileCanvasModeSwitch", () => {
+	it("sets canvas mode and preserves everything including selection", () => {
+		const ctx = {
+			...baseCtx(),
+			activeDomainId: "dom-payments",
+			activeCapabilityId: "cap-payment-processing",
+			selectedNodeId: "n-fraud-engine",
+			selectedEdgeId: "e-orch-fraud",
+			activeProcessId: "proc-payment-auth",
+		};
+		const result = reconcileCanvasModeSwitch(ctx, "risk_controls");
+		expect(result.activeCanvasMode).toBe("risk_controls");
+		expect(result.activeDomainId).toBe("dom-payments");
+		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		expect(result.selectedNodeId).toBe("n-fraud-engine");
+		expect(result.selectedEdgeId).toBe("e-orch-fraud");
+		expect(result.activeProcessId).toBe("proc-payment-auth");
+	});
+
+	it("switching canvas mode again replaces the previous mode", () => {
+		const ctx = {
+			...baseCtx(),
+			activeCanvasMode: "operational",
+		};
+		const result = reconcileCanvasModeSwitch(ctx, "activity");
+		expect(result.activeCanvasMode).toBe("activity");
+	});
+});
+
+describe("reconcilePerspectiveSwitch — shared context contract", () => {
+	it("clears selection and canvas mode on perspective switch", () => {
+		const ctx = {
+			...baseCtx(),
+			selectedNodeId: "n-fraud-engine",
+			selectedEdgeId: "e-orch-fraud",
+			activeCanvasMode: "risk_controls",
+		};
+		const result = reconcilePerspectiveSwitch(ctx, "persp-architecture", graph);
+		expect(result.selectedNodeId).toBeNull();
+		expect(result.selectedEdgeId).toBeNull();
+		expect(result.activeCanvasMode).toBeNull();
+	});
+
+	it("preserves domain, capability, journey, process, and route context", () => {
+		const ctx = {
+			...baseCtx(),
+			activeDomainId: "dom-payments",
+			activeCapabilityId: "cap-payment-processing",
+			activeJourneyId: "j-open-savings",
+			activeProcessId: "proc-payment-auth",
+			activeStoryRouteId: "sr-payment-flow",
+			activeWaypointIndex: 2,
+			routeState: "active" as const,
+		};
+		const result = reconcilePerspectiveSwitch(ctx, "persp-sequence", graph);
+		expect(result.activeDomainId).toBe("dom-payments");
+		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		expect(result.activeJourneyId).toBe("j-open-savings");
+		expect(result.activeProcessId).toBe("proc-payment-auth");
+		expect(result.activeStoryRouteId).toBe("sr-payment-flow");
+		expect(result.activeWaypointIndex).toBe(2);
+		expect(result.routeState).toBe("active");
+		expect(result.activePerspectiveId).toBe("persp-sequence");
 	});
 });

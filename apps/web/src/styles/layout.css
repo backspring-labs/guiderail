@@ -292,8 +292,8 @@
 	color: var(--color-selected);
 }
 
-/* Breadcrumb */
-.breadcrumb {
+/* Context Bar */
+.context-bar {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -304,7 +304,13 @@
 	flex-shrink: 0;
 }
 
-.breadcrumb__segment {
+.context-bar__breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.context-bar__segment {
 	color: var(--color-text-secondary);
 	background: none;
 	border: none;
@@ -313,39 +319,39 @@
 	font-size: var(--font-size-sm);
 }
 
-.breadcrumb__segment:hover {
+.context-bar__segment:hover {
 	color: var(--color-text);
 }
 
-.breadcrumb__segment--current {
+.context-bar__segment--current {
 	color: var(--color-text);
 	cursor: default;
 }
 
-.breadcrumb__segment--journey {
+.context-bar__segment--journey {
 	color: var(--color-highlighted);
 	cursor: default;
 }
 
-.breadcrumb__separator {
+.context-bar__separator {
 	color: var(--color-text-secondary);
 }
 
-.breadcrumb__step-count {
+.context-bar__step-count {
 	color: var(--color-text-secondary);
 }
 
-.breadcrumb__segment--value-stream {
+.context-bar__segment--value-stream {
 	color: #0ea5e9;
 	cursor: default;
 }
 
-.breadcrumb__segment--process {
+.context-bar__segment--process {
 	color: #a855f7;
 	cursor: default;
 }
 
-.breadcrumb__segment--route {
+.context-bar__segment--route {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -353,17 +359,46 @@
 	cursor: default;
 }
 
-.breadcrumb__route-state {
+.context-bar__route-state {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
 }
 
-.breadcrumb__route-state--active {
+.context-bar__route-state--active {
 	background: #22c55e;
 }
 
-.breadcrumb__route-state--paused {
+.context-bar__route-state--paused {
 	background: #f59e0b;
+}
+
+/* Canvas Mode Switcher (right-aligned) */
+.context-bar__canvas-modes {
+	display: flex;
+	gap: 4px;
+	margin-left: auto;
+}
+
+.context-bar__canvas-mode {
+	padding: 3px 10px;
+	border-radius: 4px;
+	border: 1px solid transparent;
+	background: transparent;
+	color: var(--color-text-secondary);
+	font-size: var(--font-size-sm);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.context-bar__canvas-mode:hover {
+	color: var(--color-text);
+	background: var(--color-bg-secondary);
+}
+
+.context-bar__canvas-mode--active {
+	color: var(--color-text);
+	background: var(--color-bg-secondary);
+	border-color: var(--color-accent);
 }

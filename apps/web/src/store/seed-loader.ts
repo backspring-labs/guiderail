@@ -9,12 +9,17 @@
 import { createGraph } from "@guiderail/core/graph";
 import {
 	annotations,
+	bpmnEdges,
+	bpmnNodes,
 	capabilities,
+	controlPoints,
 	domains,
 	edges,
 	evidenceRefs,
+	interfaces,
 	journeys,
 	layers,
+	messages,
 	nodes,
 	perspectives,
 	processStages,
@@ -47,3 +52,8 @@ export const seedProcesses = processes;
 export const seedProcessStages = processStages;
 export const seedStoryRoutes = storyRoutes;
 export const seedStoryWaypoints = storyWaypoints;
+export const seedControlPoints = controlPoints;
+export const seedBpmnNodes = bpmnNodes;
+export const seedBpmnEdges = bpmnEdges;
+export const seedInterfaces = interfaces;
+export const seedMessages = messages;

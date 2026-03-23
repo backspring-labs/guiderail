@@ -159,8 +159,8 @@ describe("Context Machine 0.2.0", () => {
 	it("INITIALIZE with new fields stores them", () => {
 		const actor = createFullCtx();
 		expect(actor.getSnapshot().context.providers.length).toBe(20);
-		expect(actor.getSnapshot().context.storyRoutes.length).toBe(3);
-		expect(actor.getSnapshot().context.storyWaypoints.length).toBe(18);
+		expect(actor.getSnapshot().context.storyRoutes.length).toBe(6);
+		expect(actor.getSnapshot().context.storyWaypoints.length).toBe(33);
 		expect(actor.getSnapshot().context.valueStreams.length).toBe(3);
 		expect(actor.getSnapshot().context.processes.length).toBe(2);
 		expect(actor.getSnapshot().context.processStages.length).toBe(9);

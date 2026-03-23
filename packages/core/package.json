@@ -1,6 +1,6 @@
 {
 	"name": "@guiderail/core",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "GuideRail headless kernel — canonical domain model, state machines, context synchronization",
 	"type": "module",
 	"license": "MIT",

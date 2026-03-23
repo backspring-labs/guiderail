@@ -15,7 +15,7 @@ const testNodes: KernelNode[] = [
 		tags: [],
 		metadata: {},
 		layoutByPerspective: {
-			"persp-overview": { x: 100, y: 200 },
+			"persp-landscape": { x: 100, y: 200 },
 			"persp-architecture": { x: 300, y: 400 },
 		},
 	},
@@ -26,7 +26,7 @@ const testNodes: KernelNode[] = [
 		tags: [],
 		metadata: {},
 		layoutByPerspective: {
-			"persp-overview": { x: 0, y: 50 },
+			"persp-landscape": { x: 0, y: 50 },
 		},
 	},
 ];
@@ -45,7 +45,7 @@ const testEdges: KernelEdge[] = [
 
 describe("toReactFlowNodes", () => {
 	it("maps positions from layoutByPerspective", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview");
+		const result = toReactFlowNodes(testNodes, "persp-landscape");
 		expect(result[0]?.position).toEqual({ x: 100, y: 200 });
 		expect(result[1]?.position).toEqual({ x: 0, y: 50 });
 	});
@@ -61,32 +61,32 @@ describe("toReactFlowNodes", () => {
 	});
 
 	it("sets correct node type from kernel type", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview");
+		const result = toReactFlowNodes(testNodes, "persp-landscape");
 		expect(result[0]?.type).toBe("service");
 		expect(result[1]?.type).toBe("actor");
 	});
 
 	it("passes kernel node in data", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview");
+		const result = toReactFlowNodes(testNodes, "persp-landscape");
 		expect(result[0]?.data.kernelNode.label).toBe("Service A");
 	});
 
 	it("marks nodes as dimmed when not in visibleNodeIds", () => {
 		const visible = new Set(["n-1"]);
-		const result = toReactFlowNodes(testNodes, "persp-overview", { visibleNodeIds: visible });
+		const result = toReactFlowNodes(testNodes, "persp-landscape", { visibleNodeIds: visible });
 		expect(result[0]?.data.dimmed).toBe(false);
 		expect(result[1]?.data.dimmed).toBe(true);
 	});
 
 	it("marks node as selected when matching selectedNodeId", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview", { selectedNodeId: "n-2" });
+		const result = toReactFlowNodes(testNodes, "persp-landscape", { selectedNodeId: "n-2" });
 		expect(result[0]?.selected).toBe(false);
 		expect(result[1]?.selected).toBe(true);
 	});
 
 	it("marks node as highlighted when in highlightedNodeIds", () => {
 		const highlighted = new Set(["n-1"]);
-		const result = toReactFlowNodes(testNodes, "persp-overview", {
+		const result = toReactFlowNodes(testNodes, "persp-landscape", {
 			highlightedNodeIds: highlighted,
 		});
 		expect(result[0]?.data.highlighted).toBe(true);
@@ -94,7 +94,7 @@ describe("toReactFlowNodes", () => {
 	});
 
 	it("all nodes visible when visibleNodeIds not provided", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview");
+		const result = toReactFlowNodes(testNodes, "persp-landscape");
 		expect(result[0]?.data.dimmed).toBe(false);
 		expect(result[1]?.data.dimmed).toBe(false);
 	});
@@ -152,7 +152,7 @@ const testAssociations: ProviderAssociation[] = [
 
 describe("toReactFlowNodes — provider badges", () => {
 	it("populates badges for nodes with associations", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview", {
+		const result = toReactFlowNodes(testNodes, "persp-landscape", {
 			providers: testProviders,
 			providerAssociations: testAssociations,
 		});
@@ -163,7 +163,7 @@ describe("toReactFlowNodes — provider badges", () => {
 	});
 
 	it("returns empty badges for nodes without associations", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview", {
+		const result = toReactFlowNodes(testNodes, "persp-landscape", {
 			providers: testProviders,
 			providerAssociations: testAssociations,
 		});
@@ -172,7 +172,7 @@ describe("toReactFlowNodes — provider badges", () => {
 	});
 
 	it("only uses node-type associations (not capability)", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview", {
+		const result = toReactFlowNodes(testNodes, "persp-landscape", {
 			providers: testProviders,
 			providerAssociations: testAssociations,
 		});
@@ -182,13 +182,13 @@ describe("toReactFlowNodes — provider badges", () => {
 	});
 
 	it("works without providers (backward compat)", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview");
+		const result = toReactFlowNodes(testNodes, "persp-landscape");
 		expect(result[0]?.data.providerBadges).toEqual([]);
 		expect(result[1]?.data.providerBadges).toEqual([]);
 	});
 
 	it("includes visibleBadgeCount for overflow rendering", () => {
-		const result = toReactFlowNodes(testNodes, "persp-overview", {
+		const result = toReactFlowNodes(testNodes, "persp-landscape", {
 			providers: testProviders,
 			providerAssociations: testAssociations,
 		});

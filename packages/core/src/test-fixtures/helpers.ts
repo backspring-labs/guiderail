@@ -108,7 +108,7 @@ export function makeStep(overrides: Partial<Step> = {}): Step {
 export function makePerspective(overrides: Partial<Perspective> = {}): Perspective {
 	return {
 		id: nextId("persp"),
-		type: "overview",
+		type: "landscape",
 		label: "Test Perspective",
 		highlightRules: {},
 		visibilityRules: {},

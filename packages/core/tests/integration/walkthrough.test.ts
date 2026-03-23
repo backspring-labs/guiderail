@@ -92,8 +92,8 @@ describe("Integration Walkthrough — the user must never lose their place", () 
 		expect(nav(actor).activeSceneId).toBe("sc-5");
 
 		// 11. Switch perspective back — verify full coherence
-		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-overview" });
-		expect(nav(actor).activePerspectiveId).toBe("persp-overview");
+		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-landscape" });
+		expect(nav(actor).activePerspectiveId).toBe("persp-landscape");
 		expect(nav(actor).activeStepIndex).toBe(4);
 		expect(nav(actor).activeJourneyId).toBe("j-open-savings");
 		expect(nav(actor).activeDomainId).toBe("dom-accounts");
@@ -111,7 +111,7 @@ describe("Integration Walkthrough — the user must never lose their place", () 
 		expect(nav(actor).activeSceneId).toBeNull();
 		expect(nav(actor).activeFocusTargets).toEqual([]);
 		expect(nav(actor).activeDomainId).toBe("dom-accounts");
-		expect(nav(actor).activePerspectiveId).toBe("persp-overview");
+		expect(nav(actor).activePerspectiveId).toBe("persp-landscape");
 
 		// 14. Clear capability — domain preserved
 		actor.send({ type: "CLEAR_CAPABILITY" });

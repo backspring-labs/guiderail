@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
 	AnnotationSchema,
+	CanvasModeSchema,
 	CapabilitySchema,
+	ControlPointSchema,
 	DomainSchema,
 	EdgeSchema,
 	EvidenceRefSchema,
 	FocusTargetSchema,
+	InterfaceSchema,
 	JourneySchema,
 	LayerSchema,
+	MessageSchema,
 	NodeSchema,
 	PerspectiveSchema,
+	PerspectiveTypeSchema,
 	ProcessSchema,
 	ProcessStageSchema,
 	ProviderAssociationSchema,
@@ -27,12 +32,17 @@ import {
 import { ProvenanceRefSchema } from "../../src/provenance/index.js";
 import {
 	annotations,
+	bpmnEdges,
+	bpmnNodes,
 	capabilities,
+	controlPoints,
 	domains,
 	edges,
 	evidenceRefs,
+	interfaces,
 	journeys,
 	layers,
+	messages,
 	nodes,
 	perspectives,
 	processStages,
@@ -340,14 +350,14 @@ describe("0.2.0 entity schemas validate seed data", () => {
 	});
 
 	it("validates all story routes", () => {
-		expect(storyRoutes.length).toBe(3);
+		expect(storyRoutes.length).toBe(6);
 		for (const sr of storyRoutes) {
 			expect(StoryRouteSchema.parse(sr)).toBeDefined();
 		}
 	});
 
 	it("validates all story waypoints", () => {
-		expect(storyWaypoints.length).toBe(18);
+		expect(storyWaypoints.length).toBe(33);
 		for (const sw of storyWaypoints) {
 			expect(StoryWaypointSchema.parse(sw)).toBeDefined();
 		}
@@ -429,6 +439,114 @@ describe("0.2.0 referential integrity", () => {
 			for (const capId of proc.capabilityIds) {
 				expect(capIds.has(capId)).toBe(true);
 			}
+		}
+	});
+});
+
+describe("0.4.0 entity schemas", () => {
+	it("PerspectiveTypeSchema accepts the 6 perspective types", () => {
+		for (const t of ["landscape", "journey", "process", "architecture", "system", "sequence"]) {
+			expect(() => PerspectiveTypeSchema.parse(t)).not.toThrow();
+		}
+	});
+
+	it("PerspectiveTypeSchema rejects old types", () => {
+		for (const t of ["overview", "provider", "control", "activity"]) {
+			expect(() => PerspectiveTypeSchema.parse(t)).toThrow();
+		}
+	});
+
+	it("NodeSchema accepts optional parentNodeId", () => {
+		const node = NodeSchema.parse({ id: "n-test", type: "service", label: "Test" });
+		expect(node.parentNodeId).toBeUndefined();
+
+		const withParent = NodeSchema.parse({
+			id: "n-child",
+			type: "service",
+			label: "Child",
+			parentNodeId: "n-parent",
+		});
+		expect(withParent.parentNodeId).toBe("n-parent");
+	});
+
+	it("validates all control points", () => {
+		expect(controlPoints.length).toBeGreaterThanOrEqual(8);
+		for (const cp of controlPoints) {
+			expect(ControlPointSchema.parse(cp)).toBeDefined();
+		}
+	});
+
+	it("validates all interfaces", () => {
+		expect(interfaces.length).toBeGreaterThanOrEqual(6);
+		for (const iface of interfaces) {
+			expect(InterfaceSchema.parse(iface)).toBeDefined();
+		}
+	});
+
+	it("validates all messages", () => {
+		expect(messages.length).toBeGreaterThanOrEqual(12);
+		for (const msg of messages) {
+			expect(MessageSchema.parse(msg)).toBeDefined();
+		}
+	});
+
+	it("validates BPMN nodes", () => {
+		expect(bpmnNodes.length).toBeGreaterThanOrEqual(10);
+		for (const n of bpmnNodes) {
+			expect(n.type).toMatch(/^bpmn_/);
+		}
+	});
+
+	it("validates BPMN edges", () => {
+		expect(bpmnEdges.length).toBeGreaterThanOrEqual(10);
+	});
+
+	it("CanvasModeSchema validates", () => {
+		expect(() =>
+			CanvasModeSchema.parse({ perspectiveType: "process", mode: "operational" }),
+		).not.toThrow();
+	});
+
+	it("FocusTargetType accepts interface and message", () => {
+		expect(() => FocusTargetSchema.parse({ type: "interface", targetId: "iface-1" })).not.toThrow();
+		expect(() => FocusTargetSchema.parse({ type: "message", targetId: "msg-1" })).not.toThrow();
+	});
+});
+
+describe("0.4.0 referential integrity", () => {
+	it("interfaces reference valid nodes", () => {
+		const nodeIds = new Set(nodes.map((n) => n.id));
+		for (const iface of interfaces) {
+			expect(nodeIds.has(iface.nodeId)).toBe(true);
+		}
+	});
+
+	it("messages reference valid interfaces", () => {
+		const ifaceIds = new Set(interfaces.map((i) => i.id));
+		for (const msg of messages) {
+			expect(ifaceIds.has(msg.sourceInterfaceId)).toBe(true);
+			expect(ifaceIds.has(msg.targetInterfaceId)).toBe(true);
+		}
+	});
+
+	it("message sequence numbers are contiguous from zero", () => {
+		const sorted = [...messages].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+		for (let i = 0; i < sorted.length; i++) {
+			expect(sorted[i].sequenceNumber).toBe(i);
+		}
+	});
+
+	it("control points reference valid process stages", () => {
+		const stageIds = new Set(processStages.map((ps) => ps.id));
+		for (const cp of controlPoints) {
+			expect(stageIds.has(cp.processStageId)).toBe(true);
+		}
+	});
+
+	it("BPMN nodes have valid swimLane metadata", () => {
+		for (const n of bpmnNodes) {
+			const metadata = n.metadata as Record<string, unknown>;
+			expect(typeof metadata.swimLane).toBe("string");
 		}
 	});
 });

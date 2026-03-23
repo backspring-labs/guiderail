@@ -1,4 +1,4 @@
-import { seedPerspectives, seedProcessStages } from "@/store/seed-loader.js";
+import { seedPerspectives, seedProcessStages, seedSteps } from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { Capability, Domain, ProcessStage } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
@@ -20,11 +20,36 @@ export function getVisibleNodeIds(
 	capabilities: Capability[],
 ): Set<string> {
 	return (
+		resolveSystemScope(nav) ??
 		resolveProcessScope(nav) ??
 		resolveCapabilityScope(nav, capabilities) ??
 		resolveDomainScope(nav, capabilities) ??
 		allNodeIds(graph)
 	);
+}
+
+/**
+ * System perspective: scope to nodes participating in the current process or journey.
+ * Falls back to all nodes if no process or journey is active (graceful degradation).
+ */
+function resolveSystemScope(nav: NavigationContext): Set<string> | null {
+	const perspective = seedPerspectives.find((p) => p.id === nav.activePerspectiveId);
+	if (perspective?.type !== "system") return null;
+
+	// Scope to process stage nodes if a process is active
+	if (nav.activeProcessId) {
+		const stageNodes = getProcessStageNodeIds(nav.activeProcessId);
+		if (stageNodes.size > 0) return stageNodes;
+	}
+
+	// Scope to journey step focus target nodes if a journey is active
+	if (nav.activeJourneyId) {
+		const journeyNodes = getJourneyNodeIds(nav.activeJourneyId);
+		if (journeyNodes.size > 0) return journeyNodes;
+	}
+
+	// No active process or journey — show all nodes (graceful degradation)
+	return null;
 }
 
 function resolveProcessScope(nav: NavigationContext): Set<string> | null {
@@ -107,6 +132,23 @@ export function getHighlightedEdgeIds(nav: NavigationContext): Set<string> {
  * Get node IDs from a process's stages.
  * Used to scope visibility when Process perspective is active with an active process.
  */
+/**
+ * Get node IDs from a journey's step focus targets.
+ * Used to scope System perspective to participating nodes.
+ */
+function getJourneyNodeIds(journeyId: string): Set<string> {
+	const nodeIds = new Set<string>();
+	const steps = seedSteps.filter((s) => s.journeyId === journeyId);
+	for (const step of steps) {
+		for (const ft of step.focusTargets) {
+			if (ft.type === "node") {
+				nodeIds.add(ft.targetId);
+			}
+		}
+	}
+	return nodeIds;
+}
+
 function getProcessStageNodeIds(processId: string): Set<string> {
 	const nodeIds = new Set<string>();
 	const stages = seedProcessStages.filter((s) => s.processId === processId);

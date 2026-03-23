@@ -1,0 +1,40 @@
+/* Control Point Indicators */
+.control-indicator {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	font-size: 10px;
+	font-weight: bold;
+	line-height: 1;
+}
+
+.control-indicator--critical {
+	background: #ef4444;
+	color: white;
+}
+
+.control-indicator--warning {
+	background: #f59e0b;
+	color: white;
+}
+
+.control-indicator--info {
+	background: #10b981;
+	color: white;
+}
+
+/* Risk Controls canvas mode — severity tint on tasks */
+.bpmn-task--severity-critical {
+	border-left: 4px solid #ef4444;
+}
+
+.bpmn-task--severity-warning {
+	border-left: 4px solid #f59e0b;
+}
+
+.bpmn-task--severity-info {
+	border-left: 4px solid #10b981;
+}

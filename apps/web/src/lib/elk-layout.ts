@@ -69,9 +69,8 @@ export async function computeElkLayout(
 export function getLayoutDirection(perspectiveType: string): LayoutDirection {
 	switch (perspectiveType) {
 		case "architecture":
-			return "RIGHT";
+		case "system":
 		case "process":
-			return "RIGHT";
 		case "journey":
 			return "RIGHT";
 		default:

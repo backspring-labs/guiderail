@@ -116,13 +116,13 @@ export function toReactFlowEdges(
 function resolveNodeType(kernelType: string): string {
 	switch (kernelType) {
 		case "actor":
-			return "actor";
 		case "service":
-			return "service";
 		case "system":
-			return "system";
 		case "screen":
-			return "screen";
+		case "bpmn_task":
+		case "bpmn_event":
+		case "bpmn_gateway":
+			return kernelType;
 		default:
 			return "service";
 	}

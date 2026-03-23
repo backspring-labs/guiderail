@@ -11,6 +11,7 @@ export const NodeSchema = z.object({
 	type: z.string(),
 	label: z.string(),
 	description: z.string().optional(),
+	parentNodeId: z.string().nullable().optional(),
 	tags: z.array(z.string()).default([]),
 	metadata: z.record(z.unknown()).default({}),
 	layoutByPerspective: z.record(PositionSchema).default({}),

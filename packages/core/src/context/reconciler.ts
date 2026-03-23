@@ -71,8 +71,8 @@ export function reconcileCapabilitySwitch(
 }
 
 /**
- * 3. Perspective switch: preserve domain/capability/journey/step entirely,
- *    update viewport to focal node's position in new perspective layout.
+ * 3. Perspective switch: preserve domain/capability/journey/step/process/route context,
+ *    clear selection (view-specific), reset canvas mode, update viewport.
  */
 export function reconcilePerspectiveSwitch(
 	ctx: NavigationContext,
@@ -89,7 +89,24 @@ export function reconcilePerspectiveSwitch(
 	return {
 		...ctx,
 		activePerspectiveId: perspectiveId,
+		selectedNodeId: null,
+		selectedEdgeId: null,
+		activeCanvasMode: null,
 		viewportAnchor,
+	};
+}
+
+/**
+ * 3b. Canvas mode switch: preserve everything including selection.
+ *     Same topology, different emphasis — switching feels instant.
+ */
+export function reconcileCanvasModeSwitch(
+	ctx: NavigationContext,
+	canvasMode: string,
+): NavigationContext {
+	return {
+		...ctx,
+		activeCanvasMode: canvasMode,
 	};
 }
 

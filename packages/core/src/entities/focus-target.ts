@@ -10,6 +10,8 @@ export const FocusTargetTypeSchema = z.enum([
 	"provider",
 	"process_stage",
 	"value_stream",
+	"interface",
+	"message",
 ]);
 
 export const FocusTargetSchema = z.object({

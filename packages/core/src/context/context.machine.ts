@@ -1,6 +1,9 @@
 import { assign, setup } from "xstate";
 import type { Capability } from "../entities/capability.js";
+import type { ControlPoint } from "../entities/control-point.js";
+import type { Interface } from "../entities/interface.js";
 import type { Journey } from "../entities/journey.js";
+import type { Message } from "../entities/message.js";
 import type { ProcessStage } from "../entities/process-stage.js";
 import type { Process } from "../entities/process.js";
 import type { ProviderAssociation } from "../entities/provider-association.js";
@@ -12,6 +15,7 @@ import type { ValueStream } from "../entities/value-stream.js";
 import type { TerrainGraph } from "../graph/graph.js";
 import type { NavigationContext } from "./navigation-context.js";
 import {
+	reconcileCanvasModeSwitch,
 	reconcileCapabilitySwitch,
 	reconcileDomainSwitch,
 	reconcileJourneyDeselection,
@@ -43,6 +47,10 @@ export interface ContextMachineContext {
 	processStages: ProcessStage[];
 	storyRoutes: StoryRoute[];
 	storyWaypoints: StoryWaypoint[];
+	// 0.4.0 additions
+	controlPoints: ControlPoint[];
+	interfaces: Interface[];
+	messages: Message[];
 	pausedRouteSnapshot: NavigationContext | null;
 }
 
@@ -61,6 +69,10 @@ export type ContextMachineEvent =
 			processStages?: ProcessStage[];
 			storyRoutes?: StoryRoute[];
 			storyWaypoints?: StoryWaypoint[];
+			// 0.4.0 optional additions
+			controlPoints?: ControlPoint[];
+			interfaces?: Interface[];
+			messages?: Message[];
 	  }
 	| { type: "SELECT_DOMAIN"; domainId: string }
 	| { type: "SELECT_CAPABILITY"; capabilityId: string }
@@ -87,7 +99,9 @@ export type ContextMachineEvent =
 	| { type: "JUMP_TO_WAYPOINT"; index: number }
 	| { type: "PAUSE_ROUTE" }
 	| { type: "RESUME_ROUTE" }
-	| { type: "END_ROUTE" };
+	| { type: "END_ROUTE" }
+	// 0.4.0 additions
+	| { type: "SWITCH_CANVAS_MODE"; canvasMode: string };
 
 function resolveStepsForJourney(journeyId: string, allSteps: Step[]): Step[] {
 	return allSteps
@@ -181,6 +195,7 @@ export const contextMachine = setup({
 			activeStoryRouteId: null,
 			activeWaypointIndex: null,
 			routeState: "inactive",
+			activeCanvasMode: null,
 		},
 		graph: null,
 		journeys: [],
@@ -193,6 +208,9 @@ export const contextMachine = setup({
 		processStages: [],
 		storyRoutes: [],
 		storyWaypoints: [],
+		controlPoints: [],
+		interfaces: [],
+		messages: [],
 		pausedRouteSnapshot: null,
 	},
 	states: {
@@ -212,6 +230,9 @@ export const contextMachine = setup({
 						processStages: event.processStages ?? [],
 						storyRoutes: event.storyRoutes ?? [],
 						storyWaypoints: event.storyWaypoints ?? [],
+						controlPoints: event.controlPoints ?? [],
+						interfaces: event.interfaces ?? [],
+						messages: event.messages ?? [],
 					})),
 				},
 			},
@@ -366,6 +387,12 @@ export const contextMachine = setup({
 				SWITCH_MODE: {
 					actions: assign(({ context, event }) => ({
 						nav: reconcileModeSwitch(context.nav, event.mode),
+					})),
+				},
+				// 0.4.0 event handlers
+				SWITCH_CANVAS_MODE: {
+					actions: assign(({ context, event }) => ({
+						nav: reconcileCanvasModeSwitch(context.nav, event.canvasMode),
 					})),
 				},
 				// 0.2.0 event handlers

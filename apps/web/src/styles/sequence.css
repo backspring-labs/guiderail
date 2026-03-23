@@ -1,0 +1,110 @@
+/* Lifeline Node */
+.lifeline-node {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 160px;
+	position: relative;
+}
+
+.lifeline-node__header {
+	background: var(--color-bg-panel);
+	border: 2px solid var(--color-accent);
+	border-radius: 6px;
+	padding: 8px 12px;
+	text-align: center;
+	width: 100%;
+	z-index: 1;
+	cursor: pointer;
+}
+
+.lifeline-node__label {
+	font-weight: 600;
+	font-size: var(--font-size-sm);
+	color: var(--color-text);
+}
+
+.lifeline-node__protocol {
+	font-size: 10px;
+	color: var(--color-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-top: 2px;
+}
+
+.lifeline-node__line {
+	width: 2px;
+	flex: 1;
+	background: repeating-linear-gradient(
+		to bottom,
+		var(--color-border) 0px,
+		var(--color-border) 8px,
+		transparent 8px,
+		transparent 14px
+	);
+	margin-top: -1px;
+}
+
+/* Sequence Message Node */
+.sequence-message {
+	position: relative;
+	height: 30px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.sequence-message__line {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	border-top: 2px solid #94a3b8;
+}
+
+.sequence-message--dashed .sequence-message__line {
+	border-top-style: dashed;
+}
+
+.sequence-message__arrow {
+	position: absolute;
+	top: 50%;
+	right: -1px;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 8px solid #94a3b8;
+}
+
+.sequence-message--reverse .sequence-message__arrow {
+	right: auto;
+	left: -1px;
+	border-left: none;
+	border-right: 8px solid #94a3b8;
+}
+
+/* Label */
+.sequence-message__label {
+	position: absolute;
+	top: -16px;
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	font-size: 11px;
+	color: var(--color-text-muted);
+	font-family: var(--font-family);
+	background: var(--color-bg);
+	padding: 0 4px;
+}
+
+.sequence-message__label--selected {
+	color: var(--color-selected, #3b82f6);
+	font-weight: 600;
+}
+
+/* Selected message line emphasis */
+.sequence-message--selected .sequence-message__line {
+	border-top-width: 3px;
+}
