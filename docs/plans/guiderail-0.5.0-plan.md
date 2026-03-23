@@ -126,11 +126,17 @@ Landscape may summarize and count underlying nodes, but it should never require 
 ### What the Landscape canvas should show
 - Domains as large labeled group regions (boxes or zones)
 - Capabilities as tiles/cards within each domain region
-- Cross-domain edges shown as simplified connecting lines between regions
-- Provider presence shown subtly (badge count or small indicators)
+- Actors (customers, operators, AI agents) as entry-point nodes on the left edge of the map — the people and systems that interact with the landscape
+- Cross-domain relationships as simplified connecting lines between regions (not individual node-to-node edges)
+- Provider presence shown subtly (badge count or small indicators per capability)
 - Node count per capability visible as a metric
 - Drill-down: clicking a capability navigates into it (sets `activeCapabilityId`)
 - Bounded entry: all domains visible at entry zoom with capability tiles readable
+
+### What the Landscape canvas must NOT show
+- Individual service, system, or screen nodes — these belong to Architecture, System, and Journey
+- Individual edges between terrain nodes — these are implementation detail, not strategic structure
+- The full terrain graph with ELK layout — that is the 0.3.0/0.4.0 behavior being replaced
 
 ### Shared context preservation rules
 - Landscape → Journey: preserves `activeDomainId` and `activeCapabilityId`, Journey shows journeys for that capability
