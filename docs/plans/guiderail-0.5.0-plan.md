@@ -47,7 +47,8 @@ Each new canvas introduced in Phases 1–4 must satisfy bounded canvas entry exp
 - **Canvas templates per perspective** — purpose-built rendering for Landscape, Journey, Architecture, and System (Process and Sequence already have custom rendering from 0.4.0)
 - **Architecture Deployment canvas mode** — infrastructure/deployment view alongside the existing Logical mode
 - **Journey canvas rendering** — step-by-step customer path visualization (screens, actions, progression)
-- **Landscape canvas rendering** — capability map with domain groupings, not just a node graph
+- **Landscape canvas rendering** — capability map with domain groupings, actors as entry points, not just a node graph
+- **Landscape canvas modes** — Capability (default) and Providers (provider logos overlaid on capabilities)
 - **System internal component view** — C4 Level 3 component rendering using `parentNodeId`
 - **Content loading from files** — JSON/YAML import as authored source-of-truth artifacts, not seed dumps in another wrapper
 - **Bounded canvas entry** — each perspective enters through a summarized state with progressive expansion (enforced per-phase, not only in polish)
@@ -132,6 +133,11 @@ Landscape may summarize and count underlying nodes, but it should never require 
 - Node count per capability visible as a metric
 - Drill-down: clicking a capability navigates into it (sets `activeCapabilityId`)
 - Bounded entry: all domains visible at entry zoom with capability tiles readable
+
+### Landscape canvas modes
+
+- **Capability** (default) — domains, capabilities, actors, node/provider counts. The strategic "what we do" view.
+- **Providers** — same capability map layout, but provider logos/badges overlaid on the capabilities they serve. The "who helps us do it" view. Same topology, different emphasis — canvas mode switcher appears in the context bar, same pattern as Process modes.
 
 ### What the Landscape canvas must NOT show
 - Individual service, system, or screen nodes — these belong to Architecture, System, and Journey
