@@ -1,5 +1,6 @@
 import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
 import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
+import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-layout.js";
 import {
 	getHighlightedEdgeIds,
 	getHighlightedNodeIds,
@@ -16,12 +17,15 @@ import {
 	seedDomains,
 	seedEdges,
 	seedInterfaces,
+	seedJourneys,
 	seedMessages,
 	seedNodes,
 	seedPerspectives,
 	seedProcessStages,
 	seedProviderAssociations,
 	seedProviders,
+	seedSteps,
+	seedValueStreams,
 } from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { TerrainGraph } from "@guiderail/core/graph";
@@ -42,10 +46,11 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
 	const isProcessPerspective = perspectiveType === "process";
 	const isSequencePerspective = perspectiveType === "sequence";
+	const isJourneyPerspective = perspectiveType === "journey";
 
 	// Compute ELK layout when perspective changes (terrain perspectives only)
 	useEffect(() => {
-		if (!graph || isProcessPerspective || isSequencePerspective) return;
+		if (!graph || isProcessPerspective || isSequencePerspective || isJourneyPerspective) return;
 		if (nav.activePerspectiveId === lastPerspectiveRef.current && elkPositions.size > 0) return;
 		lastPerspectiveRef.current = nav.activePerspectiveId;
 
@@ -72,6 +77,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		elkPositions.size,
 		isProcessPerspective,
 		isSequencePerspective,
+		isJourneyPerspective,
 		perspectiveType,
 	]);
 
@@ -87,6 +93,19 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		return computeSequenceLayout(seedInterfaces, seedMessages);
 	}, [isSequencePerspective]);
 
+	// Journey layout (synchronous)
+	const journeyLayout = useMemo(() => {
+		if (!isJourneyPerspective) return null;
+		if (nav.activeJourneyId) {
+			const journey = seedJourneys.find((j) => j.id === nav.activeJourneyId);
+			if (journey) {
+				const vs = seedValueStreams.find((v) => v.journeyIds?.includes(journey.id));
+				return computeJourneyLayout(journey, seedSteps, vs?.label ?? null);
+			}
+		}
+		return computeJourneyPickerLayout(seedJourneys);
+	}, [isJourneyPerspective, nav.activeJourneyId]);
+
 	const rfNodes = useMemo(() => {
 		if (!graph) return [];
 
@@ -100,6 +119,11 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			return sequenceLayout.nodes;
 		}
 
+		// Journey perspective: render step nodes or journey picker
+		if (isJourneyPerspective && journeyLayout) {
+			return journeyLayout.nodes;
+		}
+
 		// All other perspectives: render terrain nodes with ELK
 		return buildTerrainNodes(nav, graph, elkPositions);
 	}, [
@@ -110,6 +134,8 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		bpmnLayout,
 		isSequencePerspective,
 		sequenceLayout,
+		isJourneyPerspective,
+		journeyLayout,
 	]);
 
 	const rfEdges = useMemo(() => {
@@ -125,9 +151,21 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			return [];
 		}
 
+		// Journey perspective: step flow edges
+		if (isJourneyPerspective && journeyLayout) {
+			return journeyLayout.edges;
+		}
+
 		// All other perspectives: render terrain edges
 		return buildTerrainEdges(nav, graph);
-	}, [nav, graph, isProcessPerspective, isSequencePerspective]);
+	}, [
+		nav,
+		graph,
+		isProcessPerspective,
+		isSequencePerspective,
+		isJourneyPerspective,
+		journeyLayout,
+	]);
 
 	const swimLanes = isProcessPerspective ? (bpmnLayout?.swimLanes ?? []) : [];
 

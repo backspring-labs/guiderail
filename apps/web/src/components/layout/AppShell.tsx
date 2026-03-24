@@ -41,6 +41,18 @@ export function AppShell() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 
+	// Expand events from canvas nodes (e.g., journey picker + button)
+	useEffect(() => {
+		const handleExpand = (e: Event) => {
+			const detail = (e as CustomEvent).detail;
+			if (detail?.type === "journey") {
+				send({ type: "SELECT_JOURNEY", journeyId: detail.id });
+			}
+		};
+		window.addEventListener("guiderail:expand", handleExpand);
+		return () => window.removeEventListener("guiderail:expand", handleExpand);
+	}, [send]);
+
 	const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes as RFNode[]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges as RFEdge[]);
 
@@ -129,7 +141,17 @@ export function AppShell() {
 						onEdgesChange={onEdgesChange}
 						nodeTypes={nodeTypes}
 						edgeTypes={edgeTypes}
-						onNodeClick={(_, node) => send({ type: "SELECT_NODE", nodeId: node.id })}
+						onNodeClick={(_, node) => {
+							if (node.id.startsWith("journey-step-")) {
+								const stepId = node.id.replace("journey-step-", "");
+								const step = seedSteps.find((s) => s.id === stepId);
+								if (step) {
+									send({ type: "JUMP_TO_STEP", index: step.sequenceNumber });
+								}
+							} else {
+								send({ type: "SELECT_NODE", nodeId: node.id });
+							}
+						}}
 						onEdgeClick={(_, edge) => send({ type: "SELECT_EDGE", edgeId: edge.id })}
 						onPaneClick={() => {
 							send({ type: "CLEAR_SELECTION" });

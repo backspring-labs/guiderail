@@ -1,7 +1,9 @@
 import {
 	seedCapabilities,
 	seedDomains,
+	seedJourneys,
 	seedProcesses,
+	seedSteps,
 	seedValueStreams,
 } from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
@@ -46,6 +48,7 @@ function resolveSelectedNode(
 	graph: TerrainGraph,
 	onSelectNode: (id: string) => void,
 	onSelectEdge: (id: string) => void,
+	onSelectJourney: (id: string) => void,
 ): ReactNode | null {
 	if (!nav.selectedNodeId) return null;
 
@@ -58,6 +61,18 @@ function resolveSelectedNode(
 				onSelectNode={onSelectNode}
 			/>
 		);
+	}
+
+	// Journey picker card
+	if (nav.selectedNodeId.startsWith("journey-pick-")) {
+		const journeyId = nav.selectedNodeId.replace("journey-pick-", "");
+		return resolveJourneyPickerDetail(journeyId, onSelectJourney);
+	}
+
+	// Journey step node
+	if (nav.selectedNodeId.startsWith("journey-step-")) {
+		const stepId = nav.selectedNodeId.replace("journey-step-", "");
+		return resolveJourneyStepDetail(stepId);
 	}
 
 	// Terrain nodes
@@ -131,6 +146,66 @@ function resolveActiveValueStream(
 	);
 }
 
+function resolveJourneyPickerDetail(
+	journeyId: string,
+	onSelectJourney: (id: string) => void,
+): ReactNode | null {
+	const journey = seedJourneys.find((j) => j.id === journeyId);
+	if (!journey) return null;
+	const stepCount = seedSteps.filter((s) => s.journeyId === journeyId).length;
+
+	return (
+		<div className="detail-panel">
+			<div className="detail-panel__header">
+				<span className="detail-panel__type-badge" data-type="journey">
+					journey
+				</span>
+				<h3 className="detail-panel__title">{journey.label}</h3>
+			</div>
+			{journey.description && <p className="detail-panel__description">{journey.description}</p>}
+			<div className="detail-panel__section">
+				<span className="detail-panel__tag">{stepCount} steps</span>
+			</div>
+			<button
+				type="button"
+				className="detail-panel__action"
+				onClick={() => onSelectJourney(journeyId)}
+			>
+				Open Journey
+			</button>
+		</div>
+	);
+}
+
+function resolveJourneyStepDetail(stepId: string): ReactNode | null {
+	const step = seedSteps.find((s) => s.id === stepId);
+	if (!step) return null;
+
+	return (
+		<div className="detail-panel">
+			<div className="detail-panel__header">
+				<span className="detail-panel__type-badge" data-type="step">
+					step {step.sequenceNumber + 1}
+				</span>
+				<h3 className="detail-panel__title">{step.title}</h3>
+			</div>
+			{step.narrative && <p className="detail-panel__description">{step.narrative}</p>}
+			{step.actor && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Actor</h4>
+					<span className="detail-panel__tag">{step.actor}</span>
+				</div>
+			)}
+			{step.expectedAction && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Expected Action</h4>
+					<p className="detail-panel__description">{step.expectedAction}</p>
+				</div>
+			)}
+		</div>
+	);
+}
+
 function resolveActiveDomain(
 	nav: NavigationContext,
 	onSelectCapability: (id: string) => void,
@@ -145,7 +220,7 @@ export function DetailPanelRouter(props: DetailPanelRouterProps) {
 	const { nav, graph, onSelectNode, onSelectEdge, onSelectCapability } = props;
 
 	return (
-		resolveSelectedNode(nav, graph, onSelectNode, onSelectEdge) ??
+		resolveSelectedNode(nav, graph, onSelectNode, onSelectEdge, props.onSelectJourney) ??
 		resolveSelectedEdge(nav, graph, onSelectNode) ??
 		resolveActiveProcess(nav, graph, onSelectNode) ??
 		resolveActiveCapability(nav, graph, props) ??
