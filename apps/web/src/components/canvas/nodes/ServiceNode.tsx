@@ -10,10 +10,12 @@ export function ServiceNode({ data, selected }: NodeProps) {
 	const extra = data as Record<string, unknown>;
 	const deploymentRuntime = extra.deploymentRuntime as string | undefined;
 	const deploymentTier = extra.deploymentTier as string | undefined;
+	const isComponent = extra.isComponent === true;
+	const parentLabel = extra.parentLabel as string | undefined;
 
 	return (
 		<div
-			className={`terrain-node terrain-node--service ${highlighted ? "terrain-node--highlighted" : ""}`}
+			className={`terrain-node terrain-node--service ${highlighted ? "terrain-node--highlighted" : ""} ${isComponent ? "terrain-node--component" : ""}`}
 			style={{
 				opacity: dimmed ? 0.2 : 1,
 				borderColor: highlighted
@@ -24,8 +26,11 @@ export function ServiceNode({ data, selected }: NodeProps) {
 			}}
 			title={nodeData.kernelNode.description}
 		>
+			{isComponent && parentLabel && (
+				<div className="terrain-node__parent-label">{parentLabel}</div>
+			)}
 			<div className="terrain-node__content">
-				<div className="terrain-node__icon">&#x2699;</div>
+				<div className="terrain-node__icon">{isComponent ? "◇" : "⚙"}</div>
 				<div className="terrain-node__label">{nodeData.kernelNode.label}</div>
 			</div>
 			{deploymentRuntime && (

@@ -168,7 +168,7 @@ describe("MockContentRepoAdapter", () => {
 	it("lists entities (nodes)", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const entities = await adapter.listEntities();
-		expect(entities.length).toBe(39);
+		expect(entities.length).toBe(48);
 	});
 
 	it("lists research", async () => {

@@ -275,8 +275,21 @@ function buildTerrainNodes(
 	});
 
 	return nodesWithPositions.map((rfNode) => {
-		// Add deployment metadata to node data when in Deployment mode
+		// Mark component nodes (nodes with parentNodeId)
 		let node = rfNode;
+		const parentNodeId = rfNode.data.kernelNode?.parentNodeId;
+		if (parentNodeId) {
+			const parentNode = seedNodes.find((n) => n.id === parentNodeId);
+			node = {
+				...node,
+				data: {
+					...node.data,
+					isComponent: true,
+					parentLabel: parentNode?.label,
+				},
+			};
+		}
+		// Add deployment metadata to node data when in Deployment mode
 		if (isDeploymentMode) {
 			const metadata = (rfNode.data.kernelNode?.metadata ?? {}) as Record<string, unknown>;
 			const deployment = metadata.deployment as Record<string, string> | undefined;

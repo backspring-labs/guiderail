@@ -101,6 +101,21 @@
 	white-space: nowrap;
 }
 
+/* Component nodes (C4 Level 3 — children with parentNodeId) */
+.terrain-node--component {
+	border-style: dashed;
+	font-size: 11px;
+	padding: 6px 10px;
+}
+
+.terrain-node__parent-label {
+	font-size: 9px;
+	color: var(--color-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 2px;
+}
+
 /* Deployment info on terrain nodes */
 .terrain-node__deployment {
 	display: flex;

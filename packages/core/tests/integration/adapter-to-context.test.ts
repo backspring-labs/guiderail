@@ -36,7 +36,7 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		expect(capabilityManifests.length).toBe(16);
 
 		const entityManifests = await adapter.listEntities();
-		expect(entityManifests.length).toBe(39);
+		expect(entityManifests.length).toBe(48);
 
 		const researchManifests = await adapter.listResearch();
 		expect(researchManifests.length).toBeGreaterThan(0);
@@ -51,7 +51,7 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		expect(normalizedCapabilities.length).toBe(16);
 
 		const normalizedNodes = normalizer.normalizeNodes(nodes);
-		expect(normalizedNodes.length).toBe(39);
+		expect(normalizedNodes.length).toBe(48);
 
 		const normalizedEdges = normalizer.normalizeEdges(edges);
 		expect(normalizedEdges.length).toBe(45);
@@ -71,7 +71,7 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 
 		// 5. Create graph from normalized entities
 		const graph = createGraph(normalizedNodes, normalizedEdges);
-		expect(graph.nodes.size).toBe(39);
+		expect(graph.nodes.size).toBe(48);
 		expect(graph.edges.size).toBe(45);
 
 		// 6. Initialize context machine with the graph

@@ -1,4 +1,4 @@
-import { seedPerspectives, seedProcessStages, seedSteps } from "@/store/seed-loader.js";
+import { seedNodes, seedPerspectives, seedProcessStages, seedSteps } from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { Capability, Domain, ProcessStage } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
@@ -36,20 +36,37 @@ function resolveSystemScope(nav: NavigationContext): Set<string> | null {
 	const perspective = seedPerspectives.find((p) => p.id === nav.activePerspectiveId);
 	if (perspective?.type !== "system") return null;
 
+	let parentNodes: Set<string> | null = null;
+
 	// Scope to process stage nodes if a process is active
 	if (nav.activeProcessId) {
 		const stageNodes = getProcessStageNodeIds(nav.activeProcessId);
-		if (stageNodes.size > 0) return stageNodes;
+		if (stageNodes.size > 0) parentNodes = stageNodes;
 	}
 
 	// Scope to journey step focus target nodes if a journey is active
-	if (nav.activeJourneyId) {
+	if (!parentNodes && nav.activeJourneyId) {
 		const journeyNodes = getJourneyNodeIds(nav.activeJourneyId);
-		if (journeyNodes.size > 0) return journeyNodes;
+		if (journeyNodes.size > 0) parentNodes = journeyNodes;
 	}
 
-	// No active process or journey — show all nodes (graceful degradation)
-	return null;
+	if (!parentNodes) return null;
+
+	// Expand to include child components of participating systems
+	return expandWithChildComponents(parentNodes);
+}
+
+/**
+ * Expand a set of node IDs to include any child components (nodes with parentNodeId in the set).
+ */
+function expandWithChildComponents(nodeIds: Set<string>): Set<string> {
+	const expanded = new Set(nodeIds);
+	for (const node of seedNodes) {
+		if (node.parentNodeId && nodeIds.has(node.parentNodeId)) {
+			expanded.add(node.id);
+		}
+	}
+	return expanded;
 }
 
 function resolveProcessScope(nav: NavigationContext): Set<string> | null {

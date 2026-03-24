@@ -33,7 +33,7 @@ const graph = createGraph(nodes, edges);
 
 describe("createGraph", () => {
 	it("creates a graph with correct node count", () => {
-		expect(graph.nodes.size).toBe(39);
+		expect(graph.nodes.size).toBe(48);
 	});
 
 	it("creates a graph with correct edge count", () => {
@@ -102,7 +102,7 @@ describe("getEdgesForNode", () => {
 describe("filterNodes", () => {
 	it("filters by type", () => {
 		const services = filterNodes(graph, (n) => n.type === "service");
-		expect(services.length).toBe(17);
+		expect(services.length).toBe(26);
 	});
 
 	it("filters by tag", () => {
@@ -152,7 +152,7 @@ describe("getNodesForLayer", () => {
 		if (!defaultLayer) return;
 
 		const result = getNodesForLayer(graph, defaultLayer);
-		expect(result.length).toBe(39);
+		expect(result.length).toBe(48);
 	});
 
 	it("filters by eligible types for process layer", () => {
