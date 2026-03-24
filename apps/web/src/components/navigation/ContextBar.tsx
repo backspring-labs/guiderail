@@ -8,11 +8,17 @@ import {
 	seedValueStreams,
 } from "@/store/seed-loader.js";
 
-const PROCESS_CANVAS_MODES = [
-	{ id: "operational", label: "Operational" },
-	{ id: "activity", label: "Decision" },
-	{ id: "risk_controls", label: "Controls" },
-];
+const CANVAS_MODES: Record<string, Array<{ id: string; label: string; defaultMode: string }>> = {
+	process: [
+		{ id: "operational", label: "Operational", defaultMode: "operational" },
+		{ id: "activity", label: "Decision", defaultMode: "operational" },
+		{ id: "risk_controls", label: "Controls", defaultMode: "operational" },
+	],
+	landscape: [
+		{ id: "capability", label: "Capability", defaultMode: "capability" },
+		{ id: "providers", label: "Providers", defaultMode: "capability" },
+	],
+};
 
 interface ContextBarProps {
 	activeDomainId: string | null;
@@ -50,8 +56,9 @@ export function ContextBar(props: ContextBarProps) {
 				onClearDomain={props.onClearDomain}
 				onClearCapability={props.onClearCapability}
 			/>
-			{perspectiveType === "process" && (
+			{CANVAS_MODES[perspectiveType] && (
 				<CanvasModeSwitcher
+					modes={CANVAS_MODES[perspectiveType]}
 					activeCanvasMode={props.activeCanvasMode}
 					onSwitchCanvasMode={props.onSwitchCanvasMode}
 				/>
@@ -161,16 +168,22 @@ function BreadcrumbTrail(props: BreadcrumbTrailProps) {
 }
 
 interface CanvasModeSwitcherProps {
+	modes: Array<{ id: string; label: string; defaultMode: string }>;
 	activeCanvasMode: string | null;
 	onSwitchCanvasMode: (mode: string) => void;
 }
 
-function CanvasModeSwitcher({ activeCanvasMode, onSwitchCanvasMode }: CanvasModeSwitcherProps) {
-	const currentMode = activeCanvasMode ?? "operational";
+function CanvasModeSwitcher({
+	modes,
+	activeCanvasMode,
+	onSwitchCanvasMode,
+}: CanvasModeSwitcherProps) {
+	const defaultMode = modes[0]?.defaultMode ?? modes[0]?.id ?? "";
+	const currentMode = activeCanvasMode ?? defaultMode;
 
 	return (
 		<div className="context-bar__canvas-modes">
-			{PROCESS_CANVAS_MODES.map((mode) => (
+			{modes.map((mode) => (
 				<button
 					key={mode.id}
 					type="button"

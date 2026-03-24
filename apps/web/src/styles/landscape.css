@@ -81,6 +81,22 @@
 	background: rgba(14, 165, 233, 0.1);
 }
 
+/* Provider badges (Providers canvas mode) */
+.landscape-capability__providers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.landscape-capability__provider-badge {
+	font-size: 10px;
+	padding: 1px 6px;
+	border-radius: 8px;
+	background: rgba(14, 165, 233, 0.15);
+	color: #0ea5e9;
+	font-weight: 600;
+}
+
 /* Landscape Actor Entry Point */
 .landscape-actor {
 	display: flex;

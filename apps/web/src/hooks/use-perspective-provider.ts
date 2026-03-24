@@ -161,28 +161,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 
 		// Landscape perspective: render capability map with domain/capability selection
 		if (isLandscapePerspective && landscapeLayout) {
-			return landscapeLayout.nodes.map((node) => {
-				if (node.type === "landscape_domain") {
-					const domainId = node.data.domainId as string;
-					const isActive =
-						domainId === nav.activeDomainId ||
-						seedCapabilities.some(
-							(c) => c.id === nav.activeCapabilityId && c.domainId === domainId,
-						);
-					return { ...node, data: { ...node.data, isActive } };
-				}
-				if (node.type === "landscape_capability") {
-					const capId = node.data.capabilityId as string;
-					const isActive = capId === nav.activeCapabilityId;
-					return { ...node, data: { ...node.data, isActive } };
-				}
-				if (node.type === "landscape_actor") {
-					const nodeId = node.data.nodeId as string;
-					const isActive = nodeId === nav.selectedNodeId;
-					return { ...node, data: { ...node.data, isActive } };
-				}
-				return node;
-			});
+			return buildLandscapeNodes(nav, landscapeLayout.nodes);
 		}
 
 		// All other perspectives: render terrain nodes with ELK
@@ -239,6 +218,43 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const swimLanes = isProcessPerspective ? (bpmnLayout?.swimLanes ?? []) : [];
 
 	return { rfNodes, rfEdges, layoutLoading, swimLanes };
+}
+
+function buildLandscapeNodes(
+	nav: NavigationContext,
+	nodes: Array<{
+		id: string;
+		type: string;
+		position: { x: number; y: number };
+		draggable: boolean;
+		data: Record<string, unknown>;
+	}>,
+) {
+	const isProviderMode = nav.activeCanvasMode === "providers";
+	return nodes.map((node) => {
+		if (node.type === "landscape_domain") {
+			const domainId = node.data.domainId as string;
+			const isActive =
+				domainId === nav.activeDomainId ||
+				seedCapabilities.some((c) => c.id === nav.activeCapabilityId && c.domainId === domainId);
+			return { ...node, data: { ...node.data, isActive } };
+		}
+		if (node.type === "landscape_capability") {
+			const capId = node.data.capabilityId as string;
+			const isActive = capId === nav.activeCapabilityId;
+			const providerNames = isProviderMode ? resolveProviderNames(capId) : [];
+			return {
+				...node,
+				data: { ...node.data, isActive, providerNames, showProviders: isProviderMode },
+			};
+		}
+		if (node.type === "landscape_actor") {
+			const nodeId = node.data.nodeId as string;
+			const isActive = nodeId === nav.selectedNodeId;
+			return { ...node, data: { ...node.data, isActive } };
+		}
+		return node;
+	});
 }
 
 function buildTerrainNodes(
@@ -357,4 +373,13 @@ function resolveControlIndicators(terrainNodeId: string | undefined) {
 			severity: cp.severity,
 			status: cp.status,
 		}));
+}
+
+function resolveProviderNames(capabilityId: string): string[] {
+	const associations = seedProviderAssociations.filter(
+		(pa) => pa.targetType === "capability" && pa.targetId === capabilityId,
+	);
+	return associations
+		.map((a) => seedProviders.find((p) => p.id === a.providerId)?.label)
+		.filter((label): label is string => label != null);
 }
