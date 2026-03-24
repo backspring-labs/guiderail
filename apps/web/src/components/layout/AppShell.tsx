@@ -22,7 +22,7 @@ import {
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LeftPanel } from "./LeftPanel.js";
 import { RightPanel } from "./RightPanel.js";
 import { TopBar } from "./TopBar.js";
@@ -57,6 +57,33 @@ export function AppShell() {
 		window.addEventListener("guiderail:expand", handleExpand);
 		return () => window.removeEventListener("guiderail:expand", handleExpand);
 	}, [send]);
+
+	// fitView on perspective/canvas mode switch
+	const reactFlowRef = useRef<{
+		fitView: (options?: { padding?: number; duration?: number }) => void;
+	} | null>(null);
+	const lastPerspectiveId = useRef(nav.activePerspectiveId);
+	const lastCanvasMode = useRef(nav.activeCanvasMode);
+
+	useEffect(() => {
+		const perspectiveChanged = nav.activePerspectiveId !== lastPerspectiveId.current;
+		const canvasModeChanged = nav.activeCanvasMode !== lastCanvasMode.current;
+		lastPerspectiveId.current = nav.activePerspectiveId;
+		lastCanvasMode.current = nav.activeCanvasMode;
+
+		if ((perspectiveChanged || canvasModeChanged) && reactFlowRef.current) {
+			setTimeout(() => {
+				reactFlowRef.current?.fitView({ padding: 0.15, duration: 300 });
+			}, 50);
+		}
+	}, [nav.activePerspectiveId, nav.activeCanvasMode]);
+
+	const onInit = useCallback(
+		(instance: { fitView: (options?: { padding?: number; duration?: number }) => void }) => {
+			reactFlowRef.current = instance;
+		},
+		[],
+	);
 
 	const [nodes, setNodes, onNodesChangeBase] = useNodesState(rfNodes as RFNode[]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges as RFEdge[]);
@@ -166,6 +193,7 @@ export function AppShell() {
 						onEdgesChange={onEdgesChange}
 						nodeTypes={nodeTypes}
 						edgeTypes={edgeTypes}
+						onInit={onInit}
 						onNodeClick={(_, node) => {
 							if (node.id.startsWith("journey-step-")) {
 								const stepId = node.id.replace("journey-step-", "");

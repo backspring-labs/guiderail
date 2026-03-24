@@ -40,6 +40,14 @@ pnpm check:fix      # biome auto-fix all packages (turbo)
 
 6. **`@seed` is a temporary convenience.** The web app imports seed data from core's test-fixtures via a path alias. This is a development bridge, not a permanent content contract.
 
+7. **6-perspective progression.** Landscape → Journey → Process → Architecture → System → Sequence. Each answers a different question about the same terrain. Perspective switches preserve the shared context thread.
+
+8. **Canvas modes are perspective-internal.** Process: Operational/Decision/Controls. Landscape: Capability/Providers. Architecture: Logical/Deployment. Same topology, different emphasis.
+
+9. **Shared context contract.** A perspective switch means "show me this same moment through another lens," not "take me somewhere else." Domain, capability, journey, process, and route context survive perspective switches.
+
+10. **Content loading.** `@guiderail/core/content` provides `parseContentBundle()` for loading JSON content with Zod validation. Seed data remains the fallback.
+
 ## TypeScript Ownership
 
 - TypeScript tool is a root-level shared devDependency.
