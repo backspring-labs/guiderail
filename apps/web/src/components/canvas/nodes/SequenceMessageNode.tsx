@@ -6,6 +6,9 @@ interface SequenceMessageNodeData {
 	payloadSummary?: string;
 	width: number;
 	isReverse: boolean;
+	sourceLifelineId?: string;
+	targetLifelineId?: string;
+	selectedLifelineId?: string;
 	[key: string]: unknown;
 }
 
@@ -18,6 +21,10 @@ export function SequenceMessageNode({ data, selected }: SequenceMessageNodeProps
 	const isResponse = data.messageType === "response";
 	const isEvent = data.messageType === "event";
 
+	// Highlight circle if this message originates from the selected lifeline
+	const originatesFromSelected =
+		data.selectedLifelineId != null && data.sourceLifelineId === data.selectedLifelineId;
+
 	const baseColor = isEvent ? "#8b5cf6" : "#94a3b8";
 	const activeColor = selected ? "var(--color-selected, #3b82f6)" : baseColor;
 	const lineStyle = isResponse ? "sequence-message--dashed" : "";
@@ -27,6 +34,12 @@ export function SequenceMessageNode({ data, selected }: SequenceMessageNodeProps
 		? { borderRightColor: activeColor }
 		: { borderLeftColor: activeColor };
 
+	const seqClass = selected
+		? "sequence-message__seq--selected"
+		: originatesFromSelected
+			? "sequence-message__seq--lifeline-highlight"
+			: "";
+
 	return (
 		<div
 			className={`sequence-message ${lineStyle} ${arrowDirection} ${selectedClass}`}
@@ -34,10 +47,11 @@ export function SequenceMessageNode({ data, selected }: SequenceMessageNodeProps
 		>
 			<div className="sequence-message__line" style={{ borderColor: activeColor }} />
 			<div className="sequence-message__arrow" style={arrowStyle} />
+			<div className={`sequence-message__seq ${seqClass}`}>{data.sequenceNumber}</div>
 			<div
 				className={`sequence-message__label ${selected ? "sequence-message__label--selected" : ""}`}
 			>
-				{data.sequenceNumber}: {data.label}
+				{data.label}
 			</div>
 		</div>
 	);

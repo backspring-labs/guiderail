@@ -114,9 +114,21 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			return buildBpmnNodes(nav, bpmnLayout.positions);
 		}
 
-		// Sequence perspective: render lifeline + message nodes
+		// Sequence perspective: render lifeline + message nodes with selection state
 		if (isSequencePerspective && sequenceLayout) {
-			return sequenceLayout.nodes;
+			const selectedId = nav.selectedNodeId;
+			const isLifelineSelected = selectedId?.startsWith("lifeline-") ?? false;
+			return sequenceLayout.nodes.map((node) => {
+				const isSelected = node.id === selectedId;
+				if (node.type === "sequence_message" && isLifelineSelected) {
+					return {
+						...node,
+						selected: isSelected,
+						data: { ...node.data, selectedLifelineId: selectedId },
+					};
+				}
+				return { ...node, selected: isSelected };
+			});
 		}
 
 		// Journey perspective: render step nodes or journey picker

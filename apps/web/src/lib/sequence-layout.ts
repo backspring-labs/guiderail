@@ -98,6 +98,8 @@ function buildMessageNodes(
 				payloadSummary: msg.payloadSummary,
 				width: Math.abs(targetX - sourceX),
 				isReverse,
+				sourceLifelineId: `lifeline-${msg.sourceInterfaceId}`,
+				targetLifelineId: `lifeline-${msg.targetInterfaceId}`,
 			},
 		};
 	});

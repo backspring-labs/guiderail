@@ -85,6 +85,47 @@
 	border-right: 8px solid #94a3b8;
 }
 
+/* Sequence number badge — on originating (source) lifeline */
+.sequence-message__seq {
+	position: absolute;
+	left: -14px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: var(--color-bg-panel);
+	color: var(--color-text);
+	font-size: 13px;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid var(--color-accent);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	z-index: 1;
+}
+
+.sequence-message--reverse .sequence-message__seq {
+	left: auto;
+	right: -14px;
+}
+
+.sequence-message__seq--selected {
+	background: var(--color-selected, #3b82f6);
+	border-color: var(--color-selected, #3b82f6);
+	color: white;
+	box-shadow: 0 0 0 2px var(--color-selected, #3b82f6), 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Highlight circles originating from the selected lifeline — same as individually selected */
+.sequence-message__seq--lifeline-highlight {
+	background: var(--color-selected, #3b82f6);
+	border-color: var(--color-selected, #3b82f6);
+	color: white;
+	box-shadow: 0 0 0 2px var(--color-selected, #3b82f6), 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
 /* Label */
 .sequence-message__label {
 	position: absolute;

@@ -20,9 +20,7 @@ export function SequenceDetailPanel({
 		if (!iface) return null;
 
 		const terrainNode = getNode(graph, iface.nodeId);
-		const relatedMessages = seedMessages.filter(
-			(m) => m.sourceInterfaceId === ifaceId || m.targetInterfaceId === ifaceId,
-		);
+		const originatingMessages = seedMessages.filter((m) => m.sourceInterfaceId === ifaceId);
 
 		return (
 			<div className="detail-panel">
@@ -54,25 +52,20 @@ export function SequenceDetailPanel({
 					</div>
 				)}
 
-				{relatedMessages.length > 0 && (
+				{originatingMessages.length > 0 && (
 					<div className="detail-panel__section">
-						<h4 className="detail-panel__section-title">Messages ({relatedMessages.length})</h4>
-						{relatedMessages
+						<h4 className="detail-panel__section-title">Sends ({originatingMessages.length})</h4>
+						{originatingMessages
 							.sort((a, b) => a.sequenceNumber - b.sequenceNumber)
 							.map((msg) => {
-								const direction = msg.sourceInterfaceId === ifaceId ? "→" : "←";
-								const otherIfaceId =
-									msg.sourceInterfaceId === ifaceId ? msg.targetInterfaceId : msg.sourceInterfaceId;
-								const otherIface = seedInterfaces.find((i) => i.id === otherIfaceId);
+								const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
 								return (
 									<div key={msg.id} className="detail-panel__message-item">
 										<span className="detail-panel__message-seq">#{msg.sequenceNumber}</span>
-										<span className="detail-panel__message-dir">{direction}</span>
+										<span className="detail-panel__message-dir">→</span>
 										<span className="detail-panel__message-label">{msg.label}</span>
-										{otherIface && (
-											<span className="detail-panel__message-target">
-												{direction === "→" ? "to" : "from"} {otherIface.label}
-											</span>
+										{targetIface && (
+											<span className="detail-panel__message-target">to {targetIface.label}</span>
 										)}
 									</div>
 								);
