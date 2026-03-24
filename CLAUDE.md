@@ -48,6 +48,38 @@ pnpm check:fix      # biome auto-fix all packages (turbo)
 
 10. **Content loading.** `@guiderail/core/content` provides `parseContentBundle()` for loading JSON content with Zod validation. Seed data remains the fallback.
 
+## Perspective System (0.5.0)
+
+The product organizes around a 6-perspective progression, each with its own canvas template:
+
+| Perspective | Canvas Template | Canvas Modes |
+|---|---|---|
+| Landscape | Capability map (domain regions, capability tiles, actor entry points) | Capability, Providers |
+| Journey | Screen flow (step types: screen/modal/error/info/decision/confirmation, branching transitions) | — |
+| Process | BPMN swim lanes (tasks, gateways, events) | Operational, Decision, Controls |
+| Architecture | Terrain node graph (ELK layered layout) | Logical, Deployment |
+| System | Scenario-scoped filtered architecture (parentNodeId component hierarchy) | — |
+| Sequence | Lifeline diagram (interfaces, messages, request/response) | — |
+
+### Key entities added in 0.4.0–0.5.0
+- `ControlPoint` — severity, controlType, status, regulatoryRef
+- `Interface` — nodeId, protocol, for Sequence lifelines
+- `Message` — sequenceNumber, sourceInterfaceId, targetInterfaceId, for Sequence arrows
+- `StepType` — screen, modal, error, info, decision, confirmation
+- `StepTransition` — replaces nextStepIds with targetStepId, label, condition
+- `CanvasMode` — perspectiveType + mode for canvas mode switching
+- `parentNodeId` on Node — enables C4 Level 3 component hierarchy
+
+### Interaction patterns
+- **Click = detail** — clicking any canvas element shows its detail in the right panel
+- **Expand affordance** — `+` button or "Open" action in detail panel drills into the element (e.g., journey picker → step flow)
+- **`guiderail:expand` custom event** — dispatched from canvas nodes, listened by AppShell
+- **Data-driven selection** — custom canvas perspectives use `isActive` data flags, not React Flow's internal selection state
+- **fitView on perspective/mode switch** — 300ms animated transition with 0.15 padding
+
+### Content loading
+`@guiderail/core/content` exports `parseContentBundle()` which validates raw JSON through Zod schemas, collecting errors non-fatally. Returns `ContentBundle` + `ContentError[]` + `ContentProvenance`. `mergeContentBundles()` combines multiple bundles.
+
 ## TypeScript Ownership
 
 - TypeScript tool is a root-level shared devDependency.
