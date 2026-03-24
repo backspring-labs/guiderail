@@ -7,6 +7,9 @@ export function SystemNode({ data, selected }: NodeProps) {
 	const nodeData = data as TerrainNodeData;
 	const dimmed = nodeData.dimmed;
 	const highlighted = (data as Record<string, unknown>).highlighted === true;
+	const extra = data as Record<string, unknown>;
+	const deploymentRuntime = extra.deploymentRuntime as string | undefined;
+	const deploymentTier = extra.deploymentTier as string | undefined;
 
 	return (
 		<div
@@ -25,6 +28,12 @@ export function SystemNode({ data, selected }: NodeProps) {
 				<div className="terrain-node__icon">&#x1F4E6;</div>
 				<div className="terrain-node__label">{nodeData.kernelNode.label}</div>
 			</div>
+			{deploymentRuntime && (
+				<div className="terrain-node__deployment">
+					<span className="terrain-node__deploy-runtime">{deploymentRuntime}</span>
+					{deploymentTier && <span className="terrain-node__deploy-tier">{deploymentTier}</span>}
+				</div>
+			)}
 			<ProviderBadges badges={nodeData.providerBadges} />
 			<Handle type="target" position={Position.Left} />
 			<Handle type="source" position={Position.Right} />

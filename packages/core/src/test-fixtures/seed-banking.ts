@@ -625,6 +625,49 @@ export const nodes: Node[] = [
 	},
 ].map((d) => NodeSchema.parse(d));
 
+// --- Deployment metadata enrichment ---
+const deploymentMap: Record<string, { region: string; tier: string; runtime: string }> = {
+	"n-api-gateway": { region: "us-east-1", tier: "edge", runtime: "AWS API Gateway" },
+	"n-identity-svc": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-risk-svc": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-account-svc": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-payment-orch": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-payment-router": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-payment-rail": { region: "us-east-1", tier: "infrastructure", runtime: "Managed Service" },
+	"n-core-ledger": { region: "us-east-1", tier: "data", runtime: "RDS PostgreSQL" },
+	"n-deposit-system": { region: "us-east-1", tier: "data", runtime: "RDS PostgreSQL" },
+	"n-loan-system": { region: "us-east-1", tier: "data", runtime: "RDS PostgreSQL" },
+	"n-gl-system": { region: "us-east-1", tier: "data", runtime: "RDS PostgreSQL" },
+	"n-notification-svc": { region: "us-east-1", tier: "application", runtime: "Lambda" },
+	"n-fraud-engine": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-aml-screening": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-kyc-provider": { region: "us-east-1", tier: "external", runtime: "Third Party" },
+	"n-biometric-auth": { region: "us-east-1", tier: "external", runtime: "Third Party" },
+	"n-policy-engine": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-workflow-engine": { region: "us-east-1", tier: "application", runtime: "Step Functions" },
+	"n-card-processor": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-clearing-house": { region: "us-east-1", tier: "infrastructure", runtime: "Managed Service" },
+	"n-settlement-engine": { region: "us-east-1", tier: "application", runtime: "EKS" },
+	"n-rewards-engine": { region: "us-east-1", tier: "application", runtime: "Lambda" },
+	"n-analytics-platform": { region: "us-east-1", tier: "data", runtime: "Redshift" },
+	"n-data-warehouse": { region: "us-east-1", tier: "data", runtime: "S3 + Glue" },
+	"n-event-bus": { region: "us-east-1", tier: "infrastructure", runtime: "EventBridge" },
+	"n-visa-network": { region: "global", tier: "external", runtime: "Visa Network" },
+	"n-mastercard-network": { region: "global", tier: "external", runtime: "Mastercard Network" },
+	"n-ach-rail": { region: "us", tier: "external", runtime: "Federal Reserve" },
+	"n-rtp-rail": { region: "us", tier: "external", runtime: "TCH" },
+	"n-fednow-rail": { region: "us", tier: "external", runtime: "Federal Reserve" },
+	"n-wire-rail": { region: "us", tier: "external", runtime: "Fedwire" },
+	"n-zelle-rail": { region: "us", tier: "external", runtime: "EWS" },
+};
+
+for (const node of nodes) {
+	const deployment = deploymentMap[node.id];
+	if (deployment) {
+		(node.metadata as Record<string, unknown>).deployment = deployment;
+	}
+}
+
 // --- Edges ---
 
 export const edges: Edge[] = [

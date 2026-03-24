@@ -101,6 +101,31 @@
 	white-space: nowrap;
 }
 
+/* Deployment info on terrain nodes */
+.terrain-node__deployment {
+	display: flex;
+	gap: 4px;
+	margin-top: 4px;
+	flex-wrap: wrap;
+}
+
+.terrain-node__deploy-runtime {
+	font-size: 9px;
+	padding: 1px 5px;
+	border-radius: 6px;
+	background: rgba(99, 102, 241, 0.15);
+	color: #6366f1;
+	font-weight: 600;
+}
+
+.terrain-node__deploy-tier {
+	font-size: 9px;
+	padding: 1px 5px;
+	border-radius: 6px;
+	background: rgba(100, 116, 139, 0.15);
+	color: #94a3b8;
+}
+
 /* React Flow handle overrides */
 .react-flow__handle {
 	width: 6px;

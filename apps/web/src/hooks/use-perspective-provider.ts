@@ -265,6 +265,7 @@ function buildTerrainNodes(
 	const visibleNodeIds = getVisibleNodeIds(nav, graph, seedDomains, seedCapabilities);
 	const highlightedNodeIds = getHighlightedNodeIds(nav);
 
+	const isDeploymentMode = nav.activeCanvasMode === "deployment";
 	const nodesWithPositions = toReactFlowNodes(seedNodes, nav.activePerspectiveId, {
 		visibleNodeIds,
 		selectedNodeId: nav.selectedNodeId,
@@ -274,9 +275,26 @@ function buildTerrainNodes(
 	});
 
 	return nodesWithPositions.map((rfNode) => {
-		if (rfNode.position.x !== 0 || rfNode.position.y !== 0) return rfNode;
-		const elkPos = elkPositions.get(rfNode.id);
-		return elkPos ? { ...rfNode, position: elkPos } : rfNode;
+		// Add deployment metadata to node data when in Deployment mode
+		let node = rfNode;
+		if (isDeploymentMode) {
+			const metadata = (rfNode.data.kernelNode?.metadata ?? {}) as Record<string, unknown>;
+			const deployment = metadata.deployment as Record<string, string> | undefined;
+			if (deployment) {
+				node = {
+					...rfNode,
+					data: {
+						...rfNode.data,
+						deploymentTier: deployment.tier,
+						deploymentRuntime: deployment.runtime,
+						deploymentRegion: deployment.region,
+					},
+				};
+			}
+		}
+		if (node.position.x !== 0 || node.position.y !== 0) return node;
+		const elkPos = elkPositions.get(node.id);
+		return elkPos ? { ...node, position: elkPos } : node;
 	});
 }
 

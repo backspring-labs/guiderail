@@ -18,6 +18,10 @@ const CANVAS_MODES: Record<string, Array<{ id: string; label: string; defaultMod
 		{ id: "capability", label: "Capability", defaultMode: "capability" },
 		{ id: "providers", label: "Providers", defaultMode: "capability" },
 	],
+	architecture: [
+		{ id: "logical", label: "Logical", defaultMode: "logical" },
+		{ id: "deployment", label: "Deployment", defaultMode: "logical" },
+	],
 };
 
 interface ContextBarProps {
