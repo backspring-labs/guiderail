@@ -72,22 +72,63 @@ Each new canvas introduced in Phases 1–4 must satisfy bounded canvas entry exp
 ## Phase 1: Journey Canvas Template
 
 ### Goal
-Replace the generic ELK node graph on the Journey perspective with a purpose-built customer journey visualization showing step-by-step progression.
+Replace the generic ELK node graph on the Journey perspective with a purpose-built customer journey visualization showing step-by-step screen flow with decision branching, error paths, and screen type differentiation.
 
 ### Product intent
-Journey answers "what real path is being taken by the user?" It should look like a customer journey map, not a system architecture diagram. The user should see screens, actions, and emotional progression — not services and edges.
+Journey answers "what real path is being taken by the user?" It should look like a customer journey / screen flow map — not a system architecture diagram and not a BPMN process flow. The user should see screens, actions, decision outcomes, and emotional progression.
 
 ### Non-goal
-Journey canvas must not drift into BPMN-lite or process flowchart behavior. Journey shows what the user experiences, Process shows how the work operationally executes. These are different questions with different diagram grammars.
+Journey canvas must not drift into BPMN-lite or process flowchart behavior. Journey shows what the user experiences (screens, decisions the user faces, error states they encounter). Process shows how the work operationally executes (system tasks, swim lanes, gateways). These are different questions with different diagram grammars.
+
+The key distinction: Journey decisions are **user-facing** ("did verification pass?", "cancel or continue?") not operational ("is fraud score above threshold?"). Journey branches represent screen transitions the user experiences, not system-level execution paths.
+
+### Kernel changes — Step entity evolution
+
+**Add `stepType` to StepSchema:**
+```
+stepType: z.enum(["screen", "modal", "error", "info", "decision", "confirmation"]).default("screen")
+```
+
+Step types and their visual rendering:
+- `screen` — standard screen card (default). Data entry, browsing, dashboard views.
+- `modal` — overlaid on previous screen. Confirmation dialogs, terms acceptance, MFA prompts.
+- `error` — error/failure state. Red-tinted card. "Verification failed", "insufficient funds".
+- `info` — informational/processing state. "We're verifying your identity", "please wait".
+- `decision` — user-facing decision point. Diamond or branching card. "Continue with current plan?" "Try a different method?"
+- `confirmation` — success/completion. Green-tinted card. "Account created", "payment confirmed".
+
+**Add `StepTransitionSchema`:**
+```
+StepTransitionSchema = z.object({
+  targetStepId: z.string(),
+  label: z.string().optional(),       // "Success", "Error", "Cancel", "Retry"
+  condition: z.string().optional(),    // "KYC passed", "user cancels"
+})
+```
+
+**Replace `nextStepIds: string[]` with `transitions: StepTransition[]`:**
+```
+transitions: z.array(StepTransitionSchema).default([])
+```
+
+This is a breaking change to the Step entity. All existing seed data `nextStepIds` must be migrated to `transitions`. The migration is straightforward: each `nextStepId` becomes `{ targetStepId: id }` with no label.
 
 ### What the Journey canvas should show
-- Steps as primary nodes, ordered left-to-right in a horizontal path
-- Each step shows: title, actor, expected action, and the screen/node being interacted with
-- Directional flow arrows between steps
+- Steps as primary nodes with visual type differentiation (screen cards, error cards, decision diamonds, etc.)
+- Each step shows: title, actor, expected action, step type icon/color
+- **Happy path** rendered as the primary horizontal flow (left-to-right)
+- **Branch paths** (error, cancel, retry) rendered as vertical drops below the happy path, rejoining where applicable
+- **Transition labels** on arrows between steps ("Success", "Error", "Cancel")
 - Value Stream framing shown as a header/context label
 - Capability transitions visible when the journey crosses capability boundaries
-- When no journey is active, show available journeys as clickable starting points
+- When no journey is active, show available journeys as clickable starting points with `+` expand affordance
 - Bounded entry: journey enters with all steps visible at a readable zoom, not exploded
+
+### Interaction pattern
+- **Click a step** → right panel shows step detail (narrative, actor, action, linked screen, capability)
+- **Click a journey picker card** → right panel shows journey detail with "Open Journey" action button
+- **Click `+` on picker card** → expands directly into the step flow (`guiderail:expand` custom event pattern)
+- This pattern (click = detail, explicit action = drill in) is the consistent expand affordance used across all expandable canvas elements
 
 ### Shared context preservation rules
 - Journey → Architecture: preserves the current step's linked node as `selectedNodeId` focus
@@ -95,19 +136,31 @@ Journey canvas must not drift into BPMN-lite or process flowchart behavior. Jour
 - Journey → System: preserves step-linked node focus, System filters to participating systems
 - Architecture/Process/System → Journey: returns to the same step index and journey context
 
-### Steps
-- Create `apps/web/src/lib/journey-layout.ts` — custom layout: steps as horizontal nodes with fixed spacing
-- Create `JourneyStepNode.tsx` — step visualization with actor, action, linked screen
-- Create `JourneyStartNode.tsx` — journey selection when no journey is active (shows available journeys)
-- Update `use-perspective-provider.ts` — branch for journey perspective, use journey layout
-- Add `journey.css` — step path styling, progression indicators, capability boundary markers
-- Journey steps link to terrain nodes via `focusTargets` — clicking a step can navigate to the linked node in Architecture/System
+### Implementation steps
+- Add `stepType` field and `StepTransitionSchema` to kernel Step entity
+- Migrate `nextStepIds` → `transitions` in Step schema and all seed data
+- Update `journey-layout.ts` — support branching paths (happy path horizontal, error/cancel paths as vertical drops)
+- Update `JourneyStepNode.tsx` — render different visual treatments per step type (screen card, error card, decision diamond, confirmation card, modal overlay, info card)
+- Add transition label rendering on journey flow edges
+- Update seed data with step types and labeled transitions for the "Open Savings Account" journey:
+  - s-1: `screen` (Launch & Authenticate)
+  - s-2: `screen` (Fill Application)
+  - s-3: `info` (Identity Verification — "please wait" while system verifies)
+  - New: `error` step (Verification Failed — with retry transition back to s-2)
+  - s-4: `info` (Risk Assessment — system processing)
+  - s-5: `screen` (Account Creation)
+  - s-6: `confirmation` (Success — account created)
+  - New: `decision` step after risk assessment (manual review required? → info step "Under Review")
 
 ### Done when
-- Journey perspective shows a horizontal step-by-step path, not a node graph
-- Steps show actor, action, and linked screen context
-- Value Stream framing visible
-- Clicking a step shows step detail in right panel
+- Journey perspective shows screen flow with step type differentiation
+- Happy path renders horizontally, error/alternate paths branch vertically
+- Transition labels visible on arrows
+- Decision steps render as distinct from screen steps
+- Error steps render with red treatment
+- Confirmation steps render with green treatment
+- Clicking a step updates breadcrumb and shows detail
+- Journey picker shows available journeys with expand affordance
 - Switching to Architecture preserves the current step's node context
 - Bounded entry: all steps visible at entry zoom level
 
