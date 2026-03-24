@@ -13,8 +13,8 @@ export type { Edge } from "./edge.js";
 export { FocusTargetTypeSchema, FocusTargetSchema } from "./focus-target.js";
 export type { FocusTargetType, FocusTarget } from "./focus-target.js";
 
-export { StepSchema } from "./step.js";
-export type { Step } from "./step.js";
+export { StepTypeSchema, StepTransitionSchema, StepSchema } from "./step.js";
+export type { StepType, StepTransition, Step } from "./step.js";
 
 export { JourneySchema } from "./journey.js";
 export type { Journey } from "./journey.js";

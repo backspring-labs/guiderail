@@ -78,6 +78,54 @@
 	line-height: 1.4;
 }
 
+/* Step type: error */
+.journey-step--error {
+	border-color: #ef4444;
+	border-left-color: #ef4444;
+	background: rgba(239, 68, 68, 0.08);
+}
+
+.journey-step__seq--error {
+	background: #ef4444;
+	border-color: #ef4444;
+	color: white;
+}
+
+/* Step type: confirmation */
+.journey-step--confirmation {
+	border-color: #10b981;
+	border-left-color: #10b981;
+	background: rgba(16, 185, 129, 0.08);
+}
+
+.journey-step__seq--confirmation {
+	background: #10b981;
+	border-color: #10b981;
+	color: white;
+}
+
+/* Step type: info */
+.journey-step--info {
+	border-style: dashed;
+}
+
+/* Step type: decision */
+.journey-step--decision {
+	border-color: #f59e0b;
+	border-left-color: #f59e0b;
+}
+
+.journey-step__seq--decision {
+	background: #f59e0b;
+	border-color: #f59e0b;
+	color: white;
+}
+
+/* Step type: modal */
+.journey-step--modal {
+	border-style: double;
+}
+
 /* Hide React Flow default node chrome for journey nodes */
 .react-flow__node-journey_step {
 	background: transparent;

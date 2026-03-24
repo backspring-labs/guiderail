@@ -31,7 +31,7 @@ describe("Journey Machine", () => {
 		actor.send({ type: "JOURNEY_LOADED", steps: seedSteps });
 		const snap = actor.getSnapshot();
 		expect(snap.value).toBe("active");
-		expect(snap.context.steps.length).toBe(6);
+		expect(snap.context.steps.length).toBe(8);
 	});
 
 	it("DESELECT_JOURNEY from active returns to idle and clears context", () => {

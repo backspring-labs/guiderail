@@ -78,30 +78,32 @@ describe("Integration Walkthrough — the user must never lose their place", () 
 		actor.send({ type: "STEP_FORWARD" }); // step 2
 		actor.send({ type: "STEP_FORWARD" }); // step 3
 		actor.send({ type: "STEP_FORWARD" }); // step 4
-		actor.send({ type: "STEP_FORWARD" }); // step 5 (last)
-		expect(nav(actor).activeStepIndex).toBe(5);
+		actor.send({ type: "STEP_FORWARD" }); // step 5
+		actor.send({ type: "STEP_FORWARD" }); // step 6
+		actor.send({ type: "STEP_FORWARD" }); // step 7 (last)
+		expect(nav(actor).activeStepIndex).toBe(7);
 		expect(nav(actor).activeSceneId).toBe("sc-6");
 
 		// Verify STEP_FORWARD is guarded at end
 		actor.send({ type: "STEP_FORWARD" });
-		expect(nav(actor).activeStepIndex).toBe(5);
+		expect(nav(actor).activeStepIndex).toBe(7);
 
 		// 10. Step backward
 		actor.send({ type: "STEP_BACKWARD" });
-		expect(nav(actor).activeStepIndex).toBe(4);
+		expect(nav(actor).activeStepIndex).toBe(6);
 		expect(nav(actor).activeSceneId).toBe("sc-5");
 
 		// 11. Switch perspective back — verify full coherence
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-landscape" });
 		expect(nav(actor).activePerspectiveId).toBe("persp-landscape");
-		expect(nav(actor).activeStepIndex).toBe(4);
+		expect(nav(actor).activeStepIndex).toBe(6);
 		expect(nav(actor).activeJourneyId).toBe("j-open-savings");
 		expect(nav(actor).activeDomainId).toBe("dom-accounts");
 
 		// 12. Select off-path node — journey not disrupted
 		actor.send({ type: "SELECT_NODE", nodeId: "n-payment-orch" });
 		expect(nav(actor).selectedNodeId).toBe("n-payment-orch");
-		expect(nav(actor).activeStepIndex).toBe(4);
+		expect(nav(actor).activeStepIndex).toBe(6);
 		expect(nav(actor).activeJourneyId).toBe("j-open-savings");
 
 		// 13. Deselect journey — domain/capability preserved
@@ -156,23 +158,25 @@ describe("Capability boundary crossing during step traversal", () => {
 		const actor = createInitializedContext();
 
 		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
-		// Steps 0-3 are in cap-onboarding, steps 4-5 are in cap-account-opening
+		// Steps 0-5 are in cap-onboarding, steps 6-7 are in cap-account-opening
 		expect(nav(actor).activeCapabilityId).toBe("cap-onboarding");
 
 		actor.send({ type: "STEP_FORWARD" }); // step 1 - onboarding
 		actor.send({ type: "STEP_FORWARD" }); // step 2 - onboarding
 		actor.send({ type: "STEP_FORWARD" }); // step 3 - onboarding
+		actor.send({ type: "STEP_FORWARD" }); // step 4 - onboarding
+		actor.send({ type: "STEP_FORWARD" }); // step 5 - onboarding
 		expect(nav(actor).activeCapabilityId).toBe("cap-onboarding");
 
-		actor.send({ type: "STEP_FORWARD" }); // step 4 - account-opening!
+		actor.send({ type: "STEP_FORWARD" }); // step 6 - account-opening!
 		expect(nav(actor).activeCapabilityId).toBe("cap-account-opening");
 
-		actor.send({ type: "STEP_FORWARD" }); // step 5 - account-opening
+		actor.send({ type: "STEP_FORWARD" }); // step 7 - account-opening
 		expect(nav(actor).activeCapabilityId).toBe("cap-account-opening");
 
 		// Step backward should restore
-		actor.send({ type: "STEP_BACKWARD" }); // back to step 4
-		actor.send({ type: "STEP_BACKWARD" }); // back to step 3 - onboarding!
+		actor.send({ type: "STEP_BACKWARD" }); // back to step 6
+		actor.send({ type: "STEP_BACKWARD" }); // back to step 5 - onboarding!
 		expect(nav(actor).activeCapabilityId).toBe("cap-onboarding");
 	});
 });

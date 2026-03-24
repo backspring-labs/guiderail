@@ -219,10 +219,10 @@ describe("reconcileStepChange", () => {
 			...baseCtx(),
 			activeCapabilityId: "cap-onboarding",
 			activeJourneyId: "j-open-savings",
-			activeStepIndex: 3,
+			activeStepIndex: 5,
 		};
-		// Step 4 (index 4) is in cap-account-opening
-		const result = reconcileStepChange(ctx, 4, journeySteps, graph);
+		// Step s-5 (sequenceNumber 6) is in cap-account-opening
+		const result = reconcileStepChange(ctx, 6, journeySteps, graph);
 		expect(result.activeCapabilityId).toBe("cap-account-opening");
 	});
 

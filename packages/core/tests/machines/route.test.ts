@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createActor } from "xstate";
 import { routeMachine } from "../../src/machines/route.machine.js";
 
-function createRoute(totalSteps = 6) {
+function createRoute(totalSteps = 8) {
 	const actor = createActor(routeMachine).start();
 	actor.send({ type: "ROUTE_STARTED", totalSteps });
 	return actor;
@@ -21,7 +21,7 @@ describe("Route Machine", () => {
 		const snap = actor.getSnapshot();
 		expect(snap.value).toBe("navigating");
 		expect(snap.context.currentStepIndex).toBe(0);
-		expect(snap.context.totalSteps).toBe(6);
+		expect(snap.context.totalSteps).toBe(8);
 		expect(snap.context.canGoForward).toBe(true);
 		expect(snap.context.canGoBack).toBe(false);
 	});

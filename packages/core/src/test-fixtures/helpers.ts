@@ -98,7 +98,7 @@ export function makeStep(overrides: Partial<Step> = {}): Step {
 		focusTargets: [],
 		capabilityId: "cap-test",
 		title: "Test Step",
-		nextStepIds: [],
+		transitions: [],
 		evidenceRefIds: [],
 		metadata: {},
 		...overrides,

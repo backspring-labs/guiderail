@@ -41,7 +41,7 @@ describe("Context Machine", () => {
 		const actor = createCtx();
 		expect(actor.getSnapshot().value).toBe("ready");
 		expect(actor.getSnapshot().context.graph).toBeDefined();
-		expect(actor.getSnapshot().context.steps.length).toBe(6);
+		expect(actor.getSnapshot().context.steps.length).toBe(8);
 	});
 
 	it("SELECT_DOMAIN updates nav context", () => {
