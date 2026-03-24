@@ -1,0 +1,132 @@
+/* Landscape Domain Group */
+.landscape-domain {
+	border: 2px solid var(--color-border);
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.02);
+	position: relative;
+}
+
+.landscape-domain__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 16px;
+}
+
+.landscape-domain__label {
+	font-weight: 700;
+	font-size: var(--font-size-base);
+	color: var(--color-text);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.landscape-domain__count {
+	font-size: 11px;
+	color: var(--color-text-muted);
+	background: var(--color-bg-secondary);
+	padding: 2px 8px;
+	border-radius: 10px;
+}
+
+/* Domain selected state (data-driven, not React Flow .selected) */
+.landscape-domain--selected {
+	border-color: var(--color-selected);
+	box-shadow: 0 0 0 2px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Landscape Capability Tile */
+.landscape-capability {
+	width: 200px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	border: 1px solid var(--color-border);
+	background: var(--color-bg-panel);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.landscape-capability:hover {
+	border-color: var(--color-accent);
+}
+
+.landscape-capability--selected,
+.landscape-capability--selected:hover {
+	border-color: var(--color-selected);
+	box-shadow: 0 0 0 2px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.landscape-capability__label {
+	font-weight: 600;
+	font-size: var(--font-size-sm);
+	color: var(--color-text);
+	margin-bottom: 6px;
+}
+
+.landscape-capability__metrics {
+	display: flex;
+	gap: 8px;
+}
+
+.landscape-capability__metric {
+	font-size: 10px;
+	color: var(--color-text-muted);
+	background: var(--color-bg-secondary);
+	padding: 1px 6px;
+	border-radius: 8px;
+}
+
+.landscape-capability__metric--provider {
+	color: #0ea5e9;
+	background: rgba(14, 165, 233, 0.1);
+}
+
+/* Landscape Actor Entry Point */
+.landscape-actor {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	width: 100px;
+	cursor: pointer;
+}
+
+.landscape-actor__icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: var(--color-bg-secondary);
+	color: var(--color-text-secondary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.15s ease;
+}
+
+.landscape-actor:hover .landscape-actor__icon {
+	background: rgba(59, 130, 246, 0.15);
+	color: #3b82f6;
+}
+
+.landscape-actor--selected .landscape-actor__icon {
+	background: #3b82f6;
+	color: white;
+	box-shadow: 0 0 0 3px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.landscape-actor__label {
+	font-weight: 600;
+	font-size: var(--font-size-sm);
+	color: var(--color-text);
+	text-align: center;
+}
+
+/* Hide React Flow default node chrome for landscape nodes */
+.react-flow__node-landscape_domain,
+.react-flow__node-landscape_capability,
+.react-flow__node-landscape_actor {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+}

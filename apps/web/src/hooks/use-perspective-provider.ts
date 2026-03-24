@@ -1,6 +1,7 @@
 import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
 import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
 import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-layout.js";
+import { computeLandscapeLayout } from "@/lib/landscape-layout.js";
 import {
 	getHighlightedEdgeIds,
 	getHighlightedNodeIds,
@@ -47,10 +48,18 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const isProcessPerspective = perspectiveType === "process";
 	const isSequencePerspective = perspectiveType === "sequence";
 	const isJourneyPerspective = perspectiveType === "journey";
+	const isLandscapePerspective = perspectiveType === "landscape";
 
 	// Compute ELK layout when perspective changes (terrain perspectives only)
 	useEffect(() => {
-		if (!graph || isProcessPerspective || isSequencePerspective || isJourneyPerspective) return;
+		if (
+			!graph ||
+			isProcessPerspective ||
+			isSequencePerspective ||
+			isJourneyPerspective ||
+			isLandscapePerspective
+		)
+			return;
 		if (nav.activePerspectiveId === lastPerspectiveRef.current && elkPositions.size > 0) return;
 		lastPerspectiveRef.current = nav.activePerspectiveId;
 
@@ -78,6 +87,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		isProcessPerspective,
 		isSequencePerspective,
 		isJourneyPerspective,
+		isLandscapePerspective,
 		perspectiveType,
 	]);
 
@@ -105,6 +115,19 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		}
 		return computeJourneyPickerLayout(seedJourneys);
 	}, [isJourneyPerspective, nav.activeJourneyId]);
+
+	// Landscape layout (synchronous)
+	const landscapeLayout = useMemo(() => {
+		if (!isLandscapePerspective) return null;
+		const actors = seedNodes.filter((n) => n.type === "actor");
+		return computeLandscapeLayout(
+			seedDomains,
+			seedCapabilities,
+			actors,
+			seedProviders,
+			seedProviderAssociations,
+		);
+	}, [isLandscapePerspective]);
 
 	const rfNodes = useMemo(() => {
 		if (!graph) return [];
@@ -136,6 +159,32 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			return journeyLayout.nodes;
 		}
 
+		// Landscape perspective: render capability map with domain/capability selection
+		if (isLandscapePerspective && landscapeLayout) {
+			return landscapeLayout.nodes.map((node) => {
+				if (node.type === "landscape_domain") {
+					const domainId = node.data.domainId as string;
+					const isActive =
+						domainId === nav.activeDomainId ||
+						seedCapabilities.some(
+							(c) => c.id === nav.activeCapabilityId && c.domainId === domainId,
+						);
+					return { ...node, data: { ...node.data, isActive } };
+				}
+				if (node.type === "landscape_capability") {
+					const capId = node.data.capabilityId as string;
+					const isActive = capId === nav.activeCapabilityId;
+					return { ...node, data: { ...node.data, isActive } };
+				}
+				if (node.type === "landscape_actor") {
+					const nodeId = node.data.nodeId as string;
+					const isActive = nodeId === nav.selectedNodeId;
+					return { ...node, data: { ...node.data, isActive } };
+				}
+				return node;
+			});
+		}
+
 		// All other perspectives: render terrain nodes with ELK
 		return buildTerrainNodes(nav, graph, elkPositions);
 	}, [
@@ -148,6 +197,8 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		sequenceLayout,
 		isJourneyPerspective,
 		journeyLayout,
+		isLandscapePerspective,
+		landscapeLayout,
 	]);
 
 	const rfEdges = useMemo(() => {
@@ -160,6 +211,11 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 
 		// Sequence perspective: no edges (messages rendered as nodes)
 		if (isSequencePerspective) {
+			return [];
+		}
+
+		// Landscape perspective: no edges (capability map, not node graph)
+		if (isLandscapePerspective) {
 			return [];
 		}
 
@@ -176,6 +232,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		isProcessPerspective,
 		isSequencePerspective,
 		isJourneyPerspective,
+		isLandscapePerspective,
 		journeyLayout,
 	]);
 

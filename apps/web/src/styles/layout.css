@@ -79,7 +79,8 @@
 	background: rgba(255, 255, 255, 0.05);
 }
 
-.perspective-switcher__tab--active {
+.perspective-switcher__tab--active,
+.perspective-switcher__tab--active:hover {
 	background: var(--color-selected);
 	color: white;
 }
@@ -297,7 +298,8 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 6px 16px;
+	height: 36px;
+	padding: 0 16px;
 	background: var(--color-bg);
 	border-bottom: 1px solid var(--color-border);
 	font-size: var(--font-size-sm);
@@ -397,7 +399,8 @@
 	background: var(--color-bg-secondary);
 }
 
-.context-bar__canvas-mode--active {
+.context-bar__canvas-mode--active,
+.context-bar__canvas-mode--active:hover {
 	color: var(--color-text);
 	background: var(--color-bg-secondary);
 	border-color: var(--color-accent);

@@ -4,6 +4,9 @@ import { BpmnGatewayNode } from "./BpmnGatewayNode.js";
 import { BpmnTaskNode } from "./BpmnTaskNode.js";
 import { JourneyPickerNode } from "./JourneyPickerNode.js";
 import { JourneyStepNode } from "./JourneyStepNode.js";
+import { LandscapeActorNode } from "./LandscapeActorNode.js";
+import { LandscapeCapabilityNode } from "./LandscapeCapabilityNode.js";
+import { LandscapeDomainNode } from "./LandscapeDomainNode.js";
 import { LifelineNode } from "./LifelineNode.js";
 import { ScreenNode } from "./ScreenNode.js";
 import { SequenceMessageNode } from "./SequenceMessageNode.js";
@@ -22,4 +25,7 @@ export const nodeTypes = {
 	sequence_message: SequenceMessageNode,
 	journey_step: JourneyStepNode,
 	journey_picker: JourneyPickerNode,
+	landscape_domain: LandscapeDomainNode,
+	landscape_capability: LandscapeCapabilityNode,
+	landscape_actor: LandscapeActorNode,
 };

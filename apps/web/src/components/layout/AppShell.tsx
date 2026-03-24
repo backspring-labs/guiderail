@@ -5,7 +5,12 @@ import { SearchPalette } from "@/components/navigation/SearchPalette.js";
 import { StoryRouteBar } from "@/components/route/StoryRouteBar.js";
 import { useInitializeContext, useNavigation } from "@/hooks/use-context-machine.js";
 import { usePerspectiveProvider } from "@/hooks/use-perspective-provider.js";
-import { seedSteps, seedStoryRoutes, seedStoryWaypoints } from "@/store/seed-loader.js";
+import {
+	seedPerspectives,
+	seedSteps,
+	seedStoryRoutes,
+	seedStoryWaypoints,
+} from "@/store/seed-loader.js";
 import { useUIStore } from "@/store/ui-store.js";
 import type { Edge as RFEdge, Node as RFNode } from "@xyflow/react";
 import {
@@ -53,8 +58,24 @@ export function AppShell() {
 		return () => window.removeEventListener("guiderail:expand", handleExpand);
 	}, [send]);
 
-	const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes as RFNode[]);
+	const [nodes, setNodes, onNodesChangeBase] = useNodesState(rfNodes as RFNode[]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges as RFEdge[]);
+
+	// On custom canvas perspectives, filter out React Flow's internal selection changes
+	// so our data-driven selection state isn't overridden
+	const perspectiveType =
+		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
+	const usesCustomSelection =
+		perspectiveType === "landscape" ||
+		perspectiveType === "journey" ||
+		perspectiveType === "sequence" ||
+		perspectiveType === "process";
+	const onNodesChange = usesCustomSelection
+		? (changes: Parameters<typeof onNodesChangeBase>[0]) => {
+				const filtered = changes.filter((c) => c.type !== "select");
+				if (filtered.length > 0) onNodesChangeBase(filtered);
+			}
+		: onNodesChangeBase;
 
 	// Sync projected nodes/edges into React Flow state when they change
 	useEffect(() => {
@@ -71,13 +92,17 @@ export function AppShell() {
 			nav.selectedNodeId != null ||
 			nav.selectedEdgeId != null ||
 			nav.activeProcessId != null ||
-			nav.activeValueStreamId != null;
+			nav.activeValueStreamId != null ||
+			nav.activeDomainId != null ||
+			nav.activeCapabilityId != null;
 		setRightPanelOpen(hasContext);
 	}, [
 		nav.selectedNodeId,
 		nav.selectedEdgeId,
 		nav.activeProcessId,
 		nav.activeValueStreamId,
+		nav.activeDomainId,
+		nav.activeCapabilityId,
 		setRightPanelOpen,
 	]);
 
@@ -148,6 +173,15 @@ export function AppShell() {
 								if (step) {
 									send({ type: "JUMP_TO_STEP", index: step.sequenceNumber });
 								}
+							} else if (node.id.startsWith("landscape-actor-")) {
+								const nodeId = node.id.replace("landscape-actor-", "");
+								send({ type: "SELECT_NODE", nodeId });
+							} else if (node.id.startsWith("landscape-cap-")) {
+								const capId = node.id.replace("landscape-cap-", "");
+								send({ type: "SELECT_CAPABILITY", capabilityId: capId });
+							} else if (node.id.startsWith("landscape-domain-")) {
+								const domainId = node.id.replace("landscape-domain-", "");
+								send({ type: "SELECT_DOMAIN", domainId });
 							} else {
 								send({ type: "SELECT_NODE", nodeId: node.id });
 							}
