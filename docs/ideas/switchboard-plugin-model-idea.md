@@ -210,6 +210,50 @@ contributions:
 
 ---
 
+## TypeScript Implementation Guidance
+
+### Zero runtime dependencies for core
+
+The TypeScript port of Switchboard should have **zero runtime dependencies**. The Python version uses Pluggy (hook dispatch) and Transitions (lifecycle state machine) because they existed and were convenient. The TypeScript version should implement both directly because the abstractions are simpler to build than to integrate.
+
+### Hook dispatch (replaces Pluggy)
+
+No TypeScript library matches Pluggy's feature set (priority ordering, BROADCAST vs FIRST_RESULT policy, caller/hookimpl markers, tracing). The closest candidates (tapable, eventemitter3, hookable) are either too simple or too opinionated.
+
+Pluggy itself is ~500 lines of Python. The TypeScript equivalent would be ~300 lines implementing Switchboard's `HookRouterPort` interface directly. This gives exact control over:
+- Priority-based handler ordering with deterministic tie-breaks
+- BROADCAST (all handlers, collect results) vs FIRST_RESULT (first non-null wins) policies
+- Failure isolation per handler
+- No library opinions to fight
+
+### Lifecycle state machine (replaces Transitions)
+
+The plugin lifecycle is 5 states and 6 transitions — too simple to justify a dependency. Hand-roll in ~50 lines:
+
+```typescript
+type LifecycleState = "ready" | "starting" | "active" | "stopping" | "failed";
+
+const VALID_TRANSITIONS: Record<LifecycleState, LifecycleState[]> = {
+  ready: ["starting"],
+  starting: ["active", "failed"],
+  active: ["stopping"],
+  stopping: ["ready", "failed"],
+  failed: ["ready"],
+};
+```
+
+XState is already in GuideRail's dependency tree but is overkill for this. A typed enum + transition map is cleaner and has zero overhead.
+
+### Why zero dependencies matters
+
+- Smaller bundle for browser runtime
+- No version conflicts with host application
+- Full control over semantics (priority ordering, failure isolation)
+- Easier to audit and maintain
+- The Python version's dependencies are implementation choices, not architectural requirements
+
+---
+
 ## Key Design Principles (from Switchboard)
 
 1. **Host-owned seams.** Only declared extension points exist. Plugins cannot inject arbitrary hooks or modify host internals.
