@@ -1,43 +1,146 @@
-# IDEA — Mobile Screen Preview in Detail Panel
+# IDEA — Mobile Screen Preview
 
 ## Context
 
-The right panel currently shows contextual detail for the selected entity (node detail, control points, sequence messages, etc.). When the selected entity is a screen-type node or when the current navigation context maps to a customer-facing screen, the panel could render a mobile screen preview instead of — or alongside — technical detail.
+The product navigates through technical perspectives (Process, Sequence, Architecture) where the customer's actual experience becomes invisible. When you're deep in a BPMN swim lane or a sequence diagram, there's no visual anchor showing "this is what the customer sees right now."
 
-This keeps the customer's experience visible while navigating through Process, Sequence, or Journey perspectives, grounding technical abstractions in the user's reality.
+A screen node's best contextual detail is the screen itself — showing metadata about a screen (label, tags, edges) is telling someone about a painting instead of showing it to them.
 
-## Concept
+---
 
-- The right panel already has open/close infrastructure tied to `selectedNodeId` and navigation context
-- When a `screen` type node is selected (e.g., `n-mobile-app`, `n-web-app`), the panel renders a mobile screen mockup instead of the standard node detail
-- When navigating through Process (BPMN) or Sequence (lifeline) perspectives, if the current focus maps to a journey step that involves a screen transition, the panel can show that screen
-- The mapping is many-to-one: multiple process tasks or sequence messages may occur before the next screen transition — the preview shows the last relevant screen state
+## Two Rendering Approaches
 
-## Why this works
+### Approach A: Right Panel (selection-triggered)
 
-- Reuses existing panel slide-out behavior — no new UI chrome needed
-- The shared context contract already tracks `activeJourneyId`, `activeStepIndex`, and `activeFocusTargets`
-- Journey steps already reference screen nodes via `focusTargets`
-- The panel just needs to detect "is this a screen-relevant selection?" and render differently
+When a screen-type node is selected, the right panel renders a mobile screen mockup instead of standard node detail.
 
-## What it needs
+**Pros:**
+- Reuses existing panel slide-out behavior — no new UI chrome
+- Consistent with "click = detail" interaction pattern
+- Simple implementation
 
-- **Screen assets or mockup references** on screen-type nodes — currently these are just labels. Would need an image URL, SVG component reference, or structured screen layout description in metadata.
-- **Step-to-screen mapping** — a way to resolve which screen the customer sees at a given process/sequence moment. Could use the existing journey step → focusTarget → screen node chain.
-- **Mobile frame component** — a React component that renders a phone-frame container around the screen content.
+**Cons:**
+- Competes with node/message detail for panel space
+- Only visible when explicitly selected
+- Disappears when you select something else
 
-## Implementation approach
+### Approach B: Floating Overlay (context-persistent)
 
-1. Add `screenAsset` or `mockupUrl` to screen node metadata
-2. Create `ScreenPreviewPanel.tsx` — renders in the right panel when a screen node is selected
-3. Update `DetailPanelRouter.tsx` — route to screen preview when selected node type is `screen`
-4. For Process/Sequence sync: resolve current focus → nearest journey step → screen node → show preview
+A small phone-frame overlay pinned to the bottom-right corner of the canvas, staying visible and in sync as you navigate through Journey, Process, or Sequence.
+
+```
+┌──────────────────────────────────────────┐
+│                                          │
+│    React Flow Canvas                     │
+│                                          │
+│                           ┌────────────┐ │
+│                           │  Phone     │ │
+│                           │  Frame     │ │
+│                           │            │ │
+│                           │  Screen    │ │
+│                           │  Render    │ │
+│                           │            │ │
+│                           └────────────┘ │
+│                                          │
+├──────────────────────────────────────────┤
+│ StoryRouteBar                            │
+└──────────────────────────────────────────┘
+```
+
+**Pros:**
+- Always visible — customer experience stays grounded across perspectives
+- Doesn't compete with detail panel
+- Updates automatically as navigation context changes
+- Works during guided route playback without manual selection
+
+**Cons:**
+- Takes canvas space (needs toggle to hide)
+- New UI component, not reusing existing infrastructure
+
+### Recommended: Approach B (floating overlay)
+
+The floating overlay is the stronger product choice because it keeps the customer's experience persistently visible while the user explores technical perspectives. The detail panel remains available for technical detail. Both can coexist.
+
+---
+
+## How the Overlay Stays in Sync
+
+The overlay lives in `AppShell.tsx` at the same level as `StoryRouteBar` — it's a sibling of the canvas, not inside it. It reads from the shared navigation state:
+
+### Mapping chain:
+```
+Current nav state
+  → activeJourneyId + activeStepIndex
+  → step.focusTargets
+  → find node where type === "screen"
+  → resolve screen asset/mockup
+  → render in floating frame
+```
+
+### Why it persists across perspectives:
+
+The shared context contract preserves `activeJourneyId` and `activeStepIndex` across perspective switches. So when you move from Journey → Process → Sequence, the overlay knows which step you're on and which screen the customer sees at that moment.
+
+### What triggers updates:
+- Clicking a journey step (JUMP_TO_STEP)
+- Clicking a BPMN task that maps to a journey step
+- Advancing a sequence message that maps to a step transition
+- Guided route waypoint progression
+
+### Many-to-one mapping:
+Multiple process tasks or sequence messages may occur before the next screen transition. The overlay shows the **last confidently-resolved customer-visible screen state** — it does not pretend to animate every internal transition into a screen change.
+
+---
+
+## What It Needs
+
+### Screen assets or mockup references
+Screen-type nodes currently have only labels. They need visual content:
+- `metadata.screenAsset`: image URL (simplest — screenshot or Figma export)
+- `metadata.screenLayout`: structured screen description (richer — rendered components)
+- `metadata.mockupUrl`: external URL to a hosted mockup image
+
+### Mobile frame component
+`ScreenOverlay.tsx` — renders a phone-frame container with:
+- The current screen image/content inside the frame
+- The screen node label as a caption
+- A show/hide toggle button
+- Smooth transition when the screen changes
+
+### Step-to-screen resolver
+A utility that resolves the current navigation context to the appropriate screen:
+```typescript
+function resolveCurrentScreen(nav: NavigationContext, steps: Step[], nodes: Node[]): Node | null {
+  // Find the active step
+  // Look through its focusTargets for a screen-type node
+  // Return that node (or null if no screen is relevant)
+}
+```
+
+---
+
+## Design Rules
+
+1. **The preview is a contextual aid, not a parallel navigation surface.** It subordinates to the current GuideRail context. It is not a second application mode.
+
+2. **Show only confidently-resolved state.** The preview should not pretend to animate every internal transition into a screen. It shows what the customer actually sees at this moment.
+
+3. **Toggle, don't force.** The overlay should have a clear show/hide toggle. Some users won't want it taking canvas space. Default: visible on Journey, hidden on other perspectives until toggled.
+
+4. **Screen node detail = screen render.** When a screen node is selected (click = detail), the right panel should show the screen render, not metadata about the screen. The render IS the detail.
+
+---
 
 ## Scope
 
-- **0.5.0 stretch:** Establish the screen-to-step mapping in the Journey canvas template. Add `ScreenPreviewPanel` with placeholder rendering.
-- **0.6.0:** Full screen preview with real mockup assets or structured screen descriptions.
+- **0.6.0:** Establish screen-to-step mapping. Add `ScreenOverlay.tsx` with placeholder rendering (screen label in a phone frame). Toggle button. Sync with navigation state.
+- **0.7.0:** Real screen assets — mockup images or structured screen descriptions. Figma export pipeline or screenshot ingestion.
 
-## Design rule
+---
 
-The screen preview is contextual detail, not a separate mode. It lives in the right panel and follows the same open/close behavior as all other detail content. It should feel like "I selected something and the panel showed me what the customer sees" — not like switching to a different application.
+## Relationship to Plugin Model
+
+With the Switchboard plugin model (`docs/ideas/switchboard-plugin-model-idea.md`), the screen overlay could be implemented as a plugin:
+- Contributes to `canvas.overlay` slot
+- Listens to `context.changed` and `route.waypoint.entered` hooks
+- Pro version could include Figma sync for live mockup updates
