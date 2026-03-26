@@ -112,29 +112,87 @@ Each section uses the same `+` expand / click = detail pattern established in 0.
 
 ---
 
-## Sequences in the Left Panel
+## Entity Lineage — The Full Navigation Graph
 
-Sequences are currently only accessible via the Sequence perspective tab. Adding them to the left panel enables direct navigation to specific call flows:
+The left panel sections mirror the kernel's entity lineage. The complete relationship graph:
 
-### What a "sequence" represents in the panel
-A sequence is a named collection of interfaces and messages that form a coherent runtime call flow. Currently the seed data has one implicit sequence (payment authorization). At scale, there would be multiple:
-- Payment Authorization Flow
-- Account Opening Flow
-- Transfer Execution Flow
-- Fraud Review Escalation Flow
+```
+Domain
+  └── Capability (domainId → Domain)
+        ├── Journey      → "what the user experiences"
+        │     └── Step (journeyId, capabilityId, focusTargets → Node)
+        ├── Process      → "how the work executes"
+        │     └── ProcessStage (processId, nodeIds → Node, controlPoints → ControlPoint)
+        └── Sequence     → "how the systems interact at runtime"
+              ├── interfaceIds → Interface (nodeId → Node)
+              └── messageIds → Message (sourceInterfaceId, targetInterfaceId)
+
+Node (terrain entity)
+  ├── parentNodeId → Node (component hierarchy)
+  └── Interface (nodeId → Node)
+        └── Message (ordered calls between interfaces)
+
+ValueStream (capabilityIds, journeyIds — framing modifier)
+```
+
+### The Capability triad
+
+Each Capability anchors three complementary views:
+
+| Entity | Perspective | Question |
+|---|---|---|
+| Journey | Journey | What does the user experience? |
+| Process | Process | How does the work operationally execute? |
+| Sequence | Sequence | How do the systems interact at runtime? |
+
+These three are different lenses on the same capability's execution. Selecting a capability in the left panel reveals all three as navigable options.
+
+---
+
+## Sequence as a First-Class Entity
+
+Currently the Sequence perspective renders all interfaces and all messages as one flat diagram — no grouping, no filtering, no named selection. This worked at 8 lifelines and 14 messages but won't scale.
+
+### Proposed Sequence entity
+
+```typescript
+SequenceSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  capabilityId: z.string(),            // business context anchor
+  processId: z.string().optional(),    // operational context (optional)
+  interfaceIds: z.array(z.string()),   // participating lifelines
+  messageIds: z.array(z.string()),     // ordered messages in this flow
+  tags: z.array(z.string()).default([]),
+  metadata: z.record(z.unknown()).default({}),
+  provenance: ProvenanceRefSchema.optional(),
+});
+```
+
+Naming follows the pattern of other entities: `Journey`, `Process`, `Sequence` — not `SequenceFlow`. Consistent, clean.
+
+### What this enables
+- Left panel lists named sequences scoped to the selected capability
+- Selecting a sequence filters the Sequence perspective to just those interfaces and messages
+- Multiple sequences can share interfaces (an interface participates in many flows)
+- The lineage from Capability → Sequence → Interface → Message is fully navigable
+
+### Example sequences at scale
+- Payment Authorization Sequence
+- Account Opening Sequence
+- Transfer Execution Sequence
+- Fraud Review Escalation Sequence
+- Card Network Authorization Sequence
 
 ### What selecting a sequence does
-1. Sets context to the relevant interfaces/messages
-2. Switches to Sequence perspective (or scopes the current Sequence view)
+1. Sets `activeSequenceId` in navigation context
+2. Sequence perspective filters to the sequence's `interfaceIds` and `messageIds`
 3. Right panel shows sequence metadata (description, participating interfaces, message count)
+4. Left panel highlights the active sequence
 
-### What this might need in the kernel
-Currently there's no explicit "Sequence" entity — interfaces and messages exist but aren't grouped into named sequences. Options:
-- **Option A:** Add a `SequenceFlow` entity (id, label, description, interfaceIds, messageIds) — explicit grouping
-- **Option B:** Derive sequences from processes — each process maps to a sequence of interface calls
-- **Option C:** Use StoryRoutes that happen to use Sequence perspective — existing mechanism, no new entity
-
-Option A is cleanest for the left panel — it gives sequences a name and description that can be displayed.
+### Current gap
+The Sequence perspective currently calls `computeSequenceLayout(seedInterfaces, seedMessages)` with all data unfiltered. Adding the Sequence entity means this becomes `computeSequenceLayout(filteredInterfaces, filteredMessages)` scoped to the active sequence.
 
 ---
 
