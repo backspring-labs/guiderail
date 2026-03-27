@@ -1,4 +1,4 @@
-import type { Interface, Message } from "@guiderail/core/entities";
+import type { Interface, Message, Sequence } from "@guiderail/core/entities";
 
 const LIFELINE_SPACING_X = 250;
 const MESSAGE_SPACING_Y = 60;
@@ -103,4 +103,29 @@ function buildMessageNodes(
 			},
 		};
 	});
+}
+
+const PICKER_START_X = 40;
+const PICKER_START_Y = 40;
+const PICKER_SPACING = 200;
+
+/**
+ * Layout for sequence selection: available sequences as clickable cards.
+ */
+export function computeSequencePickerLayout(sequences: Sequence[]): SequenceLayoutResult {
+	const nodes: SequenceNode[] = sequences.map((seq, index) => ({
+		id: `sequence-pick-${seq.id}`,
+		type: "sequence_picker",
+		position: { x: PICKER_START_X, y: PICKER_START_Y + index * PICKER_SPACING },
+		draggable: false,
+		data: {
+			sequenceId: seq.id,
+			label: seq.label,
+			description: seq.description,
+			interfaceCount: seq.interfaceIds.length,
+			messageCount: seq.messageIds.length,
+		},
+	}));
+
+	return { nodes, edges: [] };
 }

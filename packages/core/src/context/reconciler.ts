@@ -3,6 +3,7 @@ import type { FocusTarget } from "../entities/focus-target.js";
 import type { Journey } from "../entities/journey.js";
 import type { ProcessStage } from "../entities/process-stage.js";
 import type { Process } from "../entities/process.js";
+import type { Sequence } from "../entities/sequence.js";
 import type { Step } from "../entities/step.js";
 import type { StoryRoute } from "../entities/story-route.js";
 import type { StoryWaypoint } from "../entities/story-waypoint.js";
@@ -396,5 +397,55 @@ export function reconcileRouteEnd(ctx: NavigationContext): NavigationContext {
 		activeWaypointIndex: null,
 		routeState: "inactive",
 		activeFocusTargets: [],
+	};
+}
+
+/**
+ * 16. Sequence switch: set sequence, auto-set domain/capability from sequence,
+ *     preserve compatible journey/process, clear incompatible ones.
+ *     Does NOT force a perspective switch.
+ */
+export function reconcileSequenceSwitch(
+	ctx: NavigationContext,
+	sequenceId: string,
+	sequence: Sequence,
+	capabilities: Capability[],
+): NavigationContext {
+	// Auto-set capability from sequence
+	const activeCapabilityId = sequence.capabilityId;
+
+	// Auto-set domain from capability
+	const cap = capabilities.find((c) => c.id === activeCapabilityId);
+	const activeDomainId = cap?.domainId ?? ctx.activeDomainId;
+
+	// Preserve journey only if compatible with the sequence
+	const activeJourneyId =
+		sequence.journeyId && ctx.activeJourneyId === sequence.journeyId
+			? ctx.activeJourneyId
+			: (sequence.journeyId ?? null);
+
+	// Preserve process only if compatible with the sequence
+	const activeProcessId =
+		sequence.processId && ctx.activeProcessId === sequence.processId
+			? ctx.activeProcessId
+			: (sequence.processId ?? null);
+
+	return {
+		...ctx,
+		activeSequenceId: sequenceId,
+		activeDomainId,
+		activeCapabilityId,
+		activeJourneyId,
+		activeProcessId,
+	};
+}
+
+/**
+ * 17. Sequence clear: clear sequence, preserve all other context.
+ */
+export function reconcileSequenceClear(ctx: NavigationContext): NavigationContext {
+	return {
+		...ctx,
+		activeSequenceId: null,
 	};
 }

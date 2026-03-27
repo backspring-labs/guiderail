@@ -2403,6 +2403,49 @@ export const messages: Message[] = [
 	},
 ].map((d) => MessageSchema.parse(d));
 
+// --- Sequences ---
+
+import { SequenceSchema } from "../entities/sequence.js";
+import type { Sequence } from "../entities/sequence.js";
+
+export const sequences: Sequence[] = [
+	{
+		id: "seq-payment-auth",
+		label: "Payment Authorization",
+		description:
+			"Full request/response sequence for authorizing a card payment — from customer device through gateway, orchestration, fraud screening, network authorization, and ledger posting",
+		capabilityId: "cap-payment-processing",
+		processId: "proc-payment-auth",
+		interfaceIds: [
+			"iface-mobile",
+			"iface-gateway",
+			"iface-orch",
+			"iface-fraud",
+			"iface-aml",
+			"iface-policy",
+			"iface-network",
+			"iface-ledger",
+		],
+		messageIds: [
+			"msg-1",
+			"msg-2",
+			"msg-3",
+			"msg-4",
+			"msg-5",
+			"msg-6",
+			"msg-7",
+			"msg-8",
+			"msg-9",
+			"msg-10",
+			"msg-11",
+			"msg-12",
+			"msg-13",
+			"msg-14",
+		],
+		tags: ["payments", "authorization", "instructional"],
+	},
+].map((d) => SequenceSchema.parse(d));
+
 // --- Processes ---
 
 export const processes: Process[] = [

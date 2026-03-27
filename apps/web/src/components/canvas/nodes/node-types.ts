@@ -10,6 +10,7 @@ import { LandscapeDomainNode } from "./LandscapeDomainNode.js";
 import { LifelineNode } from "./LifelineNode.js";
 import { ScreenNode } from "./ScreenNode.js";
 import { SequenceMessageNode } from "./SequenceMessageNode.js";
+import { SequencePickerNode } from "./SequencePickerNode.js";
 import { ServiceNode } from "./ServiceNode.js";
 import { SystemNode } from "./SystemNode.js";
 
@@ -28,4 +29,5 @@ export const nodeTypes = {
 	landscape_domain: LandscapeDomainNode,
 	landscape_capability: LandscapeCapabilityNode,
 	landscape_actor: LandscapeActorNode,
+	sequence_picker: SequencePickerNode,
 };

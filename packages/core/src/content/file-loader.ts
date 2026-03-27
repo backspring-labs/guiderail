@@ -16,6 +16,7 @@ import {
 	ProcessStageSchema,
 	ProviderAssociationSchema,
 	ProviderSchema,
+	SequenceSchema,
 	StepSchema,
 	StoryRouteSchema,
 	StoryWaypointSchema,
@@ -38,6 +39,7 @@ import type {
 	ProcessStage,
 	Provider,
 	ProviderAssociation,
+	Sequence,
 	Step,
 	StoryRoute,
 	StoryWaypoint,
@@ -69,6 +71,7 @@ export interface ContentBundle {
 	controlPoints: ControlPoint[];
 	interfaces: Interface[];
 	messages: Message[];
+	sequences: Sequence[];
 }
 
 export interface LoadResult {
@@ -111,6 +114,7 @@ const ENTITY_SCHEMAS: Record<string, ZodSchema> = {
 	controlPoints: ControlPointSchema,
 	interfaces: InterfaceSchema,
 	messages: MessageSchema,
+	sequences: SequenceSchema,
 };
 
 /**
@@ -143,6 +147,7 @@ export function parseContentBundle(raw: Record<string, unknown>, sourcePath: str
 		controlPoints: [],
 		interfaces: [],
 		messages: [],
+		sequences: [],
 	};
 
 	for (const [key, schema] of Object.entries(ENTITY_SCHEMAS)) {
@@ -207,6 +212,7 @@ export function emptyContentBundle(): ContentBundle {
 		controlPoints: [],
 		interfaces: [],
 		messages: [],
+		sequences: [],
 	};
 }
 
@@ -235,5 +241,6 @@ export function mergeContentBundles(a: ContentBundle, b: ContentBundle): Content
 		controlPoints: [...a.controlPoints, ...b.controlPoints],
 		interfaces: [...a.interfaces, ...b.interfaces],
 		messages: [...a.messages, ...b.messages],
+		sequences: [...a.sequences, ...b.sequences],
 	};
 }

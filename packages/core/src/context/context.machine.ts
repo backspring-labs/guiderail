@@ -8,6 +8,7 @@ import type { ProcessStage } from "../entities/process-stage.js";
 import type { Process } from "../entities/process.js";
 import type { ProviderAssociation } from "../entities/provider-association.js";
 import type { Provider } from "../entities/provider.js";
+import type { Sequence } from "../entities/sequence.js";
 import type { Step } from "../entities/step.js";
 import type { StoryRoute } from "../entities/story-route.js";
 import type { StoryWaypoint } from "../entities/story-waypoint.js";
@@ -27,6 +28,8 @@ import {
 	reconcileRouteEnd,
 	reconcileRoutePause,
 	reconcileRouteResume,
+	reconcileSequenceClear,
+	reconcileSequenceSwitch,
 	reconcileStepChange,
 	reconcileStoryRouteStart,
 	reconcileValueStreamSwitch,
@@ -51,6 +54,7 @@ export interface ContextMachineContext {
 	controlPoints: ControlPoint[];
 	interfaces: Interface[];
 	messages: Message[];
+	sequences: Sequence[];
 	pausedRouteSnapshot: NavigationContext | null;
 }
 
@@ -73,6 +77,7 @@ export type ContextMachineEvent =
 			controlPoints?: ControlPoint[];
 			interfaces?: Interface[];
 			messages?: Message[];
+			sequences?: Sequence[];
 	  }
 	| { type: "SELECT_DOMAIN"; domainId: string }
 	| { type: "SELECT_CAPABILITY"; capabilityId: string }
@@ -101,7 +106,9 @@ export type ContextMachineEvent =
 	| { type: "RESUME_ROUTE" }
 	| { type: "END_ROUTE" }
 	// 0.4.0 additions
-	| { type: "SWITCH_CANVAS_MODE"; canvasMode: string };
+	| { type: "SWITCH_CANVAS_MODE"; canvasMode: string }
+	| { type: "SELECT_SEQUENCE"; sequenceId: string }
+	| { type: "CLEAR_SEQUENCE" };
 
 function resolveStepsForJourney(journeyId: string, allSteps: Step[]): Step[] {
 	return allSteps
@@ -196,6 +203,7 @@ export const contextMachine = setup({
 			activeWaypointIndex: null,
 			routeState: "inactive",
 			activeCanvasMode: null,
+			activeSequenceId: null,
 		},
 		graph: null,
 		journeys: [],
@@ -211,6 +219,7 @@ export const contextMachine = setup({
 		controlPoints: [],
 		interfaces: [],
 		messages: [],
+		sequences: [],
 		pausedRouteSnapshot: null,
 	},
 	states: {
@@ -233,6 +242,7 @@ export const contextMachine = setup({
 						controlPoints: event.controlPoints ?? [],
 						interfaces: event.interfaces ?? [],
 						messages: event.messages ?? [],
+						sequences: event.sequences ?? [],
 					})),
 				},
 			},
@@ -393,6 +403,25 @@ export const contextMachine = setup({
 				SWITCH_CANVAS_MODE: {
 					actions: assign(({ context, event }) => ({
 						nav: reconcileCanvasModeSwitch(context.nav, event.canvasMode),
+					})),
+				},
+				SELECT_SEQUENCE: {
+					actions: assign(({ context, event }) => {
+						const sequence = context.sequences.find((s) => s.id === event.sequenceId);
+						if (!sequence) return {};
+						return {
+							nav: reconcileSequenceSwitch(
+								context.nav,
+								event.sequenceId,
+								sequence,
+								context.capabilities,
+							),
+						};
+					}),
+				},
+				CLEAR_SEQUENCE: {
+					actions: assign(({ context }) => ({
+						nav: reconcileSequenceClear(context.nav),
 					})),
 				},
 				// 0.2.0 event handlers

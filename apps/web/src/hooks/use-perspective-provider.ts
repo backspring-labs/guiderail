@@ -9,7 +9,7 @@ import {
 	getVisibleNodeIds,
 } from "@/lib/projection.js";
 import { toReactFlowEdges, toReactFlowNodes } from "@/lib/react-flow-adapter.js";
-import { computeSequenceLayout } from "@/lib/sequence-layout.js";
+import { computeSequenceLayout, computeSequencePickerLayout } from "@/lib/sequence-layout.js";
 import {
 	seedBpmnEdges,
 	seedBpmnNodes,
@@ -25,6 +25,7 @@ import {
 	seedProcessStages,
 	seedProviderAssociations,
 	seedProviders,
+	seedSequences,
 	seedSteps,
 	seedValueStreams,
 } from "@/store/seed-loader.js";
@@ -97,11 +98,21 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		return computeBpmnLayout(seedBpmnNodes, seedBpmnEdges);
 	}, [isProcessPerspective]);
 
-	// Sequence layout (synchronous)
+	// Sequence layout (synchronous, filtered by active sequence)
 	const sequenceLayout = useMemo(() => {
 		if (!isSequencePerspective) return null;
-		return computeSequenceLayout(seedInterfaces, seedMessages);
-	}, [isSequencePerspective]);
+		const activeSequence = nav.activeSequenceId
+			? seedSequences.find((s) => s.id === nav.activeSequenceId)
+			: null;
+		if (activeSequence) {
+			const filteredInterfaces = seedInterfaces.filter((i) =>
+				activeSequence.interfaceIds.includes(i.id),
+			);
+			const filteredMessages = seedMessages.filter((m) => activeSequence.messageIds.includes(m.id));
+			return computeSequenceLayout(filteredInterfaces, filteredMessages);
+		}
+		return computeSequencePickerLayout(seedSequences);
+	}, [isSequencePerspective, nav.activeSequenceId]);
 
 	// Journey layout (synchronous)
 	const journeyLayout = useMemo(() => {

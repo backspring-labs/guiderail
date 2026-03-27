@@ -27,6 +27,7 @@ import {
 	providerAssociations,
 	providers,
 	scenes,
+	sequences,
 	steps,
 	storyRoutes,
 	storyWaypoints,
@@ -57,3 +58,4 @@ export const seedBpmnNodes = bpmnNodes;
 export const seedBpmnEdges = bpmnEdges;
 export const seedInterfaces = interfaces;
 export const seedMessages = messages;
+export const seedSequences = sequences;

@@ -52,6 +52,8 @@ export function AppShell() {
 			const detail = (e as CustomEvent).detail;
 			if (detail?.type === "journey") {
 				send({ type: "SELECT_JOURNEY", journeyId: detail.id });
+			} else if (detail?.type === "sequence") {
+				send({ type: "SELECT_SEQUENCE", sequenceId: detail.id });
 			}
 		};
 		window.addEventListener("guiderail:expand", handleExpand);

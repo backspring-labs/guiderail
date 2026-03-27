@@ -22,6 +22,7 @@ export {
 	bpmnEdges,
 	interfaces,
 	messages,
+	sequences,
 } from "./seed-banking.js";
 
 export { MockContentRepoAdapter } from "./mock-content-adapter.js";

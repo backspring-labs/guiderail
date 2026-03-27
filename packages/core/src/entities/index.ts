@@ -84,6 +84,9 @@ export type { StoryWaypoint } from "./story-waypoint.js";
 export { ProcessCanvasModeSchema, CanvasModeSchema } from "./canvas-mode.js";
 export type { ProcessCanvasMode, CanvasMode } from "./canvas-mode.js";
 
+export { SequenceSchema } from "./sequence.js";
+export type { Sequence } from "./sequence.js";
+
 export { InterfaceProtocolSchema, InterfaceSchema } from "./interface.js";
 export type { InterfaceProtocol, Interface } from "./interface.js";
 
