@@ -15,18 +15,21 @@ A transport control bar appears at the bottom of the canvas when a sequential pe
 ### Visual Controls
 
 ```
-┌──────────────────────────────────────────────────┐
-│  ⏮   ◀   ▶   ⏭     Step 3 of 8                │
-│                       Identity Verification       │
-└──────────────────────────────────────────────────┘
+┌─────────────┐
+│ ⏮ ◀  ▶ ⏭  │
+│ 3 of 14     │
+├─────────────┤
+│ + − ⊡       │  ← React Flow zoom controls
+└─────────────┘
 ```
 
-- **⏮** (Reset) — jump to first item
-- **◀** (Back) — previous item
-- **▶** (Forward) — next item
-- **⏭** (End) — jump to last item
-- **Current position** — "Step 3 of 8" or "Message 7 of 14"
-- **Current label** — title of the current step/stage/message
+Positioned in the **lower left** of the canvas, stacked above the React Flow zoom controls. This groups all canvas navigation tools together in one compact cluster. The stepper is a utility control, not a narrative surface — it belongs with the zoom controls, not in the full-width StoryRouteBar position.
+
+- **⏮** (Reset / Arrow Up) — jump to first item
+- **◀** (Back / Arrow Left) — previous item
+- **▶** (Forward / Arrow Right) — next item
+- **⏭** (End / Arrow Down) — jump to last item
+- **Current position** — "3 of 14"
 
 ### Keyboard Controls
 
@@ -184,20 +187,20 @@ useEffect(() => {
 
 ## Styling
 
-The stepper bar should match the StoryRouteBar aesthetic — dark background, centered controls, subtle border. The transport buttons use the same icon style.
+The stepper control should be compact and visually consistent with the React Flow zoom controls below it — dark background, small buttons, minimal footprint.
 
 ```css
-.stepper-bar {
-  /* Same positioning and sizing as .story-route-bar */
+.stepper-control {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  /* Transport button styling */
-  /* Current position label */
-  /* Keyboard hint text */
+  bottom: 120px;  /* above zoom controls */
+  left: 10px;
+  z-index: 5;
+  /* Compact transport buttons */
+  /* Position counter */
 }
 ```
+
+The stepper is NOT a full-width bar. It is a small control cluster in the lower-left corner.
 
 ---
 
