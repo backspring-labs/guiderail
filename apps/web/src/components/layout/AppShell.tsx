@@ -279,6 +279,7 @@ export function AppShell() {
 						onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
 						onSelectValueStream={(id) => send({ type: "SELECT_VALUE_STREAM", valueStreamId: id })}
 						onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
+						onSelectSequence={(id) => send({ type: "SELECT_SEQUENCE", sequenceId: id })}
 						onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 					/>
 				)}

@@ -12,6 +12,7 @@ interface RightPanelProps {
 	onSelectJourney: (journeyId: string) => void;
 	onSelectValueStream?: (valueStreamId: string) => void;
 	onSelectProcess?: (processId: string) => void;
+	onSelectSequence?: (sequenceId: string) => void;
 	onStartRoute?: (storyRouteId: string) => void;
 }
 
@@ -24,6 +25,7 @@ export function RightPanel({
 	onSelectJourney,
 	onSelectValueStream,
 	onSelectProcess,
+	onSelectSequence,
 	onStartRoute,
 }: RightPanelProps) {
 	const { rightPanelOpen, toggleRightPanel } = useUIStore();
@@ -44,6 +46,7 @@ export function RightPanel({
 						onSelectJourney={onSelectJourney}
 						onSelectValueStream={onSelectValueStream}
 						onSelectProcess={onSelectProcess}
+						onSelectSequence={onSelectSequence}
 						onStartRoute={onStartRoute}
 					/>
 				</div>

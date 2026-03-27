@@ -28,6 +28,7 @@ interface DetailPanelRouterProps {
 	onSelectJourney: (journeyId: string) => void;
 	onSelectValueStream?: (valueStreamId: string) => void;
 	onSelectProcess?: (processId: string) => void;
+	onSelectSequence?: (sequenceId: string) => void;
 	onStartRoute?: (storyRouteId: string) => void;
 }
 
@@ -50,6 +51,7 @@ function resolveSelectedNode(
 	onSelectNode: (id: string) => void,
 	onSelectEdge: (id: string) => void,
 	onSelectJourney: (id: string) => void,
+	onSelectSequence: (id: string) => void,
 ): ReactNode | null {
 	if (!nav.selectedNodeId) return null;
 
@@ -67,7 +69,7 @@ function resolveSelectedNode(
 	// Sequence picker card
 	if (nav.selectedNodeId.startsWith("sequence-pick-")) {
 		const sequenceId = nav.selectedNodeId.replace("sequence-pick-", "");
-		return resolveSequencePickerDetail(sequenceId);
+		return resolveSequencePickerDetail(sequenceId, onSelectSequence);
 	}
 
 	// Journey picker card
@@ -153,7 +155,10 @@ function resolveActiveValueStream(
 	);
 }
 
-function resolveSequencePickerDetail(sequenceId: string): ReactNode | null {
+function resolveSequencePickerDetail(
+	sequenceId: string,
+	onSelectSequence: (id: string) => void,
+): ReactNode | null {
 	const sequence = seedSequences.find((s) => s.id === sequenceId);
 	if (!sequence) return null;
 
@@ -170,6 +175,13 @@ function resolveSequencePickerDetail(sequenceId: string): ReactNode | null {
 				<span className="detail-panel__tag">{sequence.interfaceIds.length} interfaces</span>
 				<span className="detail-panel__tag">{sequence.messageIds.length} messages</span>
 			</div>
+			<button
+				type="button"
+				className="detail-panel__action"
+				onClick={() => onSelectSequence(sequenceId)}
+			>
+				Open Sequence
+			</button>
 		</div>
 	);
 }
@@ -248,7 +260,14 @@ export function DetailPanelRouter(props: DetailPanelRouterProps) {
 	const { nav, graph, onSelectNode, onSelectEdge, onSelectCapability } = props;
 
 	return (
-		resolveSelectedNode(nav, graph, onSelectNode, onSelectEdge, props.onSelectJourney) ??
+		resolveSelectedNode(
+			nav,
+			graph,
+			onSelectNode,
+			onSelectEdge,
+			props.onSelectJourney,
+			props.onSelectSequence ?? (() => {}),
+		) ??
 		resolveSelectedEdge(nav, graph, onSelectNode) ??
 		resolveActiveProcess(nav, graph, onSelectNode) ??
 		resolveActiveCapability(nav, graph, props) ??
