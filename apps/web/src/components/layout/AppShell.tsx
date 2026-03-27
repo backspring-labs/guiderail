@@ -169,6 +169,7 @@ export function AppShell() {
 				totalSteps={journeySteps.length}
 				activeValueStreamId={nav.activeValueStreamId}
 				activeProcessId={nav.activeProcessId}
+				activeSequenceId={nav.activeSequenceId}
 				activeStoryRouteId={nav.activeStoryRouteId}
 				activePerspectiveId={nav.activePerspectiveId}
 				activeCanvasMode={nav.activeCanvasMode}
@@ -290,6 +291,7 @@ export function AppShell() {
 				onSelectNode={(id) => send({ type: "SELECT_NODE", nodeId: id })}
 				onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
 				onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
+				onSelectSequence={(id) => send({ type: "SELECT_SEQUENCE", sequenceId: id })}
 				onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 			/>
 		</div>

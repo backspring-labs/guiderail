@@ -353,6 +353,11 @@
 	cursor: default;
 }
 
+.context-bar__segment--sequence {
+	color: #6366f1;
+	cursor: default;
+}
+
 .context-bar__segment--route {
 	display: flex;
 	align-items: center;

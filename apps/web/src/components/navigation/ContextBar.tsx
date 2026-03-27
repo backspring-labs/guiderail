@@ -4,6 +4,7 @@ import {
 	seedJourneys,
 	seedPerspectives,
 	seedProcesses,
+	seedSequences,
 	seedStoryRoutes,
 	seedValueStreams,
 } from "@/store/seed-loader.js";
@@ -32,6 +33,7 @@ interface ContextBarProps {
 	totalSteps: number;
 	activeValueStreamId: string | null;
 	activeProcessId: string | null;
+	activeSequenceId: string | null;
 	activeStoryRouteId: string | null;
 	activePerspectiveId: string;
 	activeCanvasMode: string | null;
@@ -55,6 +57,7 @@ export function ContextBar(props: ContextBarProps) {
 				totalSteps={props.totalSteps}
 				activeValueStreamId={props.activeValueStreamId}
 				activeProcessId={props.activeProcessId}
+				activeSequenceId={props.activeSequenceId}
 				activeStoryRouteId={props.activeStoryRouteId}
 				routeState={props.routeState}
 				onClearDomain={props.onClearDomain}
@@ -79,6 +82,7 @@ interface BreadcrumbTrailProps {
 	totalSteps: number;
 	activeValueStreamId: string | null;
 	activeProcessId: string | null;
+	activeSequenceId: string | null;
 	activeStoryRouteId: string | null;
 	routeState: "inactive" | "active" | "paused";
 	onClearDomain: () => void;
@@ -100,6 +104,9 @@ function BreadcrumbTrail(props: BreadcrumbTrailProps) {
 		: null;
 	const process = props.activeProcessId
 		? seedProcesses.find((p) => p.id === props.activeProcessId)
+		: null;
+	const sequence = props.activeSequenceId
+		? seedSequences.find((s) => s.id === props.activeSequenceId)
 		: null;
 	const storyRoute = props.activeStoryRouteId
 		? seedStoryRoutes.find((sr) => sr.id === props.activeStoryRouteId)
@@ -139,6 +146,14 @@ function BreadcrumbTrail(props: BreadcrumbTrailProps) {
 					<span className="context-bar__separator">&rsaquo;</span>
 					<span className="context-bar__segment context-bar__segment--process">
 						{process.label}
+					</span>
+				</>
+			)}
+			{sequence && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<span className="context-bar__segment context-bar__segment--sequence">
+						{sequence.label}
 					</span>
 				</>
 			)}

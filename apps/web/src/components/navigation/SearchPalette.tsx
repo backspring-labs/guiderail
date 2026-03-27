@@ -5,6 +5,7 @@ import {
 	seedNodes,
 	seedProcesses,
 	seedProviders,
+	seedSequences,
 	seedStoryRoutes,
 } from "@/store/seed-loader.js";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,7 +13,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 interface SearchResult {
 	id: string;
 	label: string;
-	type: "domain" | "capability" | "node" | "provider" | "journey" | "process" | "route";
+	type:
+		| "domain"
+		| "capability"
+		| "node"
+		| "provider"
+		| "journey"
+		| "process"
+		| "sequence"
+		| "route";
 	action: () => void;
 }
 
@@ -24,6 +33,7 @@ interface SearchPaletteProps {
 	onSelectNode: (id: string) => void;
 	onSelectProcess: (id: string) => void;
 	onSelectJourney: (id: string) => void;
+	onSelectSequence: (id: string) => void;
 	onStartRoute: (id: string) => void;
 }
 
@@ -44,6 +54,7 @@ export function SearchPalette({
 	onSelectNode,
 	onSelectProcess,
 	onSelectJourney,
+	onSelectSequence,
 	onStartRoute,
 }: SearchPaletteProps) {
 	const [query, setQuery] = useState("");
@@ -96,6 +107,14 @@ export function SearchPalette({
 				action: () => onSelectProcess(p.id),
 			});
 		}
+		for (const s of seedSequences) {
+			items.push({
+				id: s.id,
+				label: s.label,
+				type: "sequence",
+				action: () => onSelectSequence(s.id),
+			});
+		}
 		for (const r of seedStoryRoutes) {
 			items.push({ id: r.id, label: r.title, type: "route", action: () => onStartRoute(r.id) });
 		}
@@ -107,6 +126,7 @@ export function SearchPalette({
 		onSelectNode,
 		onSelectProcess,
 		onSelectJourney,
+		onSelectSequence,
 		onStartRoute,
 	]);
 
