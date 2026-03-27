@@ -61,7 +61,7 @@ export function SequenceDetailPanel({
 								const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
 								return (
 									<div key={msg.id} className="detail-panel__message-item">
-										<span className="detail-panel__message-seq">#{msg.sequenceNumber}</span>
+										<span className="detail-panel__message-seq">#{msg.sequenceNumber + 1}</span>
 										<span className="detail-panel__message-dir">→</span>
 										<span className="detail-panel__message-label">{msg.label}</span>
 										{targetIface && (
@@ -89,7 +89,7 @@ export function SequenceDetailPanel({
 			<div className="detail-panel">
 				<div className="detail-panel__header">
 					<span className="detail-panel__type-badge" data-type="message">
-						message #{msg.sequenceNumber}
+						message #{msg.sequenceNumber + 1}
 					</span>
 					<h3 className="detail-panel__title">{msg.label}</h3>
 				</div>

@@ -47,7 +47,7 @@ export function SequenceMessageNode({ data, selected }: SequenceMessageNodeProps
 		>
 			<div className="sequence-message__line" style={{ borderColor: activeColor }} />
 			<div className="sequence-message__arrow" style={arrowStyle} />
-			<div className={`sequence-message__seq ${seqClass}`}>{data.sequenceNumber}</div>
+			<div className={`sequence-message__seq ${seqClass}`}>{data.sequenceNumber + 1}</div>
 			<div
 				className={`sequence-message__label ${selected ? "sequence-message__label--selected" : ""}`}
 			>
