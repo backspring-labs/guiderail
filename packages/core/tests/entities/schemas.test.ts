@@ -20,6 +20,7 @@ import {
 	ProviderAssociationSchema,
 	ProviderSchema,
 	SceneSchema,
+	SequenceSchema,
 	SessionSchema,
 	SourceSchema,
 	StepSchema,
@@ -50,6 +51,7 @@ import {
 	providerAssociations,
 	providers,
 	scenes,
+	sequences,
 	steps,
 	storyRoutes,
 	storyWaypoints,
@@ -547,6 +549,102 @@ describe("0.4.0 referential integrity", () => {
 		for (const n of bpmnNodes) {
 			const metadata = n.metadata as Record<string, unknown>;
 			expect(typeof metadata.swimLane).toBe("string");
+		}
+	});
+});
+
+describe("0.5.0 Sequence entity", () => {
+	it("validates Sequence schema", () => {
+		expect(() =>
+			SequenceSchema.parse({
+				id: "seq-test",
+				label: "Test",
+				capabilityId: "cap-1",
+				interfaceIds: ["i-1"],
+				messageIds: ["m-1"],
+			}),
+		).not.toThrow();
+	});
+
+	it("requires capabilityId", () => {
+		expect(() =>
+			SequenceSchema.parse({
+				id: "seq-test",
+				label: "Test",
+				interfaceIds: [],
+				messageIds: [],
+			}),
+		).toThrow();
+	});
+
+	it("accepts optional journeyId and processId", () => {
+		const seq = SequenceSchema.parse({
+			id: "seq-test",
+			label: "Test",
+			capabilityId: "cap-1",
+			journeyId: "j-1",
+			processId: "proc-1",
+			interfaceIds: [],
+			messageIds: [],
+		});
+		expect(seq.journeyId).toBe("j-1");
+		expect(seq.processId).toBe("proc-1");
+	});
+
+	it("validates all seed sequences", () => {
+		expect(sequences.length).toBeGreaterThanOrEqual(1);
+		for (const seq of sequences) {
+			expect(SequenceSchema.parse(seq)).toBeDefined();
+		}
+	});
+});
+
+describe("0.5.0 Sequence referential integrity", () => {
+	it("sequences reference valid capabilities", () => {
+		const capIds = new Set(capabilities.map((c) => c.id));
+		for (const seq of sequences) {
+			expect(capIds.has(seq.capabilityId)).toBe(true);
+		}
+	});
+
+	it("sequences reference valid interfaces", () => {
+		const ifaceIds = new Set(interfaces.map((i) => i.id));
+		for (const seq of sequences) {
+			for (const ifaceId of seq.interfaceIds) {
+				expect(ifaceIds.has(ifaceId)).toBe(true);
+			}
+		}
+	});
+
+	it("sequences reference valid messages", () => {
+		const msgIds = new Set(messages.map((m) => m.id));
+		for (const seq of sequences) {
+			for (const msgId of seq.messageIds) {
+				expect(msgIds.has(msgId)).toBe(true);
+			}
+		}
+	});
+
+	it("all messages in sequences have interfaces in the sequence interfaceIds", () => {
+		for (const seq of sequences) {
+			const seqIfaceIds = new Set(seq.interfaceIds);
+			const seqMessages = messages.filter((m) => seq.messageIds.includes(m.id));
+			for (const msg of seqMessages) {
+				expect(seqIfaceIds.has(msg.sourceInterfaceId)).toBe(true);
+				expect(seqIfaceIds.has(msg.targetInterfaceId)).toBe(true);
+			}
+		}
+	});
+
+	it("no duplicate interfaceIds in sequences", () => {
+		for (const seq of sequences) {
+			expect(new Set(seq.interfaceIds).size).toBe(seq.interfaceIds.length);
+		}
+	});
+
+	it("no duplicate messageIds in sequences", () => {
+		for (const seq of sequences) {
+			expect(new Set(seq.messageIds).size).toBe(seq.messageIds.length);
 		}
 	});
 });

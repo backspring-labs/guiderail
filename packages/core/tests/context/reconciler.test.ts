@@ -13,6 +13,8 @@ import {
 	reconcileRouteEnd,
 	reconcileRoutePause,
 	reconcileRouteResume,
+	reconcileSequenceClear,
+	reconcileSequenceSwitch,
 	reconcileStepChange,
 	reconcileStoryRouteStart,
 	reconcileValueStreamSwitch,
@@ -562,5 +564,95 @@ describe("reconcilePerspectiveSwitch — shared context contract", () => {
 		expect(result.activeWaypointIndex).toBe(2);
 		expect(result.routeState).toBe("active");
 		expect(result.activePerspectiveId).toBe("persp-sequence");
+	});
+});
+
+describe("reconcileSequenceSwitch", () => {
+	it("sets activeSequenceId and auto-sets domain/capability from sequence", () => {
+		const ctx = baseCtx();
+		const sequence = {
+			id: "seq-test",
+			label: "Test",
+			capabilityId: "cap-payment-processing",
+			interfaceIds: [],
+			messageIds: [],
+			tags: [],
+			metadata: {},
+		};
+		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
+		expect(result.activeSequenceId).toBe("seq-test");
+		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		expect(result.activeDomainId).toBe("dom-payments");
+	});
+
+	it("preserves compatible processId from sequence", () => {
+		const ctx = {
+			...baseCtx(),
+			activeProcessId: "proc-payment-auth",
+		};
+		const sequence = {
+			id: "seq-test",
+			label: "Test",
+			capabilityId: "cap-payment-processing",
+			processId: "proc-payment-auth",
+			interfaceIds: [],
+			messageIds: [],
+			tags: [],
+			metadata: {},
+		};
+		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
+		expect(result.activeProcessId).toBe("proc-payment-auth");
+	});
+
+	it("clears incompatible processId", () => {
+		const ctx = {
+			...baseCtx(),
+			activeProcessId: "proc-other",
+		};
+		const sequence = {
+			id: "seq-test",
+			label: "Test",
+			capabilityId: "cap-payment-processing",
+			processId: "proc-payment-auth",
+			interfaceIds: [],
+			messageIds: [],
+			tags: [],
+			metadata: {},
+		};
+		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
+		expect(result.activeProcessId).toBe("proc-payment-auth");
+	});
+
+	it("does not force perspective switch", () => {
+		const ctx = {
+			...baseCtx(),
+			activePerspectiveId: "persp-architecture",
+		};
+		const sequence = {
+			id: "seq-test",
+			label: "Test",
+			capabilityId: "cap-payment-processing",
+			interfaceIds: [],
+			messageIds: [],
+			tags: [],
+			metadata: {},
+		};
+		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
+		expect(result.activePerspectiveId).toBe("persp-architecture");
+	});
+});
+
+describe("reconcileSequenceClear", () => {
+	it("clears only activeSequenceId", () => {
+		const ctx = {
+			...baseCtx(),
+			activeSequenceId: "seq-test",
+			activeDomainId: "dom-payments",
+			activeCapabilityId: "cap-payment-processing",
+		};
+		const result = reconcileSequenceClear(ctx);
+		expect(result.activeSequenceId).toBeNull();
+		expect(result.activeDomainId).toBe("dom-payments");
+		expect(result.activeCapabilityId).toBe("cap-payment-processing");
 	});
 });
