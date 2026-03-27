@@ -7,6 +7,7 @@ import {
 	seedProcesses,
 	seedProviderAssociations,
 	seedProviders,
+	seedSequences,
 	seedSteps,
 	seedStoryRoutes,
 	seedStoryWaypoints,
@@ -60,6 +61,7 @@ export function useInitializeContext() {
 			processStages: seedProcessStages,
 			storyRoutes: seedStoryRoutes,
 			storyWaypoints: seedStoryWaypoints,
+			sequences: seedSequences,
 		});
 
 		// Set the default perspective so nodes have positions on first render
