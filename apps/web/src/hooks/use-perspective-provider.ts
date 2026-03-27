@@ -111,8 +111,11 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			const filteredMessages = seedMessages.filter((m) => activeSequence.messageIds.includes(m.id));
 			return computeSequenceLayout(filteredInterfaces, filteredMessages);
 		}
-		return computeSequencePickerLayout(seedSequences);
-	}, [isSequencePerspective, nav.activeSequenceId]);
+		const scopedSequences = nav.activeCapabilityId
+			? seedSequences.filter((s) => s.capabilityId === nav.activeCapabilityId)
+			: seedSequences;
+		return computeSequencePickerLayout(scopedSequences);
+	}, [isSequencePerspective, nav.activeSequenceId, nav.activeCapabilityId]);
 
 	// Journey layout (synchronous)
 	const journeyLayout = useMemo(() => {
