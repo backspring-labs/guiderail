@@ -3,6 +3,7 @@ import {
 	seedDomains,
 	seedJourneys,
 	seedProcesses,
+	seedSequences,
 	seedSteps,
 	seedValueStreams,
 } from "@/store/seed-loader.js";
@@ -61,6 +62,12 @@ function resolveSelectedNode(
 				onSelectNode={onSelectNode}
 			/>
 		);
+	}
+
+	// Sequence picker card
+	if (nav.selectedNodeId.startsWith("sequence-pick-")) {
+		const sequenceId = nav.selectedNodeId.replace("sequence-pick-", "");
+		return resolveSequencePickerDetail(sequenceId);
 	}
 
 	// Journey picker card
@@ -143,6 +150,27 @@ function resolveActiveValueStream(
 	if (!valueStream) return null;
 	return (
 		<ValueStreamDetailPanel valueStream={valueStream} onSelectCapability={onSelectCapability} />
+	);
+}
+
+function resolveSequencePickerDetail(sequenceId: string): ReactNode | null {
+	const sequence = seedSequences.find((s) => s.id === sequenceId);
+	if (!sequence) return null;
+
+	return (
+		<div className="detail-panel">
+			<div className="detail-panel__header">
+				<span className="detail-panel__type-badge" data-type="interface">
+					sequence
+				</span>
+				<h3 className="detail-panel__title">{sequence.label}</h3>
+			</div>
+			{sequence.description && <p className="detail-panel__description">{sequence.description}</p>}
+			<div className="detail-panel__section">
+				<span className="detail-panel__tag">{sequence.interfaceIds.length} interfaces</span>
+				<span className="detail-panel__tag">{sequence.messageIds.length} messages</span>
+			</div>
+		</div>
 	);
 }
 
