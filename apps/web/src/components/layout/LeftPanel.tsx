@@ -98,7 +98,12 @@ export function LeftPanel(props: LeftPanelProps) {
 				</div>
 
 				<div className="left-panel__entity-zone">
-					<CollapsibleSection label="Domains" count={domainItems.length} defaultExpanded>
+					<CollapsibleSection
+						label="Domains"
+						count={domainItems.length}
+						defaultExpanded
+						forceExpanded={isFiltering}
+					>
 						{domainItems.map((d) => (
 							<SectionItem
 								key={d.id}
@@ -109,7 +114,12 @@ export function LeftPanel(props: LeftPanelProps) {
 						))}
 					</CollapsibleSection>
 
-					<CollapsibleSection label="Capabilities" count={capItems.length} defaultExpanded>
+					<CollapsibleSection
+						label="Capabilities"
+						count={capItems.length}
+						defaultExpanded
+						forceExpanded={isFiltering}
+					>
 						{capItems.map((c) => (
 							<SectionItem
 								key={c.id}
@@ -120,7 +130,11 @@ export function LeftPanel(props: LeftPanelProps) {
 						))}
 					</CollapsibleSection>
 
-					<CollapsibleSection label="Journeys" count={journeyItems.length}>
+					<CollapsibleSection
+						label="Journeys"
+						count={journeyItems.length}
+						forceExpanded={isFiltering}
+					>
 						{journeyItems.map((j) => (
 							<SectionItem
 								key={j.id}
@@ -131,7 +145,11 @@ export function LeftPanel(props: LeftPanelProps) {
 						))}
 					</CollapsibleSection>
 
-					<CollapsibleSection label="Processes" count={processItems.length}>
+					<CollapsibleSection
+						label="Processes"
+						count={processItems.length}
+						forceExpanded={isFiltering}
+					>
 						{processItems.map((p) => (
 							<SectionItem
 								key={p.id}
@@ -142,7 +160,11 @@ export function LeftPanel(props: LeftPanelProps) {
 						))}
 					</CollapsibleSection>
 
-					<CollapsibleSection label="Sequences" count={sequenceItems.length}>
+					<CollapsibleSection
+						label="Sequences"
+						count={sequenceItems.length}
+						forceExpanded={isFiltering}
+					>
 						{sequenceItems.map((s) => (
 							<SectionItem
 								key={s.id}
@@ -153,7 +175,11 @@ export function LeftPanel(props: LeftPanelProps) {
 						))}
 					</CollapsibleSection>
 
-					<CollapsibleSection label="Providers" count={providerItems.length}>
+					<CollapsibleSection
+						label="Providers"
+						count={providerItems.length}
+						forceExpanded={isFiltering}
+					>
 						{providerItems.map((p) => (
 							<SectionItem key={p.id} label={p.label} active={false} onClick={() => {}} />
 						))}
@@ -161,7 +187,12 @@ export function LeftPanel(props: LeftPanelProps) {
 				</div>
 
 				<div className="left-panel__teaching-zone">
-					<CollapsibleSection label="Guides" count={guideItems.length} defaultExpanded>
+					<CollapsibleSection
+						label="Guides"
+						count={guideItems.length}
+						defaultExpanded
+						forceExpanded={isFiltering}
+					>
 						{guideItems.map((r) => (
 							<SectionItem
 								key={r.id}
