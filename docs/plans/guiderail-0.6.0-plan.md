@@ -67,14 +67,43 @@ Every section defines its inclusion predicate against the active selection. This
 | Journeys | `journey.capabilityIds.includes(activeCapabilityId)` or `journey.entryCapabilityId === activeCapabilityId` | Visible when capability selected |
 | Processes | `process.capabilityIds.includes(activeCapabilityId)` | Visible when capability selected |
 | Sequences | `sequence.capabilityId === activeCapabilityId` or `sequence.processId === activeProcessId` | Visible when capability or process selected |
-| Guides | All story routes (global) | Always visible |
+| Providers | `providerAssociation.targetType === "capability" && providerAssociation.targetId === activeCapabilityId` | Visible when capability selected |
 | Systems | Resolved by `resolveSystemScope` from selected entity — direct resolution only, no secondary graph traversal | Visible when process, journey, or capability selected |
 
-### Section order (fixed for 0.6.0)
+### Panel layout (fixed for 0.6.0)
+
+The left panel has three zones:
 
 ```
-Domains → Capabilities → Journeys → Processes → Sequences → Guides → Systems
+┌──────────────────────┐
+│ 🔍 Filter...         │  ← local filter across visible sections
+├──────────────────────┤
+│ ▼ DOMAINS            │
+│ ▼ CAPABILITIES       │
+│ ▼ JOURNEYS           │  Entity browsing zone
+│ ▼ PROCESSES          │  (scoped to primary selection)
+│ ▼ SEQUENCES          │
+│ ▼ PROVIDERS          │
+│ ▼ SYSTEMS            │
+├──────────────────────┤
+│ 📚 GUIDES            │  Teaching zone
+│   ○ How a Payment    │  (always visible, visually separated)
+│     Flows            │
+│   ...                │
+└──────────────────────┘
 ```
+
+- **Filter input** at top — filters items across all visible sections contextually
+- **Entity browsing zone** — sections scoped to primary selection, ordered as listed
+- **Teaching zone** — Guides section separated by divider, always visible regardless of context, visually distinct background tint
+
+### Section order within entity browsing zone (fixed for 0.6.0)
+
+```
+Domains → Capabilities → Journeys → Processes → Sequences → Providers → Systems
+```
+
+Guides are NOT in the section order — they live in a separate zone below.
 
 This order is locked for 0.6.0. No reordering without a plan amendment.
 
@@ -93,7 +122,9 @@ This order is locked for 0.6.0. No reordering without a plan amendment.
 ## What 0.6.0 adds
 
 - **Left panel contextual navigation hub** — collapsible sections scoped to primary selection
-- **Sections:** Domains, Capabilities, Journeys, Processes, Sequences, Guides, Systems (fixed order)
+- **Entity sections:** Domains, Capabilities, Journeys, Processes, Sequences, Providers, Systems (fixed order)
+- **Teaching zone:** Guides section visually separated, always visible
+- **Local filter** — text input filters within visible sections
 - **Cascading filter behavior** — deterministic scoping predicates per section
 - **Stepper transport control** — compact lower-left controls for stepping through sequential content with keyboard arrows
 - **Seed data file split** — break seed-banking.ts (3000+ lines) into domain-specific files
@@ -134,9 +165,17 @@ Split the oversized seed file first (enabling work), then refactor the left pane
 - Collapse state persisted by section key only (not per entity context) for 0.6.0
 - Default: Domains expanded, Guides expanded, other sections collapsed until populated
 
+**Create filter input:**
+- Text input at top of left panel
+- Filters items across all visible sections by label match
+- Clears on focus loss or explicit clear button
+- Does not change kernel selection — only visual filtering within the panel
+
 **Refactor `LeftPanel.tsx`:**
+- Three-zone layout: filter input, entity browsing zone, teaching zone (Guides)
 - Replace current `DomainCapabilityBrowser` with section-based layout
 - Phase 1 ships with two sections: Domains (always visible) and Capabilities (scoped to active domain)
+- Guides section in separated teaching zone below entity sections
 - Vertical scroll when sections overflow
 - Fixed panel width
 
@@ -148,18 +187,20 @@ Split the oversized seed file first (enabling work), then refactor the left pane
 ### Done when
 - No single seed file exceeds 1000 lines
 - Barrel export maintains same import API — all existing tests pass without changes
-- Left panel shows collapsible Domains and Capabilities sections
-- Selecting a domain scopes Capabilities section
+- Left panel shows three-zone layout: filter input, entity sections, teaching zone
+- Domains and Capabilities sections work with cascading filter
+- Guides section visible in teaching zone below entity sections
+- Filter input narrows items across visible sections
 - Sections auto-hide when empty (no vertical gaps)
 - Collapse/expand toggle works per section
 - Item count badges visible on section headers
 
 ---
 
-## Phase 2: Content Sections — Journeys, Processes, Sequences
+## Phase 2: Content Sections — Journeys, Processes, Sequences, Providers
 
 ### Goal
-Add Journeys, Processes, and Sequences sections to the left panel, scoped to the active capability (and for Sequences, also to the active process).
+Add Journeys, Processes, Sequences, and Providers sections to the entity browsing zone, scoped to the active capability (and for Sequences, also to the active process).
 
 ### Steps
 
@@ -179,8 +220,13 @@ Add Journeys, Processes, and Sequences sections to the left panel, scoped to the
 - Section hides when empty
 - Shows sequences for both the active capability AND the active process (dual access path)
 
+**Add ProvidersSection:**
+- Inclusion: providers linked to the active capability via `providerAssociation.targetType === "capability" && providerAssociation.targetId === activeCapabilityId`
+- Click fires `SELECT_NODE` with the provider ID (shows provider detail in right panel)
+- Section hides when no capability is active or capability has no providers
+
 ### Done when
-- Journeys, Processes, Sequences sections appear when a capability is selected
+- Journeys, Processes, Sequences, Providers sections appear when a capability is selected
 - Sequences also appear when a process is selected (even without a capability)
 - Each section correctly follows its inclusion predicate
 - Clicking an item fires the correct kernel event
@@ -189,33 +235,7 @@ Add Journeys, Processes, and Sequences sections to the left panel, scoped to the
 
 ---
 
-## Phase 3: Guides Section
-
-### Goal
-Add a Guides section that is always visible regardless of context.
-
-### Design rule
-Guides are cross-cutting teaching content — they should never be hidden by context scoping. Guide playback does not reset domain/capability selection.
-
-### Steps
-
-**Add GuidesSection:**
-- Always visible, always expanded by default
-- Lists all story routes
-- Click fires `START_ROUTE`
-- Shows route title and tag/audience badge
-- Active route highlighted when a guided route is playing
-
-### Done when
-- Guides section always visible in the left panel
-- All story routes listed
-- Clicking a guide starts the route
-- Active guide highlighted during playback
-- Guide playback does not reset other selections
-
----
-
-## Phase 4: Systems Section
+## Phase 3: Systems Section
 
 ### Goal
 Add a Systems section that shows participating systems for the current context.
@@ -241,7 +261,7 @@ Add a Systems section that shows participating systems for the current context.
 
 ---
 
-## Phase 5: Stepper Transport Control
+## Phase 4: Stepper Transport Control
 
 ### Goal
 Add compact transport controls in the lower left of the canvas for stepping through sequential content.
@@ -296,7 +316,7 @@ The stepper is **perspective transport**, not general navigation:
 
 ---
 
-## Phase 6: Complexity Refactors
+## Phase 5: Complexity Refactors
 
 ### Goal
 Resolve the two remaining complexity warnings.
@@ -316,7 +336,7 @@ Resolve the two remaining complexity warnings.
 
 ---
 
-## Phase 7: Tests + Version Bump
+## Phase 6: Tests + Version Bump
 
 ### Tests
 
@@ -360,22 +380,22 @@ Resolve the two remaining complexity warnings.
 ## Sequencing
 
 ```
-Phase 1 (Seed split + section infrastructure) → Phase 2 (Content sections) → Phase 3 (Guides) → Phase 4 (Systems) → Phase 5 (Stepper) → Phase 6 (Complexity refactors) → Phase 7 (Tests + version)
+Phase 1 (Seed split + sections + filter + guides) → Phase 2 (Content sections + providers) → Phase 3 (Systems) → Phase 4 (Stepper) → Phase 5 (Complexity refactors) → Phase 6 (Tests + version)
 ```
 
-Seed split moved to Phase 1 as enabling work. Complexity refactors remain late since they're mechanical and low-risk.
+Seed split and Guides moved to Phase 1 as foundational work. Providers added to Phase 2 alongside other content sections.
 
 ---
 
 ## Audit Schedule
 
-Pause for audit after phases **2** (sections with content), **5** (stepper complete), and **7** (final).
+Pause for audit after phases **2** (all content sections), **4** (stepper complete), and **6** (final).
 
 ### Phase-specific audit prompts
 
-- **After phase 2:** Does the left panel feel like a contextual navigation hub? Do sections scope deterministically per the predicate table? Are hidden sections leaving no gaps? Is exactly one item highlighted per section?
-- **After phase 5:** Does the stepper feel natural? Do keyboard controls work without conflict? Does it coexist correctly with StoryRouteBar? Do stepper indices reset cleanly on entity change?
-- **After phase 7:** Is the seed file split clean? Are all complexity warnings at 0? Does the full left panel + stepper + canvas integration feel cohesive? Do selection integrity tests pass?
+- **After phase 2:** Does the left panel feel like a contextual navigation hub? Do all 7 entity sections + Guides teaching zone work correctly? Do sections scope deterministically per the predicate table? Is the filter input narrowing items across sections? Are Providers scoped to capability?
+- **After phase 4:** Does the stepper feel natural? Do keyboard controls work without conflict? Does it coexist correctly with StoryRouteBar? Do stepper indices reset cleanly on entity change?
+- **After phase 6:** Are all complexity warnings at 0? Does the full left panel + stepper + canvas integration feel cohesive? Do selection integrity tests pass?
 
 ---
 
@@ -384,12 +404,14 @@ Pause for audit after phases **2** (sections with content), **5** (stepper compl
 1. **The left panel is scoped off primary selection, not perspective.** Switching perspectives does not change left panel content.
 2. **Every section defines its inclusion predicate.** No ad-hoc scoping logic.
 3. **Sections hide when irrelevant.** No empty lists, no vertical gaps.
-4. **Guides are always visible.** Guide playback does not reset other selections.
-5. **Systems are read-only discovery.** System clicks show detail but don't re-anchor nav.
-6. **The stepper is perspective transport.** It updates sequential indices only, not primary selection.
-7. **Story route playback owns transport priority.** Stepper and StoryRouteBar never render simultaneously.
-8. **Section order is fixed for 0.6.0.** Domains → Capabilities → Journeys → Processes → Sequences → Guides → Systems.
-9. **Exactly one primary active item per section.** No multi-select, no ambiguous highlighting.
+4. **Guides live in a separated teaching zone.** Always visible, visually distinct from entity browsing. Guide playback does not reset other selections.
+5. **Providers are contextual participants.** Scoped to capability, shown alongside journeys/processes/sequences.
+6. **Systems are read-only discovery.** System clicks show detail but don't re-anchor nav.
+7. **The stepper is perspective transport.** It updates sequential indices only, not primary selection.
+8. **Story route playback owns transport priority.** Stepper and StoryRouteBar never render simultaneously.
+9. **Section order is fixed for 0.6.0.** Entity zone: Domains → Capabilities → Journeys → Processes → Sequences → Providers → Systems. Teaching zone: Guides.
+10. **Exactly one primary active item per section.** No multi-select, no ambiguous highlighting.
+11. **Filter input is visual only.** It narrows what's displayed in the panel but does not change kernel selection state.
 
 ---
 
