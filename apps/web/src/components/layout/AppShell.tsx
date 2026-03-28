@@ -27,6 +27,37 @@ import { LeftPanel } from "./LeftPanel.js";
 import { RightPanel } from "./RightPanel.js";
 import { TopBar } from "./TopBar.js";
 
+type SendFn = (event: Record<string, unknown>) => void;
+
+const NODE_CLICK_HANDLERS: Array<{ prefix: string; action: (id: string, send: SendFn) => void }> = [
+	{
+		prefix: "journey-step-",
+		action: (id, send) => {
+			const step = seedSteps.find((s) => s.id === id);
+			if (step) send({ type: "JUMP_TO_STEP", index: step.sequenceNumber });
+		},
+	},
+	{ prefix: "landscape-actor-", action: (id, send) => send({ type: "SELECT_NODE", nodeId: id }) },
+	{
+		prefix: "landscape-cap-",
+		action: (id, send) => send({ type: "SELECT_CAPABILITY", capabilityId: id }),
+	},
+	{
+		prefix: "landscape-domain-",
+		action: (id, send) => send({ type: "SELECT_DOMAIN", domainId: id }),
+	},
+];
+
+function handleNodeClick(nodeId: string, send: SendFn) {
+	for (const handler of NODE_CLICK_HANDLERS) {
+		if (nodeId.startsWith(handler.prefix)) {
+			handler.action(nodeId.replace(handler.prefix, ""), send);
+			return;
+		}
+	}
+	send({ type: "SELECT_NODE", nodeId });
+}
+
 export function AppShell() {
 	useInitializeContext();
 	const { nav, graph, isReady, send } = useNavigation();
@@ -206,26 +237,7 @@ export function AppShell() {
 						nodeTypes={nodeTypes}
 						edgeTypes={edgeTypes}
 						onInit={onInit}
-						onNodeClick={(_, node) => {
-							if (node.id.startsWith("journey-step-")) {
-								const stepId = node.id.replace("journey-step-", "");
-								const step = seedSteps.find((s) => s.id === stepId);
-								if (step) {
-									send({ type: "JUMP_TO_STEP", index: step.sequenceNumber });
-								}
-							} else if (node.id.startsWith("landscape-actor-")) {
-								const nodeId = node.id.replace("landscape-actor-", "");
-								send({ type: "SELECT_NODE", nodeId });
-							} else if (node.id.startsWith("landscape-cap-")) {
-								const capId = node.id.replace("landscape-cap-", "");
-								send({ type: "SELECT_CAPABILITY", capabilityId: capId });
-							} else if (node.id.startsWith("landscape-domain-")) {
-								const domainId = node.id.replace("landscape-domain-", "");
-								send({ type: "SELECT_DOMAIN", domainId });
-							} else {
-								send({ type: "SELECT_NODE", nodeId: node.id });
-							}
-						}}
+						onNodeClick={(_, node) => handleNodeClick(node.id, send)}
 						onEdgeClick={(_, edge) => send({ type: "SELECT_EDGE", edgeId: edge.id })}
 						onPaneClick={() => {
 							send({ type: "CLEAR_SELECTION" });

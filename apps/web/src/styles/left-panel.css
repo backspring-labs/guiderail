@@ -7,19 +7,19 @@
 }
 
 .left-panel__filter {
-	padding: 8px 12px;
+	padding: 6px 24px 6px 12px;
 	border-bottom: 1px solid var(--color-border);
 	flex-shrink: 0;
 }
 
 .left-panel__filter-input {
 	width: 100%;
-	padding: 6px 10px;
+	padding: 4px 8px;
 	border: 1px solid var(--color-border);
 	border-radius: 4px;
 	background: var(--color-bg);
 	color: var(--color-text);
-	font-size: var(--font-size-sm);
+	font-size: 12px;
 	font-family: var(--font-family);
 }
 

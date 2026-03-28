@@ -1,5 +1,6 @@
 import {
 	seedCapabilities,
+	seedControlPoints,
 	seedGraph,
 	seedJourneys,
 	seedPerspectives,
@@ -62,6 +63,7 @@ export function useInitializeContext() {
 			storyRoutes: seedStoryRoutes,
 			storyWaypoints: seedStoryWaypoints,
 			sequences: seedSequences,
+			controlPoints: seedControlPoints,
 		});
 
 		// Set the default perspective so nodes have positions on first render
