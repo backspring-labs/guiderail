@@ -46,30 +46,39 @@ export function LeftPanel(props: LeftPanelProps) {
 	const filterLower = filter.toLowerCase();
 	const matchesFilter = (label: string) => !filter || label.toLowerCase().includes(filterLower);
 
-	// Scoped data
-	const domainItems = seedDomains.filter((d) => matchesFilter(d.label));
+	// When filtering, show all matching items regardless of scoping.
+	// When not filtering, scope to active selection.
+	const isFiltering = filter.length > 0;
 	const activeCap = props.activeCapabilityId;
-	const capItems = props.activeDomainId
-		? seedCapabilities.filter((c) => c.domainId === props.activeDomainId && matchesFilter(c.label))
-		: [];
-	const journeyItems = activeCap
-		? seedJourneys.filter(
-				(j) =>
-					(j.capabilityIds.includes(activeCap) || j.entryCapabilityId === activeCap) &&
-					matchesFilter(j.label),
-			)
-		: [];
-	const processItems = activeCap
-		? seedProcesses.filter((p) => p.capabilityIds.includes(activeCap) && matchesFilter(p.label))
-		: [];
-	const sequenceItems = seedSequences.filter(
-		(s) =>
-			(s.capabilityId === props.activeCapabilityId || s.processId === props.activeProcessId) &&
-			matchesFilter(s.label),
-	);
-	const providerItems = props.activeCapabilityId
-		? resolveProviders(props.activeCapabilityId, filterLower)
-		: [];
+
+	const domainItems = seedDomains.filter((d) => matchesFilter(d.label));
+	const capItems = isFiltering
+		? seedCapabilities.filter((c) => matchesFilter(c.label))
+		: props.activeDomainId
+			? seedCapabilities.filter((c) => c.domainId === props.activeDomainId)
+			: [];
+	const journeyItems = isFiltering
+		? seedJourneys.filter((j) => matchesFilter(j.label))
+		: activeCap
+			? seedJourneys.filter(
+					(j) => j.capabilityIds.includes(activeCap) || j.entryCapabilityId === activeCap,
+				)
+			: [];
+	const processItems = isFiltering
+		? seedProcesses.filter((p) => matchesFilter(p.label))
+		: activeCap
+			? seedProcesses.filter((p) => p.capabilityIds.includes(activeCap))
+			: [];
+	const sequenceItems = isFiltering
+		? seedSequences.filter((s) => matchesFilter(s.label))
+		: seedSequences.filter(
+				(s) => s.capabilityId === props.activeCapabilityId || s.processId === props.activeProcessId,
+			);
+	const providerItems = isFiltering
+		? seedProviders.filter((p) => matchesFilter(p.label))
+		: props.activeCapabilityId
+			? resolveProviders(props.activeCapabilityId, "")
+			: [];
 	const guideItems = seedStoryRoutes.filter((r) => matchesFilter(r.title));
 
 	return (
