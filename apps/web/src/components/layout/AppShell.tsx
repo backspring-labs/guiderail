@@ -182,8 +182,17 @@ export function AppShell() {
 				<LeftPanel
 					activeDomainId={nav.activeDomainId}
 					activeCapabilityId={nav.activeCapabilityId}
+					activeJourneyId={nav.activeJourneyId}
+					activeProcessId={nav.activeProcessId}
+					activeSequenceId={nav.activeSequenceId}
+					activeStoryRouteId={nav.activeStoryRouteId}
+					routeState={nav.routeState}
 					onSelectDomain={(id) => send({ type: "SELECT_DOMAIN", domainId: id })}
 					onSelectCapability={(id) => send({ type: "SELECT_CAPABILITY", capabilityId: id })}
+					onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
+					onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
+					onSelectSequence={(id) => send({ type: "SELECT_SEQUENCE", sequenceId: id })}
+					onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 					onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				/>
 				<div
