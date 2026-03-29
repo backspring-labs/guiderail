@@ -1,3 +1,4 @@
+import type { SwimLane } from "@/lib/bpmn-layout.js";
 import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
 import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
 import type { JourneyLayoutResult, JourneyNode } from "@/lib/journey-layout.js";
@@ -317,23 +318,55 @@ function buildTerrainEdges(nav: NavigationContext, graph: TerrainGraph) {
 	});
 }
 
-function buildBpmnNodes(nav: NavigationContext, positions: Map<string, { x: number; y: number }>) {
+function resolveSubProcess(stageId: string | undefined): string | null {
+	if (!stageId) return null;
+	const stage = seedProcessStages.find((s) => s.id === stageId);
+	return stage?.subProcessId ?? null;
+}
+
+function resolveActiveStageId(nav: NavigationContext): string | null {
+	if (nav.activeStageIndex == null || !nav.activeProcessId) return null;
+	const stages = seedProcessStages
+		.filter((s) => s.processId === nav.activeProcessId)
+		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	return stages[nav.activeStageIndex]?.id ?? null;
+}
+
+function buildBpmnNodes(
+	nav: NavigationContext,
+	positions: Map<string, { x: number; y: number }>,
+	swimLanes: SwimLane[],
+) {
 	const canvasMode = nav.activeCanvasMode ?? "operational";
 	const isRiskControls = canvasMode === "risk_controls";
 	const isActivity = canvasMode === "activity";
+	const activeStageId = resolveActiveStageId(nav);
+	const hasStepper = activeStageId != null;
 
-	return seedBpmnNodes.map((node) => {
+	// Swim lane background nodes (rendered behind BPMN nodes)
+	const laneNodes = swimLanes.map((lane) => ({
+		id: `swim-lane-${lane.label}`,
+		type: "swim_lane",
+		position: { x: 0, y: lane.y },
+		draggable: false,
+		selectable: false,
+		data: { label: lane.label, width: lane.width, height: lane.height },
+		style: { zIndex: -1 },
+	}));
+
+	const bpmnNodeList = seedBpmnNodes.map((node) => {
 		const pos = positions.get(node.id) ?? { x: 0, y: 0 };
 		const metadata = node.metadata as Record<string, unknown>;
 
-		// Resolve control indicators for Risk Controls mode
 		const controlIndicators = isRiskControls
 			? resolveControlIndicators(metadata.terrainNodeId as string | undefined)
 			: [];
 
-		// Activity mode: dim non-gateway nodes
 		const isGateway = node.type === "bpmn_gateway";
-		const dimmed = isActivity && !isGateway && node.type !== "bpmn_event";
+		const isActiveStage = metadata.stageId === activeStageId;
+		const highlighted = isActiveStage;
+		const dimmed =
+			(isActivity && !isGateway && node.type !== "bpmn_event") || (hasStepper && !isActiveStage);
 
 		return {
 			id: node.id,
@@ -344,15 +377,19 @@ function buildBpmnNodes(nav: NavigationContext, positions: Map<string, { x: numb
 				kernelNode: node,
 				label: node.label,
 				dimmed,
-				highlighted: false,
+				highlighted,
 				selected: node.id === nav.selectedNodeId,
 				providerBadges: [],
 				eventKind: metadata.eventKind as string | undefined,
 				gatewayKind: metadata.gatewayKind as string | undefined,
 				controlIndicators,
+				isSubProcess: resolveSubProcess(metadata.stageId as string | undefined) != null,
+				subProcessId: resolveSubProcess(metadata.stageId as string | undefined),
 			},
 		};
 	});
+
+	return [...laneNodes, ...bpmnNodeList];
 }
 
 function buildBpmnEdges(nav: NavigationContext) {
@@ -366,7 +403,7 @@ function buildBpmnEdges(nav: NavigationContext) {
 			id: edge.id,
 			source: edge.sourceNodeId,
 			target: edge.targetNodeId,
-			type: "default",
+			type: "smoothstep",
 			label: edge.label ?? undefined,
 			style: isBranch
 				? { stroke: edge.type === "yes_branch" ? "#10b981" : "#ef4444", strokeWidth: 2 }
@@ -439,7 +476,7 @@ function resolveNodes(
 		return buildOrientationNodes(nav, ctx.orientationLayout.nodes);
 	}
 	if (ctx.isProcessPerspective && ctx.bpmnLayout) {
-		return buildBpmnNodes(nav, ctx.bpmnLayout.positions);
+		return buildBpmnNodes(nav, ctx.bpmnLayout.positions, ctx.bpmnLayout.swimLanes);
 	}
 	if (ctx.isSequencePerspective && ctx.sequenceLayout) {
 		return buildSequenceNodes(nav, ctx.sequenceLayout.nodes);

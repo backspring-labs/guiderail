@@ -293,7 +293,7 @@ export function reconcileProcessSwitch(
 	return {
 		...ctx,
 		activeProcessId: processId,
-		activeStageIndex: null,
+		activeStageIndex: 0,
 		activeFocusTargets: focusTargets,
 		viewportAnchor,
 	};
@@ -434,7 +434,7 @@ export function reconcileSequenceSwitch(
 	return {
 		...ctx,
 		activeSequenceId: sequenceId,
-		activeMessageIndex: null,
+		activeMessageIndex: 0,
 		activeDomainId,
 		activeCapabilityId,
 		activeJourneyId,

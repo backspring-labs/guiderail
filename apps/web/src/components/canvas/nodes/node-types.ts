@@ -13,6 +13,7 @@ import { ScreenNode } from "./ScreenNode.js";
 import { SequenceMessageNode } from "./SequenceMessageNode.js";
 import { SequencePickerNode } from "./SequencePickerNode.js";
 import { ServiceNode } from "./ServiceNode.js";
+import { SwimLaneNode } from "./SwimLaneNode.js";
 import { SystemNode } from "./SystemNode.js";
 
 export const nodeTypes = {
@@ -32,4 +33,5 @@ export const nodeTypes = {
 	landscape_actor: LandscapeActorNode,
 	sequence_picker: SequencePickerNode,
 	orientation_item: OrientationItemNode,
+	swim_lane: SwimLaneNode,
 };

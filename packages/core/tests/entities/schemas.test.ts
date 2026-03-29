@@ -340,14 +340,14 @@ describe("0.2.0 entity schemas validate seed data", () => {
 	});
 
 	it("validates all processes", () => {
-		expect(processes.length).toBe(3);
+		expect(processes.length).toBe(4);
 		for (const p of processes) {
 			expect(ProcessSchema.parse(p)).toBeDefined();
 		}
 	});
 
 	it("validates all process stages", () => {
-		expect(processStages.length).toBe(22);
+		expect(processStages.length).toBe(26);
 		for (const ps of processStages) {
 			expect(ProcessStageSchema.parse(ps)).toBeDefined();
 		}

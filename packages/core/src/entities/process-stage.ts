@@ -9,6 +9,7 @@ export const ProcessStageSchema = z.object({
 	nodeIds: z.array(z.string()).default([]),
 	edgeIds: z.array(z.string()).default([]),
 	controlPoints: z.array(z.string()).default([]),
+	subProcessId: z.string().optional(),
 	metadata: z.record(z.unknown()).default({}),
 });
 

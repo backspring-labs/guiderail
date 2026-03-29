@@ -6,6 +6,7 @@ interface BpmnTaskNodeData {
 	dimmed?: boolean;
 	highlighted?: boolean;
 	selected?: boolean;
+	isSubProcess?: boolean;
 	controlIndicators?: Array<{
 		controlPointId: string;
 		label: string;
@@ -18,9 +19,19 @@ interface BpmnTaskNodeData {
 export function BpmnTaskNode({ data }: { data: BpmnTaskNodeData }) {
 	const indicators = data.controlIndicators ?? [];
 
+	const handleExpand = () => {
+		if (data.isSubProcess) {
+			window.dispatchEvent(
+				new CustomEvent("guiderail:expand", {
+					detail: { type: "subprocess", id: data.subProcessId },
+				}),
+			);
+		}
+	};
+
 	return (
 		<div
-			className={`bpmn-node bpmn-task ${data.dimmed ? "bpmn-node--dimmed" : ""} ${data.highlighted ? "bpmn-node--highlighted" : ""} ${data.selected ? "bpmn-node--selected" : ""}`}
+			className={`bpmn-node bpmn-task ${data.dimmed ? "bpmn-node--dimmed" : ""} ${data.highlighted ? "bpmn-node--highlighted" : ""} ${data.selected ? "bpmn-node--selected" : ""} ${data.isSubProcess ? "bpmn-task--subprocess" : ""}`}
 		>
 			<Handle type="target" position={Position.Left} />
 			<div className="bpmn-task__label">{data.label}</div>
@@ -34,6 +45,11 @@ export function BpmnTaskNode({ data }: { data: BpmnTaskNodeData }) {
 						/>
 					))}
 				</div>
+			)}
+			{data.isSubProcess && (
+				<button type="button" className="bpmn-task__subprocess-marker" onClick={handleExpand}>
+					+
+				</button>
 			)}
 			<Handle type="source" position={Position.Right} />
 		</div>

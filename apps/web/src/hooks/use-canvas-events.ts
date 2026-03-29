@@ -26,6 +26,8 @@ export function useExpandEvents(send: (event: ContextMachineEvent) => void) {
 				send({ type: "SELECT_JOURNEY", journeyId: detail.id });
 			} else if (detail?.type === "sequence") {
 				send({ type: "SELECT_SEQUENCE", sequenceId: detail.id });
+			} else if (detail?.type === "subprocess") {
+				send({ type: "SELECT_PROCESS", processId: detail.id });
 			}
 		};
 		window.addEventListener("guiderail:expand", handleExpand);

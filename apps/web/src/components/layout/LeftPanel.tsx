@@ -101,6 +101,15 @@ export function LeftPanel(props: LeftPanelProps) {
 						value={filter}
 						onChange={(e) => setFilter(e.target.value)}
 					/>
+					{filter && (
+						<button
+							type="button"
+							className="left-panel__filter-clear"
+							onClick={() => setFilter("")}
+						>
+							×
+						</button>
+					)}
 				</div>
 
 				<div className="left-panel__entity-zone">

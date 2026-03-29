@@ -469,6 +469,15 @@ export const processes: Process[] = [
 		stageIds: ["ps-sf-1", "ps-sf-2", "ps-sf-3", "ps-sf-4", "ps-sf-5", "ps-sf-6", "ps-sf-7"],
 		tags: ["stepper", "transport", "sequential"],
 	},
+	{
+		id: "proc-reconcile-perspective",
+		label: "Reconcile Perspective Switch",
+		description:
+			"The internal steps of reconcilePerspectiveSwitch — clearing selection, resetting canvas mode, preserving context, and updating viewport anchor",
+		capabilityIds: ["cap-state-reconciliation"],
+		stageIds: ["ps-rp-1", "ps-rp-2", "ps-rp-3", "ps-rp-4"],
+		tags: ["reconciler", "sub-process"],
+	},
 ].map((d) => ProcessSchema.parse(d));
 
 // ============================================================================
@@ -505,6 +514,7 @@ export const processStages: ProcessStage[] = [
 		description:
 			"reconcilePerspectiveSwitch — clears selection, resets canvas mode, preserves domain/capability/journey/process",
 		nodeIds: ["n-reconciler"],
+		subProcessId: "proc-reconcile-perspective",
 		metadata: { sourceFile: "reconciler.ts" },
 	},
 	{
@@ -691,6 +701,45 @@ export const processStages: ProcessStage[] = [
 		nodeIds: ["n-use-perspective-provider"],
 		metadata: { sourceFile: "use-perspective-provider.ts" },
 	},
+
+	// --- Sub-Process: Reconcile Perspective Switch (4 stages) ---
+	{
+		id: "ps-rp-1",
+		processId: "proc-reconcile-perspective",
+		sequenceNumber: 0,
+		label: "Clear selection",
+		description: "Set selectedNodeId and selectedEdgeId to null",
+		nodeIds: ["n-reconciler"],
+		metadata: { sourceFile: "reconciler.ts" },
+	},
+	{
+		id: "ps-rp-2",
+		processId: "proc-reconcile-perspective",
+		sequenceNumber: 1,
+		label: "Reset canvas mode",
+		description: "Set activeCanvasMode to null — new perspective starts in default mode",
+		nodeIds: ["n-reconciler"],
+		metadata: { sourceFile: "reconciler.ts" },
+	},
+	{
+		id: "ps-rp-3",
+		processId: "proc-reconcile-perspective",
+		sequenceNumber: 2,
+		label: "Preserve context",
+		description:
+			"Keep activeDomainId, activeCapabilityId, activeJourneyId, activeProcessId — the shared context contract",
+		nodeIds: ["n-reconciler"],
+		metadata: { sourceFile: "reconciler.ts" },
+	},
+	{
+		id: "ps-rp-4",
+		processId: "proc-reconcile-perspective",
+		sequenceNumber: 3,
+		label: "Update viewport anchor",
+		description: "Recompute viewport position for the primary focus node in the new perspective",
+		nodeIds: ["n-reconciler"],
+		metadata: { sourceFile: "reconciler.ts" },
+	},
 ].map((d) => ProcessStageSchema.parse(d));
 
 // ============================================================================
@@ -707,7 +756,7 @@ export const bpmnNodes: Node[] = [
 		metadata: {
 			swimLane: "app-shell",
 			terrainNodeId: "n-app-shell",
-			eventType: "start",
+			eventKind: "start",
 		},
 		layoutByPerspective: {
 			"persp-process": { x: 0, y: 0 },
@@ -782,7 +831,7 @@ export const bpmnNodes: Node[] = [
 		metadata: {
 			swimLane: "perspective-provider",
 			terrainNodeId: "n-use-perspective-provider",
-			gatewayType: "exclusive",
+			gatewayKind: "exclusive",
 		},
 		layoutByPerspective: {
 			"persp-process": { x: 1000, y: 150 },
@@ -842,7 +891,7 @@ export const bpmnNodes: Node[] = [
 		metadata: {
 			swimLane: "app-shell",
 			terrainNodeId: "n-app-shell",
-			eventType: "end",
+			eventKind: "end",
 		},
 		layoutByPerspective: {
 			"persp-process": { x: 1800, y: 0 },

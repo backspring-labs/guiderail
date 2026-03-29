@@ -20,7 +20,9 @@ export function SwimLaneBackground({ swimLanes }: SwimLaneBackgroundProps) {
 						height: lane.height,
 					}}
 				>
-					<div className="swim-lane__header">{lane.label}</div>
+					<div className="swim-lane__header">
+						<span className="swim-lane__header-text">{lane.label}</span>
+					</div>
 				</div>
 			))}
 		</div>

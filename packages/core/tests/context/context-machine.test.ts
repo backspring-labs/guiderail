@@ -170,8 +170,8 @@ describe("Context Machine 0.2.0", () => {
 		expect(actor.getSnapshot().context.storyRoutes.length).toBe(3);
 		expect(actor.getSnapshot().context.storyWaypoints.length).toBe(18);
 		expect(actor.getSnapshot().context.valueStreams.length).toBe(0);
-		expect(actor.getSnapshot().context.processes.length).toBe(3);
-		expect(actor.getSnapshot().context.processStages.length).toBe(22);
+		expect(actor.getSnapshot().context.processes.length).toBe(4);
+		expect(actor.getSnapshot().context.processStages.length).toBe(26);
 	});
 
 	it("SELECT_PROCESS updates nav", () => {
@@ -311,16 +311,13 @@ describe("Context Machine — Stepper (Process)", () => {
 		return actor;
 	}
 
-	it("STEPPER_FORWARD sets activeStageIndex from null to 0", () => {
+	it("activeStageIndex starts at 0 after process selection", () => {
 		const actor = createProcessStepperCtx();
-		expect(actor.getSnapshot().context.nav.activeStageIndex).toBeNull();
-		actor.send({ type: "STEPPER_FORWARD" });
 		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(0);
 	});
 
 	it("STEPPER_FORWARD increments activeStageIndex", () => {
 		const actor = createProcessStepperCtx();
-		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_FORWARD" });
 		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(1);
 	});
@@ -330,7 +327,7 @@ describe("Context Machine — Stepper (Process)", () => {
 		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_BACKWARD" });
-		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(0);
+		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(1);
 	});
 
 	it("STEPPER_FORWARD guard prevents stepping beyond last stage", () => {
@@ -343,19 +340,17 @@ describe("Context Machine — Stepper (Process)", () => {
 
 	it("STEPPER_BACKWARD guard prevents stepping below 0", () => {
 		const actor = createProcessStepperCtx();
-		actor.send({ type: "STEPPER_FORWARD" }); // go to 0
 		actor.send({ type: "STEPPER_BACKWARD" });
-		// Guard should prevent going below 0
 		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(0);
 	});
 
-	it("selecting a new process resets activeStageIndex", () => {
+	it("selecting a new process resets activeStageIndex to 0", () => {
 		const actor = createProcessStepperCtx();
 		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_FORWARD" });
-		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(1);
+		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(2);
 		actor.send({ type: "SELECT_PROCESS", processId: "proc-perspective-switch" });
-		expect(actor.getSnapshot().context.nav.activeStageIndex).toBeNull();
+		expect(actor.getSnapshot().context.nav.activeStageIndex).toBe(0);
 	});
 });
 
@@ -367,16 +362,13 @@ describe("Context Machine — Stepper (Sequence)", () => {
 		return actor;
 	}
 
-	it("STEPPER_FORWARD sets activeMessageIndex from null to 0", () => {
+	it("activeMessageIndex starts at 0 after sequence selection", () => {
 		const actor = createSequenceStepperCtx();
-		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBeNull();
-		actor.send({ type: "STEPPER_FORWARD" });
 		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(0);
 	});
 
 	it("STEPPER_FORWARD increments activeMessageIndex", () => {
 		const actor = createSequenceStepperCtx();
-		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_FORWARD" });
 		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(1);
 	});
@@ -386,7 +378,7 @@ describe("Context Machine — Stepper (Sequence)", () => {
 		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_BACKWARD" });
-		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(0);
+		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(1);
 	});
 
 	it("STEPPER_FORWARD guard prevents stepping beyond last message", () => {
@@ -399,18 +391,17 @@ describe("Context Machine — Stepper (Sequence)", () => {
 
 	it("STEPPER_BACKWARD guard prevents stepping below 0", () => {
 		const actor = createSequenceStepperCtx();
-		actor.send({ type: "STEPPER_FORWARD" }); // go to 0
 		actor.send({ type: "STEPPER_BACKWARD" });
 		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(0);
 	});
 
-	it("selecting a new sequence resets activeMessageIndex", () => {
+	it("selecting a new sequence resets activeMessageIndex to 0", () => {
 		const actor = createSequenceStepperCtx();
 		actor.send({ type: "STEPPER_FORWARD" });
 		actor.send({ type: "STEPPER_FORWARD" });
-		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(1);
+		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(2);
 		actor.send({ type: "SELECT_SEQUENCE", sequenceId: "seq-capability-selection" });
-		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBeNull();
+		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(0);
 	});
 });
 
@@ -424,7 +415,7 @@ describe("Context Machine — Stepper indices do not leak between types", () => 
 		// Step forward in process perspective — should affect activeStageIndex only
 		actor.send({ type: "STEPPER_FORWARD" });
 		const nav = actor.getSnapshot().context.nav;
-		expect(nav.activeStageIndex).toBe(0);
+		expect(nav.activeStageIndex).toBe(1);
 		// Journey step index should be preserved (set to 0 from SELECT_JOURNEY)
 		expect(nav.activeStepIndex).toBe(0);
 		// Message index should remain null
@@ -435,15 +426,15 @@ describe("Context Machine — Stepper indices do not leak between types", () => 
 		const actor = createFullCtx();
 		actor.send({ type: "SELECT_PROCESS", processId: "proc-perspective-switch" });
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-process" });
-		actor.send({ type: "STEPPER_FORWARD" }); // sets activeStageIndex to 0
+		actor.send({ type: "STEPPER_FORWARD" }); // increments activeStageIndex from 0 to 1
 		actor.send({ type: "SELECT_SEQUENCE", sequenceId: "seq-capability-selection" });
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-sequence" });
 
 		actor.send({ type: "STEPPER_FORWARD" });
 		const nav = actor.getSnapshot().context.nav;
-		expect(nav.activeMessageIndex).toBe(0);
+		expect(nav.activeMessageIndex).toBe(1);
 		// Stage index should be preserved (reconcileSequenceSwitch does not clear it)
-		expect(nav.activeStageIndex).toBe(0);
+		expect(nav.activeStageIndex).toBe(1);
 	});
 });
 

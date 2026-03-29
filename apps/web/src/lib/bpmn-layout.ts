@@ -1,9 +1,10 @@
 import type { Edge, Node } from "@guiderail/core/entities";
 
-interface SwimLane {
+export interface SwimLane {
 	label: string;
 	y: number;
 	height: number;
+	width: number;
 }
 
 export interface BpmnLayoutResult {
@@ -12,22 +13,48 @@ export interface BpmnLayoutResult {
 }
 
 const LANE_HEIGHT = 120;
-const LANE_PADDING = 20;
-const NODE_SPACING_X = 200;
-const LANE_HEADER_WIDTH = 160;
-const NODE_WIDTH = 160;
-const NODE_HEIGHT = 60;
+const LANE_HEADER_WIDTH = 140;
+const COLUMN_WIDTH = 220;
+const NODE_START_X = LANE_HEADER_WIDTH + 40;
 
 /**
  * Compute BPMN swim lane layout for Process perspective.
- * Groups nodes into horizontal lanes by swimLane metadata,
- * arranges nodes left-to-right within each lane by topological flow order.
+ * Nodes are placed in columns (by topological order) within their lane row.
+ * Lanes stack vertically with no gap — forming one continuous table.
  */
 export function computeBpmnLayout(bpmnNodes: Node[], bpmnEdges: Edge[]): BpmnLayoutResult {
 	const laneOrder = extractLaneOrder(bpmnNodes);
 	const nodesByLane = groupNodesByLane(bpmnNodes, laneOrder);
 	const topoOrder = computeTopologicalOrder(bpmnNodes, bpmnEdges);
-	return positionNodesInLanes(laneOrder, nodesByLane, topoOrder);
+
+	// Determine the total number of columns from the max topological order
+	let maxColumn = 0;
+	for (const order of topoOrder.values()) {
+		if (order > maxColumn) maxColumn = order;
+	}
+	const totalColumns = maxColumn + 1;
+	const totalWidth = NODE_START_X + totalColumns * COLUMN_WIDTH;
+
+	const positions = new Map<string, { x: number; y: number }>();
+	const swimLanes: SwimLane[] = [];
+
+	let laneY = 0;
+	for (const lane of laneOrder) {
+		const laneNodes = nodesByLane.get(lane) ?? [];
+		laneNodes.sort((a, b) => (topoOrder.get(a.id) ?? 0) - (topoOrder.get(b.id) ?? 0));
+
+		const laneCenterY = laneY + LANE_HEIGHT / 2 - 30; // center nodes vertically in lane
+		for (const node of laneNodes) {
+			const column = topoOrder.get(node.id) ?? 0;
+			const x = NODE_START_X + column * COLUMN_WIDTH;
+			positions.set(node.id, { x, y: laneCenterY });
+		}
+
+		swimLanes.push({ label: lane, y: laneY, height: LANE_HEIGHT, width: totalWidth });
+		laneY += LANE_HEIGHT; // no gap — lanes stack directly
+	}
+
+	return { positions, swimLanes };
 }
 
 function getSwimLane(node: Node): string | undefined {
@@ -108,31 +135,4 @@ function computeTopologicalOrder(nodes: Node[], edges: Edge[]): Map<string, numb
 	}
 
 	return topoOrder;
-}
-
-function positionNodesInLanes(
-	laneOrder: string[],
-	nodesByLane: Map<string, Node[]>,
-	topoOrder: Map<string, number>,
-): BpmnLayoutResult {
-	const positions = new Map<string, { x: number; y: number }>();
-	const swimLanes: SwimLane[] = [];
-
-	let laneY = LANE_PADDING;
-	for (const lane of laneOrder) {
-		const laneNodes = nodesByLane.get(lane) ?? [];
-		laneNodes.sort((a, b) => (topoOrder.get(a.id) ?? 0) - (topoOrder.get(b.id) ?? 0));
-
-		const laneCenterY = laneY + LANE_HEIGHT / 2 - NODE_HEIGHT / 2;
-		for (const node of laneNodes) {
-			const order = topoOrder.get(node.id) ?? 0;
-			const x = LANE_HEADER_WIDTH + order * (NODE_WIDTH + NODE_SPACING_X);
-			positions.set(node.id, { x, y: laneCenterY });
-		}
-
-		swimLanes.push({ label: lane, y: laneY, height: LANE_HEIGHT });
-		laneY += LANE_HEIGHT + LANE_PADDING;
-	}
-
-	return { positions, swimLanes };
 }
