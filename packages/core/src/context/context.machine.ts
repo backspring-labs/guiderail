@@ -4,6 +4,7 @@ import type { ControlPoint } from "../entities/control-point.js";
 import type { Interface } from "../entities/interface.js";
 import type { Journey } from "../entities/journey.js";
 import type { Message } from "../entities/message.js";
+import type { OrientationItem } from "../entities/orientation-item.js";
 import type { ProcessStage } from "../entities/process-stage.js";
 import type { Process } from "../entities/process.js";
 import type { ProviderAssociation } from "../entities/provider-association.js";
@@ -21,8 +22,10 @@ import {
 	reconcileDomainSwitch,
 	reconcileJourneyDeselection,
 	reconcileJourneySelection,
+	reconcileMessageChange,
 	reconcileModeSwitch,
 	reconcileNodeSelection,
+	reconcileOrientationChange,
 	reconcilePerspectiveSwitch,
 	reconcileProcessSwitch,
 	reconcileRouteEnd,
@@ -30,6 +33,7 @@ import {
 	reconcileRouteResume,
 	reconcileSequenceClear,
 	reconcileSequenceSwitch,
+	reconcileStageChange,
 	reconcileStepChange,
 	reconcileStoryRouteStart,
 	reconcileValueStreamSwitch,
@@ -55,6 +59,8 @@ export interface ContextMachineContext {
 	interfaces: Interface[];
 	messages: Message[];
 	sequences: Sequence[];
+	// 0.7.0 additions
+	orientationItems: OrientationItem[];
 	pausedRouteSnapshot: NavigationContext | null;
 }
 
@@ -78,6 +84,8 @@ export type ContextMachineEvent =
 			interfaces?: Interface[];
 			messages?: Message[];
 			sequences?: Sequence[];
+			// 0.7.0 optional additions
+			orientationItems?: OrientationItem[];
 	  }
 	| { type: "SELECT_DOMAIN"; domainId: string }
 	| { type: "SELECT_CAPABILITY"; capabilityId: string }
@@ -108,7 +116,14 @@ export type ContextMachineEvent =
 	// 0.4.0 additions
 	| { type: "SWITCH_CANVAS_MODE"; canvasMode: string }
 	| { type: "SELECT_SEQUENCE"; sequenceId: string }
-	| { type: "CLEAR_SEQUENCE" };
+	| { type: "CLEAR_SEQUENCE" }
+	// 0.6.0 additions — generic stepper events
+	| { type: "STEPPER_FORWARD" }
+	| { type: "STEPPER_BACKWARD" }
+	| { type: "STEPPER_RESET" }
+	| { type: "STEPPER_END" }
+	// 0.7.0 additions — orientation jump
+	| { type: "JUMP_TO_ORIENTATION"; index: number };
 
 function resolveStepsForJourney(journeyId: string, allSteps: Step[]): Step[] {
 	return allSteps
@@ -120,6 +135,36 @@ function resolveWaypointsForRoute(routeId: string, allWaypoints: StoryWaypoint[]
 	return allWaypoints
 		.filter((w) => w.storyRouteId === routeId)
 		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+}
+
+function resolveStagesForProcess(processId: string, allStages: ProcessStage[]): ProcessStage[] {
+	return allStages
+		.filter((s) => s.processId === processId)
+		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+}
+
+function resolveMessagesForSequence(
+	sequenceId: string,
+	allSequences: Sequence[],
+	allMessages: Message[],
+): Message[] {
+	const seq = allSequences.find((s) => s.id === sequenceId);
+	if (!seq) return [];
+	return allMessages
+		.filter((m) => seq.messageIds.includes(m.id))
+		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+}
+
+type StepperTarget = "journey" | "process" | "sequence" | "orientation" | null;
+
+function resolveStepperTarget(ctx: ContextMachineContext): StepperTarget {
+	const perspectiveId = ctx.nav.activePerspectiveId;
+	if (perspectiveId.includes("orientation") && ctx.orientationItems.length > 0)
+		return "orientation";
+	if (perspectiveId.includes("journey") && ctx.nav.activeJourneyId) return "journey";
+	if (perspectiveId.includes("process") && ctx.nav.activeProcessId) return "process";
+	if (perspectiveId.includes("sequence") && ctx.nav.activeSequenceId) return "sequence";
+	return null;
 }
 
 export const contextMachine = setup({
@@ -180,6 +225,47 @@ export const contextMachine = setup({
 			);
 			return event.index >= 0 && event.index < waypoints.length;
 		},
+		canStepperForward: ({ context }) => {
+			const { nav } = context;
+			if (nav.activePerspectiveId.includes("orientation") && context.orientationItems.length > 0) {
+				return (nav.activeOrientationIndex ?? -1) < context.orientationItems.length - 1;
+			}
+			if (nav.activeJourneyId && nav.activePerspectiveId.includes("journey")) {
+				if (nav.activeStepIndex == null) return false;
+				const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
+				return nav.activeStepIndex < steps.length - 1;
+			}
+			if (nav.activeProcessId && nav.activePerspectiveId.includes("process")) {
+				const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
+				return (nav.activeStageIndex ?? -1) < stages.length - 1;
+			}
+			if (nav.activeSequenceId && nav.activePerspectiveId.includes("sequence")) {
+				const msgs = resolveMessagesForSequence(
+					nav.activeSequenceId,
+					context.sequences,
+					context.messages,
+				);
+				return (nav.activeMessageIndex ?? -1) < msgs.length - 1;
+			}
+			return false;
+		},
+		canStepperBackward: ({ context }) => {
+			const { nav } = context;
+			if (nav.activePerspectiveId.includes("orientation") && context.orientationItems.length > 0) {
+				return (nav.activeOrientationIndex ?? 0) > 0;
+			}
+			if (nav.activeJourneyId && nav.activePerspectiveId.includes("journey")) {
+				return (nav.activeStepIndex ?? 0) > 0;
+			}
+			if (nav.activeProcessId && nav.activePerspectiveId.includes("process")) {
+				return (nav.activeStageIndex ?? 0) > 0;
+			}
+			if (nav.activeSequenceId && nav.activePerspectiveId.includes("sequence")) {
+				return (nav.activeMessageIndex ?? 0) > 0;
+			}
+			return false;
+		},
+		hasStepperTarget: ({ context }) => resolveStepperTarget(context) != null,
 	},
 }).createMachine({
 	id: "context",
@@ -204,6 +290,9 @@ export const contextMachine = setup({
 			routeState: "inactive",
 			activeCanvasMode: null,
 			activeSequenceId: null,
+			activeStageIndex: null,
+			activeMessageIndex: null,
+			activeOrientationIndex: null,
 		},
 		graph: null,
 		journeys: [],
@@ -220,6 +309,7 @@ export const contextMachine = setup({
 		interfaces: [],
 		messages: [],
 		sequences: [],
+		orientationItems: [],
 		pausedRouteSnapshot: null,
 	},
 	states: {
@@ -243,6 +333,7 @@ export const contextMachine = setup({
 						interfaces: event.interfaces ?? [],
 						messages: event.messages ?? [],
 						sequences: event.sequences ?? [],
+						orientationItems: event.orientationItems ?? [],
 					})),
 				},
 			},
@@ -556,6 +647,135 @@ export const contextMachine = setup({
 						nav: reconcileRouteEnd(context.nav),
 						pausedRouteSnapshot: null,
 					})),
+				},
+				// 0.6.0 — Generic stepper events
+				STEPPER_FORWARD: {
+					guard: "canStepperForward",
+					actions: assign(({ context }) => {
+						const target = resolveStepperTarget(context);
+						const { nav } = context;
+						if (target === "orientation") {
+							return {
+								nav: reconcileOrientationChange(nav, (nav.activeOrientationIndex ?? -1) + 1),
+							};
+						}
+						if (target === "journey" && nav.activeJourneyId && context.graph) {
+							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
+							return {
+								nav: reconcileStepChange(nav, (nav.activeStepIndex ?? 0) + 1, steps, context.graph),
+							};
+						}
+						if (target === "process" && nav.activeProcessId && context.graph) {
+							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
+							return {
+								nav: reconcileStageChange(
+									nav,
+									(nav.activeStageIndex ?? -1) + 1,
+									stages,
+									context.graph,
+								),
+							};
+						}
+						if (target === "sequence" && nav.activeSequenceId) {
+							return { nav: reconcileMessageChange(nav, (nav.activeMessageIndex ?? -1) + 1) };
+						}
+						return {};
+					}),
+				},
+				STEPPER_BACKWARD: {
+					guard: "canStepperBackward",
+					actions: assign(({ context }) => {
+						const target = resolveStepperTarget(context);
+						const { nav } = context;
+						if (target === "orientation") {
+							return {
+								nav: reconcileOrientationChange(nav, (nav.activeOrientationIndex ?? 0) - 1),
+							};
+						}
+						if (target === "journey" && nav.activeJourneyId && context.graph) {
+							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
+							return {
+								nav: reconcileStepChange(nav, (nav.activeStepIndex ?? 0) - 1, steps, context.graph),
+							};
+						}
+						if (target === "process" && nav.activeProcessId && context.graph) {
+							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
+							return {
+								nav: reconcileStageChange(
+									nav,
+									(nav.activeStageIndex ?? 0) - 1,
+									stages,
+									context.graph,
+								),
+							};
+						}
+						if (target === "sequence" && nav.activeSequenceId) {
+							return { nav: reconcileMessageChange(nav, (nav.activeMessageIndex ?? 0) - 1) };
+						}
+						return {};
+					}),
+				},
+				STEPPER_RESET: {
+					guard: "hasStepperTarget",
+					actions: assign(({ context }) => {
+						const target = resolveStepperTarget(context);
+						const { nav } = context;
+						if (target === "orientation") {
+							return { nav: reconcileOrientationChange(nav, 0) };
+						}
+						if (target === "journey" && nav.activeJourneyId && context.graph) {
+							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
+							return { nav: reconcileStepChange(nav, 0, steps, context.graph) };
+						}
+						if (target === "process" && nav.activeProcessId && context.graph) {
+							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
+							return { nav: reconcileStageChange(nav, 0, stages, context.graph) };
+						}
+						if (target === "sequence" && nav.activeSequenceId) {
+							return { nav: reconcileMessageChange(nav, 0) };
+						}
+						return {};
+					}),
+				},
+				STEPPER_END: {
+					guard: "hasStepperTarget",
+					actions: assign(({ context }) => {
+						const target = resolveStepperTarget(context);
+						const { nav } = context;
+						if (target === "orientation") {
+							return {
+								nav: reconcileOrientationChange(nav, context.orientationItems.length - 1),
+							};
+						}
+						if (target === "journey" && nav.activeJourneyId && context.graph) {
+							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
+							return { nav: reconcileStepChange(nav, steps.length - 1, steps, context.graph) };
+						}
+						if (target === "process" && nav.activeProcessId && context.graph) {
+							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
+							return { nav: reconcileStageChange(nav, stages.length - 1, stages, context.graph) };
+						}
+						if (target === "sequence" && nav.activeSequenceId) {
+							const msgs = resolveMessagesForSequence(
+								nav.activeSequenceId,
+								context.sequences,
+								context.messages,
+							);
+							return { nav: reconcileMessageChange(nav, msgs.length - 1) };
+						}
+						return {};
+					}),
+				},
+				// 0.7.0 — Orientation jump
+				JUMP_TO_ORIENTATION: {
+					actions: assign(({ context, event }) => {
+						if (event.index < 0 || event.index >= context.orientationItems.length) {
+							return {};
+						}
+						return {
+							nav: reconcileOrientationChange(context.nav, event.index),
+						};
+					}),
 				},
 			},
 		},

@@ -13,6 +13,7 @@ import {
 	LayerSchema,
 	MessageSchema,
 	NodeSchema,
+	OrientationItemSchema,
 	PerspectiveSchema,
 	PerspectiveTypeSchema,
 	ProcessSchema,
@@ -57,6 +58,7 @@ import {
 	storyWaypoints,
 	valueStreams,
 } from "../../src/test-fixtures/index.js";
+import { orientationItems } from "../../src/test-fixtures/seed-orientation.js";
 
 describe("Entity schemas validate seed data", () => {
 	it("validates all domains", () => {
@@ -316,50 +318,50 @@ describe("Domain → Capability → Journey hierarchy", () => {
 });
 
 describe("0.2.0 entity schemas validate seed data", () => {
-	it("validates all providers", () => {
-		expect(providers.length).toBe(20);
+	it("validates all providers (empty in self-referential corpus)", () => {
+		expect(providers.length).toBe(0);
 		for (const p of providers) {
 			expect(ProviderSchema.parse(p)).toBeDefined();
 		}
 	});
 
-	it("validates all provider associations", () => {
-		expect(providerAssociations.length).toBeGreaterThanOrEqual(6);
+	it("validates all provider associations (empty in self-referential corpus)", () => {
+		expect(providerAssociations.length).toBe(0);
 		for (const pa of providerAssociations) {
 			expect(ProviderAssociationSchema.parse(pa)).toBeDefined();
 		}
 	});
 
-	it("validates all value streams", () => {
-		expect(valueStreams.length).toBe(3);
+	it("validates all value streams (empty in self-referential corpus)", () => {
+		expect(valueStreams.length).toBe(0);
 		for (const vs of valueStreams) {
 			expect(ValueStreamSchema.parse(vs)).toBeDefined();
 		}
 	});
 
 	it("validates all processes", () => {
-		expect(processes.length).toBe(2);
+		expect(processes.length).toBe(3);
 		for (const p of processes) {
 			expect(ProcessSchema.parse(p)).toBeDefined();
 		}
 	});
 
 	it("validates all process stages", () => {
-		expect(processStages.length).toBe(9);
+		expect(processStages.length).toBe(22);
 		for (const ps of processStages) {
 			expect(ProcessStageSchema.parse(ps)).toBeDefined();
 		}
 	});
 
 	it("validates all story routes", () => {
-		expect(storyRoutes.length).toBe(6);
+		expect(storyRoutes.length).toBe(3);
 		for (const sr of storyRoutes) {
 			expect(StoryRouteSchema.parse(sr)).toBeDefined();
 		}
 	});
 
 	it("validates all story waypoints", () => {
-		expect(storyWaypoints.length).toBe(33);
+		expect(storyWaypoints.length).toBe(18);
 		for (const sw of storyWaypoints) {
 			expect(StoryWaypointSchema.parse(sw)).toBeDefined();
 		}
@@ -380,29 +382,6 @@ describe("0.2.0 entity schemas validate seed data", () => {
 });
 
 describe("0.2.0 referential integrity", () => {
-	it("provider associations reference valid providers", () => {
-		const providerIds = new Set(providers.map((p) => p.id));
-		for (const pa of providerAssociations) {
-			expect(providerIds.has(pa.providerId)).toBe(true);
-		}
-	});
-
-	it("value streams reference valid domains", () => {
-		const domainIds = new Set(domains.map((d) => d.id));
-		for (const vs of valueStreams) {
-			expect(domainIds.has(vs.domainId)).toBe(true);
-		}
-	});
-
-	it("value stream capabilityIds reference valid capabilities", () => {
-		const capIds = new Set(capabilities.map((c) => c.id));
-		for (const vs of valueStreams) {
-			for (const capId of vs.capabilityIds) {
-				expect(capIds.has(capId)).toBe(true);
-			}
-		}
-	});
-
 	it("process stageIds reference valid process stages", () => {
 		const stageIds = new Set(processStages.map((ps) => ps.id));
 		for (const proc of processes) {
@@ -446,8 +425,16 @@ describe("0.2.0 referential integrity", () => {
 });
 
 describe("0.4.0 entity schemas", () => {
-	it("PerspectiveTypeSchema accepts the 6 perspective types", () => {
-		for (const t of ["landscape", "journey", "process", "architecture", "system", "sequence"]) {
+	it("PerspectiveTypeSchema accepts the 7 perspective types", () => {
+		for (const t of [
+			"orientation",
+			"landscape",
+			"journey",
+			"process",
+			"architecture",
+			"system",
+			"sequence",
+		]) {
 			expect(() => PerspectiveTypeSchema.parse(t)).not.toThrow();
 		}
 	});
@@ -471,36 +458,33 @@ describe("0.4.0 entity schemas", () => {
 		expect(withParent.parentNodeId).toBe("n-parent");
 	});
 
-	it("validates all control points", () => {
-		expect(controlPoints.length).toBeGreaterThanOrEqual(8);
-		for (const cp of controlPoints) {
-			expect(ControlPointSchema.parse(cp)).toBeDefined();
-		}
+	it("validates all control points (empty in self-referential corpus)", () => {
+		expect(controlPoints.length).toBe(0);
 	});
 
 	it("validates all interfaces", () => {
-		expect(interfaces.length).toBeGreaterThanOrEqual(6);
+		expect(interfaces.length).toBe(8);
 		for (const iface of interfaces) {
 			expect(InterfaceSchema.parse(iface)).toBeDefined();
 		}
 	});
 
 	it("validates all messages", () => {
-		expect(messages.length).toBeGreaterThanOrEqual(12);
+		expect(messages.length).toBe(19);
 		for (const msg of messages) {
 			expect(MessageSchema.parse(msg)).toBeDefined();
 		}
 	});
 
 	it("validates BPMN nodes", () => {
-		expect(bpmnNodes.length).toBeGreaterThanOrEqual(10);
+		expect(bpmnNodes.length).toBe(10);
 		for (const n of bpmnNodes) {
 			expect(n.type).toMatch(/^bpmn_/);
 		}
 	});
 
 	it("validates BPMN edges", () => {
-		expect(bpmnEdges.length).toBeGreaterThanOrEqual(10);
+		expect(bpmnEdges.length).toBe(9);
 	});
 
 	it("CanvasModeSchema validates", () => {
@@ -531,17 +515,15 @@ describe("0.4.0 referential integrity", () => {
 		}
 	});
 
-	it("message sequence numbers are contiguous from zero", () => {
-		const sorted = [...messages].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
-		for (let i = 0; i < sorted.length; i++) {
-			expect(sorted[i].sequenceNumber).toBe(i);
-		}
-	});
-
-	it("control points reference valid process stages", () => {
-		const stageIds = new Set(processStages.map((ps) => ps.id));
-		for (const cp of controlPoints) {
-			expect(stageIds.has(cp.processStageId)).toBe(true);
+	it("message sequence numbers are contiguous per sequence", () => {
+		// Messages are split across 2 sequences — check contiguity within each
+		for (const seq of sequences) {
+			const seqMsgs = messages
+				.filter((m) => seq.messageIds.includes(m.id))
+				.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+			for (let i = 0; i < seqMsgs.length; i++) {
+				expect(seqMsgs[i].sequenceNumber).toBe(i);
+			}
 		}
 	});
 
@@ -592,7 +574,7 @@ describe("0.5.0 Sequence entity", () => {
 	});
 
 	it("validates all seed sequences", () => {
-		expect(sequences.length).toBeGreaterThanOrEqual(1);
+		expect(sequences.length).toBe(2);
 		for (const seq of sequences) {
 			expect(SequenceSchema.parse(seq)).toBeDefined();
 		}
@@ -645,6 +627,40 @@ describe("0.5.0 Sequence referential integrity", () => {
 	it("no duplicate messageIds in sequences", () => {
 		for (const seq of sequences) {
 			expect(new Set(seq.messageIds).size).toBe(seq.messageIds.length);
+		}
+	});
+});
+
+describe("0.7.0 OrientationItem entity", () => {
+	it("validates OrientationItem schema for valid item", () => {
+		const item = OrientationItemSchema.parse({
+			id: "orient-test",
+			sequenceNumber: 0,
+			title: "Test Item",
+			body: "Test body content",
+		});
+		expect(item.id).toBe("orient-test");
+		expect(item.terms).toEqual([]);
+		expect(item.links).toEqual([]);
+		expect(item.tags).toEqual([]);
+	});
+
+	it("rejects OrientationItem missing required fields", () => {
+		expect(() => OrientationItemSchema.parse({ id: "orient-test" })).toThrow();
+		expect(() => OrientationItemSchema.parse({ id: "orient-test", sequenceNumber: 0 })).toThrow();
+	});
+
+	it("validates all seed orientation items", () => {
+		expect(orientationItems.length).toBe(8);
+		for (const item of orientationItems) {
+			expect(OrientationItemSchema.parse(item)).toBeDefined();
+		}
+	});
+
+	it("orientation items have sequential sequence numbers", () => {
+		const sorted = [...orientationItems].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+		for (let i = 0; i < sorted.length; i++) {
+			expect(sorted[i].sequenceNumber).toBe(i);
 		}
 	});
 });

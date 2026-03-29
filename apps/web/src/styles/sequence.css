@@ -215,6 +215,7 @@
 }
 
 /* Selected message line emphasis */
-.sequence-message--selected .sequence-message__line {
+.sequence-message--selected .sequence-message__line,
+.sequence-message--active .sequence-message__line {
 	border-top-width: 3px;
 }

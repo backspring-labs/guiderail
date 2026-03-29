@@ -153,7 +153,7 @@ describe("MockContentRepoAdapter", () => {
 	it("lists domains", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const domains = await adapter.listDomains();
-		expect(domains.length).toBe(9);
+		expect(domains.length).toBe(7);
 		for (const d of domains) {
 			expect(EntityManifestSchema.parse(d)).toBeDefined();
 		}
@@ -162,13 +162,13 @@ describe("MockContentRepoAdapter", () => {
 	it("lists capabilities", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const caps = await adapter.listCapabilities();
-		expect(caps.length).toBe(16);
+		expect(caps.length).toBe(20);
 	});
 
 	it("lists entities (nodes)", async () => {
 		const adapter = new MockContentRepoAdapter();
 		const entities = await adapter.listEntities();
-		expect(entities.length).toBe(48);
+		expect(entities.length).toBe(24);
 	});
 
 	it("lists research", async () => {
@@ -180,10 +180,10 @@ describe("MockContentRepoAdapter", () => {
 		}
 	});
 
-	it("resolves links for entity with evidence", async () => {
+	it("resolves links for entity (empty in self-referential corpus)", async () => {
 		const adapter = new MockContentRepoAdapter();
-		const links = await adapter.resolveLinks("n-identity-svc");
-		expect(links.length).toBeGreaterThan(0);
+		const links = await adapter.resolveLinks("n-context-machine");
+		expect(links.length).toBe(0);
 	});
 
 	it("returns empty links for entity without evidence", async () => {

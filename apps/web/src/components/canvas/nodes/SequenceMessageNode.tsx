@@ -20,29 +20,33 @@ interface SequenceMessageNodeProps {
 export function SequenceMessageNode({ data, selected }: SequenceMessageNodeProps) {
 	const isResponse = data.messageType === "response";
 	const isEvent = data.messageType === "event";
+	const isActive = (data as Record<string, unknown>).isActive === true;
 
 	// Highlight circle if this message originates from the selected lifeline
 	const originatesFromSelected =
 		data.selectedLifelineId != null && data.sourceLifelineId === data.selectedLifelineId;
 
 	const baseColor = isEvent ? "#8b5cf6" : "#94a3b8";
-	const activeColor = selected ? "var(--color-selected, #3b82f6)" : baseColor;
+	const highlightColor = "var(--color-selected, #3b82f6)";
+	const activeColor = selected || isActive ? highlightColor : baseColor;
 	const lineStyle = isResponse ? "sequence-message--dashed" : "";
 	const arrowDirection = data.isReverse ? "sequence-message--reverse" : "";
 	const selectedClass = selected ? "sequence-message--selected" : "";
+	const activeStepClass = isActive ? "sequence-message--active" : "";
 	const arrowStyle = data.isReverse
 		? { borderRightColor: activeColor }
 		: { borderLeftColor: activeColor };
 
-	const seqClass = selected
-		? "sequence-message__seq--selected"
-		: originatesFromSelected
-			? "sequence-message__seq--lifeline-highlight"
-			: "";
+	const seqClass =
+		selected || isActive
+			? "sequence-message__seq--selected"
+			: originatesFromSelected
+				? "sequence-message__seq--lifeline-highlight"
+				: "";
 
 	return (
 		<div
-			className={`sequence-message ${lineStyle} ${arrowDirection} ${selectedClass}`}
+			className={`sequence-message ${lineStyle} ${arrowDirection} ${selectedClass} ${activeStepClass}`}
 			style={{ width: data.width, cursor: "pointer" }}
 		>
 			<div className="sequence-message__line" style={{ borderColor: activeColor }} />

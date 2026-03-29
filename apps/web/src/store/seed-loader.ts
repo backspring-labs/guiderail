@@ -21,6 +21,7 @@ import {
 	layers,
 	messages,
 	nodes,
+	orientationItems,
 	perspectives,
 	processStages,
 	processes,
@@ -59,3 +60,4 @@ export const seedBpmnEdges = bpmnEdges;
 export const seedInterfaces = interfaces;
 export const seedMessages = messages;
 export const seedSequences = sequences;
+export const seedOrientationItems = orientationItems;

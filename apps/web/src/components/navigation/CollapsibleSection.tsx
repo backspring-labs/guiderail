@@ -25,7 +25,7 @@ export function CollapsibleSection({
 			<button
 				type="button"
 				className="collapsible-section__header"
-				onClick={() => setExpanded(!isExpanded)}
+				onClick={() => setExpanded(!expanded)}
 			>
 				<span className="collapsible-section__toggle">{isExpanded ? "▼" : "▶"}</span>
 				<span className="collapsible-section__label">{label}</span>

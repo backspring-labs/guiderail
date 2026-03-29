@@ -23,6 +23,11 @@
 	box-shadow: 0 0 0 2px var(--color-selected), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+.journey-step--active {
+	border-color: var(--color-highlighted);
+	box-shadow: 0 0 0 2px var(--color-highlighted), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 .journey-step__seq {
 	position: absolute;
 	top: -14px;

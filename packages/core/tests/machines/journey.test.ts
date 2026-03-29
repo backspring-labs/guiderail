@@ -18,25 +18,25 @@ describe("Journey Machine", () => {
 
 	it("SELECT_JOURNEY transitions to selecting", () => {
 		const actor = createJourney();
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
 		const snap = actor.getSnapshot();
 		expect(snap.value).toBe("selecting");
-		expect(snap.context.journeyId).toBe("j-open-savings");
+		expect(snap.context.journeyId).toBe("j-full-descent");
 		expect(snap.context.steps).toEqual([]);
 	});
 
 	it("JOURNEY_LOADED transitions to active with steps", () => {
 		const actor = createJourney();
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
 		actor.send({ type: "JOURNEY_LOADED", steps: seedSteps });
 		const snap = actor.getSnapshot();
 		expect(snap.value).toBe("active");
-		expect(snap.context.steps.length).toBe(8);
+		expect(snap.context.steps.length).toBe(21);
 	});
 
 	it("DESELECT_JOURNEY from active returns to idle and clears context", () => {
 		const actor = createJourney();
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
 		actor.send({ type: "JOURNEY_LOADED", steps: seedSteps });
 		actor.send({ type: "DESELECT_JOURNEY" });
 		const snap = actor.getSnapshot();
@@ -47,7 +47,7 @@ describe("Journey Machine", () => {
 
 	it("DESELECT_JOURNEY from selecting returns to idle", () => {
 		const actor = createJourney();
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
 		actor.send({ type: "DESELECT_JOURNEY" });
 		const snap = actor.getSnapshot();
 		expect(snap.value).toBe("idle");
@@ -55,17 +55,17 @@ describe("Journey Machine", () => {
 
 	it("COMPLETE_JOURNEY transitions to completed", () => {
 		const actor = createJourney();
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
 		actor.send({ type: "JOURNEY_LOADED", steps: seedSteps });
 		actor.send({ type: "COMPLETE_JOURNEY" });
 		const snap = actor.getSnapshot();
 		expect(snap.value).toBe("completed");
-		expect(snap.context.journeyId).toBe("j-open-savings");
+		expect(snap.context.journeyId).toBe("j-full-descent");
 	});
 
 	it("can select a new journey from completed state", () => {
 		const actor = createJourney();
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
 		actor.send({ type: "JOURNEY_LOADED", steps: seedSteps });
 		actor.send({ type: "COMPLETE_JOURNEY" });
 		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-other" });

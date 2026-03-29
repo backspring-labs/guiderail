@@ -6,8 +6,10 @@ import {
 	reconcileDomainSwitch,
 	reconcileJourneyDeselection,
 	reconcileJourneySelection,
+	reconcileMessageChange,
 	reconcileModeSwitch,
 	reconcileNodeSelection,
+	reconcileOrientationChange,
 	reconcilePerspectiveSwitch,
 	reconcileProcessSwitch,
 	reconcileRouteEnd,
@@ -15,9 +17,9 @@ import {
 	reconcileRouteResume,
 	reconcileSequenceClear,
 	reconcileSequenceSwitch,
+	reconcileStageChange,
 	reconcileStepChange,
 	reconcileStoryRouteStart,
-	reconcileValueStreamSwitch,
 	reconcileWaypointChange,
 } from "../../src/context/reconciler.js";
 import { createGraph } from "../../src/graph/graph.js";
@@ -30,7 +32,6 @@ import {
 	steps,
 	storyRoutes,
 	storyWaypoints,
-	valueStreams,
 } from "../../src/test-fixtures/index.js";
 
 const graph = createGraph(nodes, edges);
@@ -46,12 +47,12 @@ describe("reconcileDomainSwitch", () => {
 	it("sets domain and clears capability/journey/step", () => {
 		const ctx = {
 			...baseCtx(),
-			activeCapabilityId: "cap-onboarding",
-			activeJourneyId: "j-open-savings",
+			activeCapabilityId: "cap-context-machine",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 3,
 		};
-		const result = reconcileDomainSwitch(ctx, "dom-accounts");
-		expect(result.activeDomainId).toBe("dom-accounts");
+		const result = reconcileDomainSwitch(ctx, "dom-core-kernel");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
 		expect(result.activeCapabilityId).toBeNull();
 		expect(result.activeJourneyId).toBeNull();
 		expect(result.activeStepIndex).toBeNull();
@@ -61,13 +62,13 @@ describe("reconcileDomainSwitch", () => {
 
 	it("preserves perspective", () => {
 		const ctx = { ...baseCtx(), activePerspectiveId: "persp-architecture" };
-		const result = reconcileDomainSwitch(ctx, "dom-payments");
+		const result = reconcileDomainSwitch(ctx, "dom-core-kernel");
 		expect(result.activePerspectiveId).toBe("persp-architecture");
 	});
 
 	it("preserves mode", () => {
 		const ctx = { ...baseCtx(), mode: "guiderail" as const };
-		const result = reconcileDomainSwitch(ctx, "dom-accounts");
+		const result = reconcileDomainSwitch(ctx, "dom-core-kernel");
 		expect(result.mode).toBe("guiderail");
 	});
 });
@@ -76,12 +77,12 @@ describe("reconcileCapabilitySwitch", () => {
 	it("sets capability and clears journey/step", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-accounts",
-			activeJourneyId: "j-open-savings",
+			activeDomainId: "dom-core-kernel",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 2,
 		};
-		const result = reconcileCapabilitySwitch(ctx, "cap-account-opening");
-		expect(result.activeCapabilityId).toBe("cap-account-opening");
+		const result = reconcileCapabilitySwitch(ctx, "cap-context-machine");
+		expect(result.activeCapabilityId).toBe("cap-context-machine");
 		expect(result.activeJourneyId).toBeNull();
 		expect(result.activeStepIndex).toBeNull();
 	});
@@ -89,11 +90,11 @@ describe("reconcileCapabilitySwitch", () => {
 	it("preserves domain and perspective", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-accounts",
+			activeDomainId: "dom-core-kernel",
 			activePerspectiveId: "persp-process",
 		};
-		const result = reconcileCapabilitySwitch(ctx, "cap-account-opening");
-		expect(result.activeDomainId).toBe("dom-accounts");
+		const result = reconcileCapabilitySwitch(ctx, "cap-context-machine");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
 		expect(result.activePerspectiveId).toBe("persp-process");
 	});
 });
@@ -102,16 +103,16 @@ describe("reconcilePerspectiveSwitch", () => {
 	it("preserves domain/capability/journey/step", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-accounts",
-			activeCapabilityId: "cap-account-opening",
-			activeJourneyId: "j-open-savings",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-context-machine",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 2,
-			activeFocusTargets: [{ type: "node" as const, targetId: "n-identity-svc" }],
+			activeFocusTargets: [{ type: "node" as const, targetId: "n-context-machine" }],
 		};
 		const result = reconcilePerspectiveSwitch(ctx, "persp-architecture", graph);
-		expect(result.activeDomainId).toBe("dom-accounts");
-		expect(result.activeCapabilityId).toBe("cap-account-opening");
-		expect(result.activeJourneyId).toBe("j-open-savings");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-context-machine");
+		expect(result.activeJourneyId).toBe("j-full-descent");
 		expect(result.activeStepIndex).toBe(2);
 		expect(result.activePerspectiveId).toBe("persp-architecture");
 	});
@@ -119,63 +120,62 @@ describe("reconcilePerspectiveSwitch", () => {
 	it("updates viewport to focal node position in new perspective", () => {
 		const ctx = {
 			...baseCtx(),
-			activeFocusTargets: [{ type: "node" as const, targetId: "n-identity-svc" }],
+			activeFocusTargets: [{ type: "node" as const, targetId: "n-context-machine" }],
 		};
 		const result = reconcilePerspectiveSwitch(ctx, "persp-architecture", graph);
-		// n-identity-svc has persp-architecture layout at { x: 950, y: 0 }
-		expect(result.viewportAnchor.x).toBe(950);
+		// n-context-machine has persp-architecture layout at { x: 400, y: 0 }
+		expect(result.viewportAnchor.x).toBe(400);
 		expect(result.viewportAnchor.y).toBe(0);
 	});
 
 	it("uses selectedNodeId if no focus targets", () => {
 		const ctx = {
 			...baseCtx(),
-			selectedNodeId: "n-core-ledger",
+			selectedNodeId: "n-reconciler",
 		};
 		const result = reconcilePerspectiveSwitch(ctx, "persp-architecture", graph);
-		// n-core-ledger has persp-architecture layout at { x: 1300, y: 250 }
-		expect(result.viewportAnchor.x).toBe(1300);
-		expect(result.viewportAnchor.y).toBe(250);
+		// n-reconciler has persp-architecture layout at { x: 400, y: 150 }
+		expect(result.viewportAnchor.x).toBe(400);
+		expect(result.viewportAnchor.y).toBe(150);
 	});
 });
 
 describe("reconcileJourneySelection", () => {
 	it("sets journey, step 0, and focus targets", () => {
 		const result = reconcileJourneySelection(baseCtx(), journey, journeySteps, capabilities, graph);
-		expect(result.activeJourneyId).toBe("j-open-savings");
+		expect(result.activeJourneyId).toBe("j-full-descent");
 		expect(result.activeStepIndex).toBe(0);
 		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
-		expect(result.activeSceneId).toBe("sc-1");
 	});
 
 	it("infers domain from entry capability when not set", () => {
 		const result = reconcileJourneySelection(baseCtx(), journey, journeySteps, capabilities, graph);
-		expect(result.activeDomainId).toBe("dom-customer");
-		expect(result.activeCapabilityId).toBe("cap-onboarding");
+		expect(result.activeDomainId).toBe("dom-navigation");
+		expect(result.activeCapabilityId).toBe("cap-perspective-switching");
 	});
 
 	it("preserves existing domain/capability if already set", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-accounts",
-			activeCapabilityId: "cap-account-opening",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-context-machine",
 		};
 		const result = reconcileJourneySelection(ctx, journey, journeySteps, capabilities, graph);
-		expect(result.activeDomainId).toBe("dom-accounts");
-		expect(result.activeCapabilityId).toBe("cap-account-opening");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-context-machine");
 	});
 
 	it("preserves perspective", () => {
-		const ctx = { ...baseCtx(), activePerspectiveId: "persp-provider" };
+		const ctx = { ...baseCtx(), activePerspectiveId: "persp-architecture" };
 		const result = reconcileJourneySelection(ctx, journey, journeySteps, capabilities, graph);
-		expect(result.activePerspectiveId).toBe("persp-provider");
+		expect(result.activePerspectiveId).toBe("persp-architecture");
 	});
 
 	it("updates viewport to first step's primary node", () => {
 		const result = reconcileJourneySelection(baseCtx(), journey, journeySteps, capabilities, graph);
-		// First step focuses on n-customer, which has persp-overview layout at { x: 0, y: 200 }
+		// First step focuses on n-app-shell which has persp-architecture layout at { x: 0, y: 0 }
 		expect(result.viewportAnchor.x).toBe(0);
-		expect(result.viewportAnchor.y).toBe(200);
+		expect(result.viewportAnchor.y).toBe(0);
 	});
 });
 
@@ -183,60 +183,60 @@ describe("reconcileJourneyDeselection", () => {
 	it("clears journey/step/scene but preserves domain/capability/perspective", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-customer",
-			activeCapabilityId: "cap-onboarding",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-context-machine",
 			activePerspectiveId: "persp-process",
-			activeJourneyId: "j-open-savings",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 3,
 			activeSceneId: "sc-4",
-			selectedNodeId: "n-risk-svc",
+			selectedNodeId: "n-reconciler",
 		};
 		const result = reconcileJourneyDeselection(ctx);
 		expect(result.activeJourneyId).toBeNull();
 		expect(result.activeStepIndex).toBeNull();
 		expect(result.activeSceneId).toBeNull();
 		expect(result.activeFocusTargets).toEqual([]);
-		expect(result.activeDomainId).toBe("dom-customer");
-		expect(result.activeCapabilityId).toBe("cap-onboarding");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-context-machine");
 		expect(result.activePerspectiveId).toBe("persp-process");
-		expect(result.selectedNodeId).toBe("n-risk-svc");
+		expect(result.selectedNodeId).toBe("n-reconciler");
 	});
 });
 
 describe("reconcileStepChange", () => {
-	it("updates focus targets, scene, and viewport", () => {
+	it("updates focus targets and viewport", () => {
 		const ctx = {
 			...baseCtx(),
-			activeJourneyId: "j-open-savings",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 0,
 		};
 		const result = reconcileStepChange(ctx, 2, journeySteps, graph);
 		expect(result.activeStepIndex).toBe(2);
 		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
-		expect(result.activeSceneId).toBe("sc-3");
 	});
 
 	it("updates capability when step crosses capability boundary", () => {
 		const ctx = {
 			...baseCtx(),
-			activeCapabilityId: "cap-onboarding",
-			activeJourneyId: "j-open-savings",
+			activeCapabilityId: "cap-perspective-switching",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 5,
 		};
-		// Step s-5 (sequenceNumber 6) is in cap-account-opening
+		// Step index 6 (step-fd-7) is in cap-canvas-mode-switching
 		const result = reconcileStepChange(ctx, 6, journeySteps, graph);
-		expect(result.activeCapabilityId).toBe("cap-account-opening");
+		expect(result.activeCapabilityId).toBe("cap-canvas-mode-switching");
 	});
 
 	it("updates viewport to primary node position", () => {
 		const ctx = {
 			...baseCtx(),
-			activeJourneyId: "j-open-savings",
+			activePerspectiveId: "persp-architecture",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 0,
 		};
-		// Step 2 focuses on n-identity-svc (persp-overview: { x: 950, y: 0 })
+		// Step 2 (step-fd-3) focuses on n-context-machine (persp-architecture: { x: 400, y: 0 })
 		const result = reconcileStepChange(ctx, 2, journeySteps, graph);
-		expect(result.viewportAnchor.x).toBe(950);
+		expect(result.viewportAnchor.x).toBe(400);
 		expect(result.viewportAnchor.y).toBe(0);
 	});
 
@@ -251,33 +251,30 @@ describe("reconcileNodeSelection", () => {
 	it("snaps to step when node is on active journey path", () => {
 		const ctx = {
 			...baseCtx(),
-			activeJourneyId: "j-open-savings",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 0,
 		};
-		// n-identity-svc is on step 2 (sequenceNumber 2)
-		const result = reconcileNodeSelection(ctx, "n-identity-svc", journeySteps, graph);
+		// n-context-machine is a focus target on step 2 (step-fd-3)
+		const result = reconcileNodeSelection(ctx, "n-context-machine", journeySteps, graph);
 		expect(result.activeStepIndex).toBe(2);
-		expect(result.activeSceneId).toBe("sc-3");
 	});
 
 	it("selects node without disrupting journey when node is off-path", () => {
 		const ctx = {
 			...baseCtx(),
-			activeJourneyId: "j-open-savings",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 2,
-			activeSceneId: "sc-3",
 		};
-		// n-payment-orch is not on the account-opening journey path
-		const result = reconcileNodeSelection(ctx, "n-payment-orch", journeySteps, graph);
-		expect(result.selectedNodeId).toBe("n-payment-orch");
+		// n-graph is not on the full-descent journey path
+		const result = reconcileNodeSelection(ctx, "n-graph", journeySteps, graph);
+		expect(result.selectedNodeId).toBe("n-graph");
 		expect(result.activeStepIndex).toBe(2);
-		expect(result.activeSceneId).toBe("sc-3");
-		expect(result.activeJourneyId).toBe("j-open-savings");
+		expect(result.activeJourneyId).toBe("j-full-descent");
 	});
 
 	it("selects node normally when no journey is active", () => {
-		const result = reconcileNodeSelection(baseCtx(), "n-core-ledger", [], graph);
-		expect(result.selectedNodeId).toBe("n-core-ledger");
+		const result = reconcileNodeSelection(baseCtx(), "n-reconciler", [], graph);
+		expect(result.selectedNodeId).toBe("n-reconciler");
 		expect(result.activeJourneyId).toBeNull();
 	});
 });
@@ -286,16 +283,16 @@ describe("reconcileModeSwitch", () => {
 	it("switches mode and preserves all context", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-accounts",
-			activeCapabilityId: "cap-account-opening",
-			activeJourneyId: "j-open-savings",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-context-machine",
+			activeJourneyId: "j-full-descent",
 			activeStepIndex: 3,
 		};
 		const result = reconcileModeSwitch(ctx, "guiderail");
 		expect(result.mode).toBe("guiderail");
-		expect(result.activeDomainId).toBe("dom-accounts");
-		expect(result.activeCapabilityId).toBe("cap-account-opening");
-		expect(result.activeJourneyId).toBe("j-open-savings");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-context-machine");
+		expect(result.activeJourneyId).toBe("j-full-descent");
 		expect(result.activeStepIndex).toBe(3);
 	});
 });
@@ -303,58 +300,21 @@ describe("reconcileModeSwitch", () => {
 // --- 0.2.0 reconciler additions ---
 
 // biome-ignore lint/style/noNonNullAssertion: seed data known
-const retailPayments = valueStreams.find((vs) => vs.id === "vs-retail-payments")!;
-// biome-ignore lint/style/noNonNullAssertion: seed data known
-const paymentAuthProcess = storyRoutes.find((sr) => sr.id === "sr-payment-flow")!;
-const paymentAuthStages = processStages.filter((ps) => ps.processId === "proc-payment-auth");
-const routeWaypoints = storyWaypoints.filter((sw) => sw.storyRouteId === "sr-payment-flow");
-// biome-ignore lint/style/noNonNullAssertion: seed data known
-const storyRoute = storyRoutes.find((sr) => sr.id === "sr-payment-flow")!;
-
-describe("reconcileValueStreamSwitch", () => {
-	it("sets value stream and clears process", () => {
-		const ctx = { ...baseCtx(), activeDomainId: "dom-payments", activeProcessId: "proc-1" };
-		const result = reconcileValueStreamSwitch(ctx, "vs-retail-payments", retailPayments);
-		expect(result.activeValueStreamId).toBe("vs-retail-payments");
-		expect(result.activeProcessId).toBeNull();
-	});
-
-	it("preserves capability if it belongs to the value stream", () => {
-		const ctx = {
-			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-money-movement",
-		};
-		const result = reconcileValueStreamSwitch(ctx, "vs-retail-payments", retailPayments);
-		expect(result.activeCapabilityId).toBe("cap-money-movement");
-	});
-
-	it("clears capability if it does not belong to the value stream", () => {
-		const ctx = {
-			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-auth",
-		};
-		const result = reconcileValueStreamSwitch(ctx, "vs-retail-payments", retailPayments);
-		expect(result.activeCapabilityId).toBeNull();
-	});
-
-	it("preserves domain and perspective", () => {
-		const ctx = {
-			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activePerspectiveId: "persp-provider",
-		};
-		const result = reconcileValueStreamSwitch(ctx, "vs-retail-payments", retailPayments);
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activePerspectiveId).toBe("persp-provider");
-	});
-});
+const storyRoute = storyRoutes.find((sr) => sr.id === "sr-full-descent")!;
+const routeWaypoints = storyWaypoints.filter((sw) => sw.storyRouteId === "sr-full-descent");
+const perspectiveSwitchStages = processStages.filter(
+	(ps) => ps.processId === "proc-perspective-switch",
+);
 
 describe("reconcileProcessSwitch", () => {
 	it("sets process and updates focus to first stage nodes", () => {
-		const result = reconcileProcessSwitch(baseCtx(), "proc-payment-auth", paymentAuthStages, graph);
-		expect(result.activeProcessId).toBe("proc-payment-auth");
+		const result = reconcileProcessSwitch(
+			baseCtx(),
+			"proc-perspective-switch",
+			perspectiveSwitchStages,
+			graph,
+		);
+		expect(result.activeProcessId).toBe("proc-perspective-switch");
 		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
 		expect(result.activeFocusTargets[0]?.type).toBe("node");
 	});
@@ -362,13 +322,18 @@ describe("reconcileProcessSwitch", () => {
 	it("preserves domain/capability/perspective", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-payment-processing",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
 			activePerspectiveId: "persp-process",
 		};
-		const result = reconcileProcessSwitch(ctx, "proc-payment-auth", paymentAuthStages, graph);
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		const result = reconcileProcessSwitch(
+			ctx,
+			"proc-perspective-switch",
+			perspectiveSwitchStages,
+			graph,
+		);
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
 		expect(result.activePerspectiveId).toBe("persp-process");
 	});
 });
@@ -376,7 +341,7 @@ describe("reconcileProcessSwitch", () => {
 describe("reconcileStoryRouteStart", () => {
 	it("sets route, first waypoint, and routeState active", () => {
 		const result = reconcileStoryRouteStart(baseCtx(), storyRoute, routeWaypoints, graph);
-		expect(result.activeStoryRouteId).toBe("sr-payment-flow");
+		expect(result.activeStoryRouteId).toBe("sr-full-descent");
 		expect(result.activeWaypointIndex).toBe(0);
 		expect(result.routeState).toBe("active");
 		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
@@ -384,19 +349,19 @@ describe("reconcileStoryRouteStart", () => {
 
 	it("applies first waypoint perspective if present", () => {
 		const result = reconcileStoryRouteStart(baseCtx(), storyRoute, routeWaypoints, graph);
-		// First waypoint (sw-1) has perspectiveId: "persp-landscape"
+		// First waypoint (sw-fd-1) has perspectiveId: "persp-landscape"
 		expect(result.activePerspectiveId).toBe("persp-landscape");
 	});
 
 	it("does not clear domain/capability", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-payment-processing",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
 		};
 		const result = reconcileStoryRouteStart(ctx, storyRoute, routeWaypoints, graph);
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
 	});
 });
 
@@ -404,31 +369,19 @@ describe("reconcileWaypointChange", () => {
 	it("updates focus targets for new waypoint", () => {
 		const ctx = {
 			...baseCtx(),
-			activeStoryRouteId: "sr-payment-flow",
+			activeStoryRouteId: "sr-full-descent",
 			activeWaypointIndex: 0,
 			routeState: "active" as const,
 		};
 		const result = reconcileWaypointChange(ctx, 1, routeWaypoints, graph);
 		expect(result.activeWaypointIndex).toBe(1);
-		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
 	});
 
 	it("applies waypoint perspective if present", () => {
 		const ctx = { ...baseCtx(), routeState: "active" as const };
-		// Waypoint sw-2 (index 1) has perspectiveId: "persp-architecture"
+		// Waypoint sw-fd-2 (index 1) has perspectiveId: "persp-landscape"
 		const result = reconcileWaypointChange(ctx, 1, routeWaypoints, graph);
-		expect(result.activePerspectiveId).toBe("persp-architecture");
-	});
-
-	it("preserves current perspective if waypoint has no perspectiveId", () => {
-		const ctx = {
-			...baseCtx(),
-			activePerspectiveId: "persp-provider",
-			routeState: "active" as const,
-		};
-		// Waypoint sw-5 (index 4) has no perspectiveId
-		const result = reconcileWaypointChange(ctx, 4, routeWaypoints, graph);
-		expect(result.activePerspectiveId).toBe("persp-provider");
+		expect(result.activePerspectiveId).toBe("persp-landscape");
 	});
 
 	it("returns unchanged for invalid waypoint index", () => {
@@ -442,13 +395,13 @@ describe("reconcileRoutePause", () => {
 	it("sets routeState to paused", () => {
 		const ctx = {
 			...baseCtx(),
-			activeStoryRouteId: "sr-payment-flow",
+			activeStoryRouteId: "sr-full-descent",
 			activeWaypointIndex: 2,
 			routeState: "active" as const,
 		};
 		const result = reconcileRoutePause(ctx);
 		expect(result.routeState).toBe("paused");
-		expect(result.activeStoryRouteId).toBe("sr-payment-flow");
+		expect(result.activeStoryRouteId).toBe("sr-full-descent");
 		expect(result.activeWaypointIndex).toBe(2);
 	});
 });
@@ -457,7 +410,7 @@ describe("reconcileRouteResume", () => {
 	it("restores focus/perspective/viewport from saved snapshot", () => {
 		const savedSnapshot = {
 			...baseCtx(),
-			activeFocusTargets: [{ type: "node" as const, targetId: "n-risk-svc" }],
+			activeFocusTargets: [{ type: "node" as const, targetId: "n-reconciler" }],
 			activePerspectiveId: "persp-architecture",
 			viewportAnchor: { x: 500, y: 200, zoom: 1.5 },
 			activeWaypointIndex: 2,
@@ -465,8 +418,8 @@ describe("reconcileRouteResume", () => {
 		const currentCtx = {
 			...baseCtx(),
 			routeState: "paused" as const,
-			activeStoryRouteId: "sr-payment-flow",
-			selectedNodeId: "n-customer",
+			activeStoryRouteId: "sr-full-descent",
+			selectedNodeId: "n-user",
 			activePerspectiveId: "persp-landscape",
 		};
 		const result = reconcileRouteResume(currentCtx, savedSnapshot);
@@ -482,21 +435,21 @@ describe("reconcileRouteEnd", () => {
 	it("clears route state and preserves domain/capability/perspective", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-payment-processing",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
 			activePerspectiveId: "persp-architecture",
-			activeStoryRouteId: "sr-payment-flow",
+			activeStoryRouteId: "sr-full-descent",
 			activeWaypointIndex: 4,
 			routeState: "active" as const,
-			activeFocusTargets: [{ type: "node" as const, targetId: "n-core-ledger" }],
+			activeFocusTargets: [{ type: "node" as const, targetId: "n-reconciler" }],
 		};
 		const result = reconcileRouteEnd(ctx);
 		expect(result.activeStoryRouteId).toBeNull();
 		expect(result.activeWaypointIndex).toBeNull();
 		expect(result.routeState).toBe("inactive");
 		expect(result.activeFocusTargets).toEqual([]);
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
 		expect(result.activePerspectiveId).toBe("persp-architecture");
 	});
 });
@@ -505,19 +458,19 @@ describe("reconcileCanvasModeSwitch", () => {
 	it("sets canvas mode and preserves everything including selection", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-payment-processing",
-			selectedNodeId: "n-fraud-engine",
-			selectedEdgeId: "e-orch-fraud",
-			activeProcessId: "proc-payment-auth",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
+			selectedNodeId: "n-reconciler",
+			selectedEdgeId: "e-machine-reconciler",
+			activeProcessId: "proc-perspective-switch",
 		};
-		const result = reconcileCanvasModeSwitch(ctx, "risk_controls");
-		expect(result.activeCanvasMode).toBe("risk_controls");
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
-		expect(result.selectedNodeId).toBe("n-fraud-engine");
-		expect(result.selectedEdgeId).toBe("e-orch-fraud");
-		expect(result.activeProcessId).toBe("proc-payment-auth");
+		const result = reconcileCanvasModeSwitch(ctx, "operational");
+		expect(result.activeCanvasMode).toBe("operational");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
+		expect(result.selectedNodeId).toBe("n-reconciler");
+		expect(result.selectedEdgeId).toBe("e-machine-reconciler");
+		expect(result.activeProcessId).toBe("proc-perspective-switch");
 	});
 
 	it("switching canvas mode again replaces the previous mode", () => {
@@ -534,9 +487,9 @@ describe("reconcilePerspectiveSwitch — shared context contract", () => {
 	it("clears selection and canvas mode on perspective switch", () => {
 		const ctx = {
 			...baseCtx(),
-			selectedNodeId: "n-fraud-engine",
-			selectedEdgeId: "e-orch-fraud",
-			activeCanvasMode: "risk_controls",
+			selectedNodeId: "n-reconciler",
+			selectedEdgeId: "e-machine-reconciler",
+			activeCanvasMode: "operational",
 		};
 		const result = reconcilePerspectiveSwitch(ctx, "persp-architecture", graph);
 		expect(result.selectedNodeId).toBeNull();
@@ -547,20 +500,20 @@ describe("reconcilePerspectiveSwitch — shared context contract", () => {
 	it("preserves domain, capability, journey, process, and route context", () => {
 		const ctx = {
 			...baseCtx(),
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-payment-processing",
-			activeJourneyId: "j-open-savings",
-			activeProcessId: "proc-payment-auth",
-			activeStoryRouteId: "sr-payment-flow",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
+			activeJourneyId: "j-full-descent",
+			activeProcessId: "proc-perspective-switch",
+			activeStoryRouteId: "sr-full-descent",
 			activeWaypointIndex: 2,
 			routeState: "active" as const,
 		};
 		const result = reconcilePerspectiveSwitch(ctx, "persp-sequence", graph);
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
-		expect(result.activeJourneyId).toBe("j-open-savings");
-		expect(result.activeProcessId).toBe("proc-payment-auth");
-		expect(result.activeStoryRouteId).toBe("sr-payment-flow");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
+		expect(result.activeJourneyId).toBe("j-full-descent");
+		expect(result.activeProcessId).toBe("proc-perspective-switch");
+		expect(result.activeStoryRouteId).toBe("sr-full-descent");
 		expect(result.activeWaypointIndex).toBe(2);
 		expect(result.routeState).toBe("active");
 		expect(result.activePerspectiveId).toBe("persp-sequence");
@@ -573,7 +526,7 @@ describe("reconcileSequenceSwitch", () => {
 		const sequence = {
 			id: "seq-test",
 			label: "Test",
-			capabilityId: "cap-payment-processing",
+			capabilityId: "cap-state-reconciliation",
 			interfaceIds: [],
 			messageIds: [],
 			tags: [],
@@ -581,27 +534,27 @@ describe("reconcileSequenceSwitch", () => {
 		};
 		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
 		expect(result.activeSequenceId).toBe("seq-test");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
-		expect(result.activeDomainId).toBe("dom-payments");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
 	});
 
 	it("preserves compatible processId from sequence", () => {
 		const ctx = {
 			...baseCtx(),
-			activeProcessId: "proc-payment-auth",
+			activeProcessId: "proc-perspective-switch",
 		};
 		const sequence = {
 			id: "seq-test",
 			label: "Test",
-			capabilityId: "cap-payment-processing",
-			processId: "proc-payment-auth",
+			capabilityId: "cap-state-reconciliation",
+			processId: "proc-perspective-switch",
 			interfaceIds: [],
 			messageIds: [],
 			tags: [],
 			metadata: {},
 		};
 		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
-		expect(result.activeProcessId).toBe("proc-payment-auth");
+		expect(result.activeProcessId).toBe("proc-perspective-switch");
 	});
 
 	it("clears incompatible processId", () => {
@@ -612,15 +565,15 @@ describe("reconcileSequenceSwitch", () => {
 		const sequence = {
 			id: "seq-test",
 			label: "Test",
-			capabilityId: "cap-payment-processing",
-			processId: "proc-payment-auth",
+			capabilityId: "cap-state-reconciliation",
+			processId: "proc-perspective-switch",
 			interfaceIds: [],
 			messageIds: [],
 			tags: [],
 			metadata: {},
 		};
 		const result = reconcileSequenceSwitch(ctx, "seq-test", sequence, capabilities);
-		expect(result.activeProcessId).toBe("proc-payment-auth");
+		expect(result.activeProcessId).toBe("proc-perspective-switch");
 	});
 
 	it("does not force perspective switch", () => {
@@ -631,7 +584,7 @@ describe("reconcileSequenceSwitch", () => {
 		const sequence = {
 			id: "seq-test",
 			label: "Test",
-			capabilityId: "cap-payment-processing",
+			capabilityId: "cap-state-reconciliation",
 			interfaceIds: [],
 			messageIds: [],
 			tags: [],
@@ -647,12 +600,140 @@ describe("reconcileSequenceClear", () => {
 		const ctx = {
 			...baseCtx(),
 			activeSequenceId: "seq-test",
-			activeDomainId: "dom-payments",
-			activeCapabilityId: "cap-payment-processing",
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
 		};
 		const result = reconcileSequenceClear(ctx);
 		expect(result.activeSequenceId).toBeNull();
-		expect(result.activeDomainId).toBe("dom-payments");
-		expect(result.activeCapabilityId).toBe("cap-payment-processing");
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
+	});
+});
+
+// --- 0.6.0 reconciler additions ---
+
+const perspectiveSwitchStagesForReconciler = processStages
+	.filter((ps) => ps.processId === "proc-perspective-switch")
+	.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+
+describe("reconcileStageChange", () => {
+	it("sets activeStageIndex and updates focus targets", () => {
+		const ctx = {
+			...baseCtx(),
+			activeProcessId: "proc-perspective-switch",
+			activePerspectiveId: "persp-process",
+		};
+		const result = reconcileStageChange(ctx, 0, perspectiveSwitchStagesForReconciler, graph);
+		expect(result.activeStageIndex).toBe(0);
+		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
+		expect(result.activeFocusTargets[0]?.type).toBe("node");
+	});
+
+	it("updates focus targets when advancing to next stage", () => {
+		const ctx = {
+			...baseCtx(),
+			activeProcessId: "proc-perspective-switch",
+			activePerspectiveId: "persp-process",
+			activeStageIndex: 0,
+		};
+		const result = reconcileStageChange(ctx, 1, perspectiveSwitchStagesForReconciler, graph);
+		expect(result.activeStageIndex).toBe(1);
+		expect(result.activeFocusTargets.length).toBeGreaterThan(0);
+	});
+
+	it("returns unchanged context for invalid stage index", () => {
+		const ctx = {
+			...baseCtx(),
+			activeProcessId: "proc-perspective-switch",
+			activeStageIndex: 0,
+		};
+		const result = reconcileStageChange(ctx, 99, perspectiveSwitchStagesForReconciler, graph);
+		expect(result).toEqual(ctx);
+	});
+
+	it("preserves domain/capability/perspective", () => {
+		const ctx = {
+			...baseCtx(),
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
+			activePerspectiveId: "persp-process",
+			activeProcessId: "proc-perspective-switch",
+		};
+		const result = reconcileStageChange(ctx, 0, perspectiveSwitchStagesForReconciler, graph);
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
+		expect(result.activePerspectiveId).toBe("persp-process");
+	});
+
+	it("clears selected edge on stage change", () => {
+		const ctx = {
+			...baseCtx(),
+			activeProcessId: "proc-perspective-switch",
+			selectedEdgeId: "e-machine-reconciler",
+		};
+		const result = reconcileStageChange(ctx, 0, perspectiveSwitchStagesForReconciler, graph);
+		expect(result.selectedEdgeId).toBeNull();
+	});
+});
+
+describe("reconcileMessageChange", () => {
+	it("sets activeMessageIndex", () => {
+		const ctx = {
+			...baseCtx(),
+			activeSequenceId: "seq-capability-selection",
+			activePerspectiveId: "persp-sequence",
+		};
+		const result = reconcileMessageChange(ctx, 0);
+		expect(result.activeMessageIndex).toBe(0);
+	});
+
+	it("updates activeMessageIndex on advance", () => {
+		const ctx = {
+			...baseCtx(),
+			activeSequenceId: "seq-capability-selection",
+			activeMessageIndex: 0,
+		};
+		const result = reconcileMessageChange(ctx, 5);
+		expect(result.activeMessageIndex).toBe(5);
+	});
+
+	it("preserves all other context", () => {
+		const ctx = {
+			...baseCtx(),
+			activeDomainId: "dom-core-kernel",
+			activeCapabilityId: "cap-state-reconciliation",
+			activePerspectiveId: "persp-sequence",
+			activeSequenceId: "seq-capability-selection",
+			activeProcessId: "proc-perspective-switch",
+		};
+		const result = reconcileMessageChange(ctx, 3);
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activeCapabilityId).toBe("cap-state-reconciliation");
+		expect(result.activePerspectiveId).toBe("persp-sequence");
+		expect(result.activeSequenceId).toBe("seq-capability-selection");
+		expect(result.activeProcessId).toBe("proc-perspective-switch");
+		expect(result.activeMessageIndex).toBe(3);
+	});
+});
+
+// --- 0.7.0 reconciler additions ---
+
+describe("reconcileOrientationChange", () => {
+	it("sets activeOrientationIndex", () => {
+		const ctx = baseCtx();
+		const result = reconcileOrientationChange(ctx, 3);
+		expect(result.activeOrientationIndex).toBe(3);
+	});
+
+	it("preserves all other context", () => {
+		const ctx = {
+			...baseCtx(),
+			activeDomainId: "dom-core-kernel",
+			activePerspectiveId: "persp-orientation",
+		};
+		const result = reconcileOrientationChange(ctx, 5);
+		expect(result.activeDomainId).toBe("dom-core-kernel");
+		expect(result.activePerspectiveId).toBe("persp-orientation");
+		expect(result.activeOrientationIndex).toBe(5);
 	});
 });

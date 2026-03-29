@@ -46,6 +46,85 @@ function fuzzyMatch(text: string, query: string): number {
 	return 0;
 }
 
+function buildSearchItems(callbacks: {
+	onSelectDomain: (id: string) => void;
+	onSelectCapability: (id: string) => void;
+	onSelectNode: (id: string) => void;
+	onSelectProcess: (id: string) => void;
+	onSelectJourney: (id: string) => void;
+	onSelectSequence: (id: string) => void;
+	onStartRoute: (id: string) => void;
+}): SearchResult[] {
+	const items: SearchResult[] = [];
+
+	for (const d of seedDomains) {
+		items.push({
+			id: d.id,
+			label: d.label,
+			type: "domain",
+			action: () => callbacks.onSelectDomain(d.id),
+		});
+	}
+	for (const c of seedCapabilities) {
+		items.push({
+			id: c.id,
+			label: c.label,
+			type: "capability",
+			action: () => callbacks.onSelectCapability(c.id),
+		});
+	}
+	for (const n of seedNodes) {
+		items.push({
+			id: n.id,
+			label: n.label,
+			type: "node",
+			action: () => callbacks.onSelectNode(n.id),
+		});
+	}
+	for (const p of seedProviders) {
+		items.push({
+			id: p.id,
+			label: p.label,
+			type: "provider",
+			action: () => callbacks.onSelectNode(p.id),
+		});
+	}
+	for (const j of seedJourneys) {
+		items.push({
+			id: j.id,
+			label: j.label,
+			type: "journey",
+			action: () => callbacks.onSelectJourney(j.id),
+		});
+	}
+	for (const p of seedProcesses) {
+		items.push({
+			id: p.id,
+			label: p.label,
+			type: "process",
+			action: () => callbacks.onSelectProcess(p.id),
+		});
+	}
+	for (const s of seedSequences) {
+		items.push({
+			id: s.id,
+			label: s.label,
+			type: "sequence",
+			action: () => callbacks.onSelectSequence(s.id),
+		});
+	}
+	for (const r of seedStoryRoutes) {
+		items.push({
+			id: r.id,
+			label: r.title,
+			type: "route",
+			action: () => callbacks.onStartRoute(r.id),
+		});
+	}
+
+	return items;
+}
+
 export function SearchPalette({
 	open,
 	onClose,
@@ -70,65 +149,27 @@ export function SearchPalette({
 		}
 	}, [open]);
 
-	// Build all searchable items
-	const allItems = useMemo((): SearchResult[] => {
-		const items: SearchResult[] = [];
-
-		for (const d of seedDomains) {
-			items.push({ id: d.id, label: d.label, type: "domain", action: () => onSelectDomain(d.id) });
-		}
-		for (const c of seedCapabilities) {
-			items.push({
-				id: c.id,
-				label: c.label,
-				type: "capability",
-				action: () => onSelectCapability(c.id),
-			});
-		}
-		for (const n of seedNodes) {
-			items.push({ id: n.id, label: n.label, type: "node", action: () => onSelectNode(n.id) });
-		}
-		for (const p of seedProviders) {
-			items.push({ id: p.id, label: p.label, type: "provider", action: () => onSelectNode(p.id) });
-		}
-		for (const j of seedJourneys) {
-			items.push({
-				id: j.id,
-				label: j.label,
-				type: "journey",
-				action: () => onSelectJourney(j.id),
-			});
-		}
-		for (const p of seedProcesses) {
-			items.push({
-				id: p.id,
-				label: p.label,
-				type: "process",
-				action: () => onSelectProcess(p.id),
-			});
-		}
-		for (const s of seedSequences) {
-			items.push({
-				id: s.id,
-				label: s.label,
-				type: "sequence",
-				action: () => onSelectSequence(s.id),
-			});
-		}
-		for (const r of seedStoryRoutes) {
-			items.push({ id: r.id, label: r.title, type: "route", action: () => onStartRoute(r.id) });
-		}
-
-		return items;
-	}, [
-		onSelectDomain,
-		onSelectCapability,
-		onSelectNode,
-		onSelectProcess,
-		onSelectJourney,
-		onSelectSequence,
-		onStartRoute,
-	]);
+	const allItems = useMemo(
+		() =>
+			buildSearchItems({
+				onSelectDomain,
+				onSelectCapability,
+				onSelectNode,
+				onSelectProcess,
+				onSelectJourney,
+				onSelectSequence,
+				onStartRoute,
+			}),
+		[
+			onSelectDomain,
+			onSelectCapability,
+			onSelectNode,
+			onSelectProcess,
+			onSelectJourney,
+			onSelectSequence,
+			onStartRoute,
+		],
+	);
 
 	// Filter and score results
 	const results = useMemo(() => {

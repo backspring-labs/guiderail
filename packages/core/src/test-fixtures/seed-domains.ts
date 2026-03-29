@@ -1,0 +1,306 @@
+import { CapabilitySchema } from "../entities/capability.js";
+import type { Capability } from "../entities/capability.js";
+import { DomainSchema } from "../entities/domain.js";
+import type { Domain } from "../entities/domain.js";
+
+// --- Domains ---
+
+export const domains: Domain[] = [
+	{
+		id: "dom-core-kernel",
+		label: "Core Kernel",
+		description: "Headless state management — context machine, reconciler, navigation context",
+		tags: ["core", "state"],
+		metadata: { codeBoundary: "packages/core/src/context/" },
+	},
+	{
+		id: "dom-entity-model",
+		label: "Entity Model",
+		description: "Canonical domain schemas — Zod-validated entities with identity and provenance",
+		tags: ["core", "entities"],
+		metadata: { codeBoundary: "packages/core/src/entities/" },
+	},
+	{
+		id: "dom-graph",
+		label: "Graph",
+		description: "Terrain graph and queries — node/edge maps for topology traversal",
+		tags: ["core", "graph"],
+		metadata: { codeBoundary: "packages/core/src/graph/" },
+	},
+	{
+		id: "dom-content-pipeline",
+		label: "Content Pipeline",
+		description: "Loading, validation, provenance — parseContentBundle with Zod validation",
+		tags: ["core", "content"],
+		metadata: { codeBoundary: "packages/core/src/content/" },
+	},
+	{
+		id: "dom-canvas-rendering",
+		label: "Canvas Rendering",
+		description: "Perspective-specific visualization — layout engines and perspective provider",
+		tags: ["web", "rendering"],
+		metadata: { codeBoundary: "apps/web/src/hooks/ + apps/web/src/lib/" },
+	},
+	{
+		id: "dom-navigation",
+		label: "Navigation",
+		description:
+			"User navigation and discovery — left panel, breadcrumbs, search, perspective switching",
+		tags: ["web", "navigation"],
+		metadata: {
+			codeBoundary: "apps/web/src/components/navigation/ + apps/web/src/components/layout/",
+		},
+	},
+	{
+		id: "dom-guided-routes",
+		label: "Guided Routes",
+		description: "Authored walkthrough experiences — story routes, waypoints, stepper transport",
+		tags: ["web", "routes"],
+		metadata: { codeBoundary: "apps/web/src/components/route/ + stepper" },
+	},
+].map((d) => DomainSchema.parse(d));
+
+// --- Capabilities ---
+
+export const capabilities: Capability[] = [
+	// Core Kernel
+	{
+		id: "cap-context-machine",
+		domainId: "dom-core-kernel",
+		label: "Context Machine",
+		description: "XState state machine — single authority for all navigation state, 35 events",
+		nodeIds: ["n-context-machine"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["state", "xstate"],
+		metadata: { keyFile: "context.machine.ts" },
+	},
+	{
+		id: "cap-state-reconciliation",
+		domainId: "dom-core-kernel",
+		label: "State Reconciliation",
+		description:
+			"19 pure functions that enforce the shared context contract on every state transition",
+		nodeIds: ["n-reconciler"],
+		edgeIds: ["e-machine-reconciler"],
+		journeyIds: [],
+		tags: ["reconciler", "pure-functions"],
+		metadata: { keyFile: "reconciler.ts" },
+	},
+	{
+		id: "cap-navigation-context",
+		domainId: "dom-core-kernel",
+		label: "Navigation Context",
+		description: "Zod-validated navigation state schema — 18 fields, the shared context contract",
+		nodeIds: ["n-navigation-context"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["context", "zod"],
+		metadata: { keyFile: "navigation-context.ts" },
+	},
+	// Entity Model
+	{
+		id: "cap-schema-validation",
+		domainId: "dom-entity-model",
+		label: "Schema Validation",
+		description:
+			"Every entity validated at parse time via Zod — Domain, Node, Step, Sequence, etc.",
+		nodeIds: ["n-entities"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["zod", "validation"],
+		metadata: { keyFile: "entities/*.ts" },
+	},
+	{
+		id: "cap-entity-relationships",
+		domainId: "dom-entity-model",
+		label: "Entity Relationships",
+		description:
+			"Foreign keys linking entities across perspectives — capabilityId, domainId, journeyId",
+		nodeIds: ["n-entities"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["relationships", "foreign-keys"],
+	},
+	{
+		id: "cap-provenance-tracking",
+		domainId: "dom-entity-model",
+		label: "Provenance Tracking",
+		description: "ProvenanceRef on entities tracks source origin for traceability",
+		nodeIds: ["n-entities"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["provenance", "traceability"],
+		metadata: { keyFile: "provenance.ts" },
+	},
+	// Canvas Rendering
+	{
+		id: "cap-perspective-provider",
+		domainId: "dom-canvas-rendering",
+		label: "Perspective Provider",
+		description: "Routes kernel state to perspective-specific layout engines on every state change",
+		nodeIds: ["n-use-perspective-provider"],
+		edgeIds: [
+			"e-provider-bpmn",
+			"e-provider-journey",
+			"e-provider-landscape",
+			"e-provider-sequence",
+		],
+		journeyIds: [],
+		tags: ["rendering", "routing"],
+		metadata: { keyFile: "use-perspective-provider.ts" },
+	},
+	{
+		id: "cap-bpmn-layout",
+		domainId: "dom-canvas-rendering",
+		label: "BPMN Layout",
+		description: "Swim lane positioning with topological ordering for the Process perspective",
+		nodeIds: ["n-bpmn-layout"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["layout", "bpmn"],
+		metadata: { keyFile: "bpmn-layout.ts" },
+	},
+	{
+		id: "cap-journey-layout",
+		domainId: "dom-canvas-rendering",
+		label: "Journey Layout",
+		description:
+			"Step flow with branching (screen/modal/error/decision) for the Journey perspective",
+		nodeIds: ["n-journey-layout"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["layout", "journey"],
+		metadata: { keyFile: "journey-layout.ts" },
+	},
+	{
+		id: "cap-landscape-layout",
+		domainId: "dom-canvas-rendering",
+		label: "Landscape Layout",
+		description:
+			"3-column domain grid with capability tiles and actor entry points for the Landscape perspective",
+		nodeIds: ["n-landscape-layout"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["layout", "landscape"],
+		metadata: { keyFile: "landscape-layout.ts" },
+	},
+	{
+		id: "cap-sequence-layout",
+		domainId: "dom-canvas-rendering",
+		label: "Sequence Layout",
+		description:
+			"Lifeline diagram with interface headers and message arrows for the Sequence perspective",
+		nodeIds: ["n-sequence-layout"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["layout", "sequence"],
+		metadata: { keyFile: "sequence-layout.ts" },
+	},
+	{
+		id: "cap-canvas-mode-switching",
+		domainId: "dom-canvas-rendering",
+		label: "Canvas Mode Switching",
+		description:
+			"Same topology, different emphasis — Operational/Decision/Controls on Process, Capability/Providers on Landscape",
+		nodeIds: ["n-context-bar"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["canvas-modes", "switching"],
+		metadata: { keyFile: "ContextBar.tsx" },
+	},
+	// Navigation
+	{
+		id: "cap-left-panel",
+		domainId: "dom-navigation",
+		label: "Contextual Left Panel",
+		description: "7 collapsible sections scoped to primary selection with cascading filter",
+		nodeIds: ["n-left-panel"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["panel", "navigation"],
+		metadata: { keyFile: "LeftPanel.tsx" },
+	},
+	{
+		id: "cap-breadcrumb-trail",
+		domainId: "dom-navigation",
+		label: "Breadcrumb Trail",
+		description:
+			"Context path with domain > capability > journey and clear actions in the context bar",
+		nodeIds: ["n-context-bar"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["breadcrumb", "context"],
+		metadata: { keyFile: "ContextBar.tsx" },
+	},
+	{
+		id: "cap-search-palette",
+		domainId: "dom-navigation",
+		label: "Search Palette",
+		description: "Cmd+K fuzzy search across all entity types for rapid navigation",
+		nodeIds: ["n-search-palette"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["search", "palette"],
+		metadata: { keyFile: "SearchPalette.tsx" },
+	},
+	{
+		id: "cap-perspective-switching",
+		domainId: "dom-navigation",
+		label: "Perspective Switching",
+		description:
+			"7 tabs — switch means 'same moment, different lens' via the shared context contract",
+		nodeIds: ["n-app-shell"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["perspectives", "switching"],
+		metadata: { keyFile: "PerspectiveSwitcher.tsx" },
+	},
+	{
+		id: "cap-detail-panel",
+		domainId: "dom-navigation",
+		label: "Detail Panel",
+		description: "Entity detail with cross-navigation actions in the right panel",
+		nodeIds: ["n-app-shell"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["detail", "panel"],
+		metadata: { keyFile: "RightPanel.tsx" },
+	},
+	// Guided Routes
+	{
+		id: "cap-route-playback",
+		domainId: "dom-guided-routes",
+		label: "Route Playback",
+		description: "Waypoint progression with pause/resume and narrative overlay via StoryRouteBar",
+		nodeIds: ["n-story-route-bar"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["routes", "playback"],
+		metadata: { keyFile: "StoryRouteBar.tsx" },
+	},
+	{
+		id: "cap-stepper-transport",
+		domainId: "dom-guided-routes",
+		label: "Stepper Transport",
+		description:
+			"Transport controls + arrow keys for sequential content across Journey, Process, Sequence, and Orientation",
+		nodeIds: ["n-stepper-control"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["stepper", "transport"],
+		metadata: { keyFile: "StepperControl.tsx" },
+	},
+	{
+		id: "cap-waypoint-progression",
+		domainId: "dom-guided-routes",
+		label: "Waypoint Progression",
+		description:
+			"Each waypoint sets perspective, focus targets, and key message via reconcileWaypointChange",
+		nodeIds: ["n-reconciler"],
+		edgeIds: [],
+		journeyIds: [],
+		tags: ["waypoints", "progression"],
+		metadata: { keyFile: "reconciler.ts (reconcileWaypointChange)" },
+	},
+].map((d) => CapabilitySchema.parse(d));

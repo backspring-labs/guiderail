@@ -3,7 +3,7 @@ import {
 	seedControlPoints,
 	seedGraph,
 	seedJourneys,
-	seedPerspectives,
+	seedOrientationItems,
 	seedProcessStages,
 	seedProcesses,
 	seedProviderAssociations,
@@ -64,15 +64,19 @@ export function useInitializeContext() {
 			storyWaypoints: seedStoryWaypoints,
 			sequences: seedSequences,
 			controlPoints: seedControlPoints,
+			orientationItems: seedOrientationItems,
 		});
 
-		// Set the default perspective so nodes have positions on first render
-		const defaultPerspective = seedPerspectives[0];
-		if (defaultPerspective) {
-			actorRef.send({
-				type: "SWITCH_PERSPECTIVE",
-				perspectiveId: defaultPerspective.id,
-			});
+		// Set the default perspective so nodes have positions on first render.
+		// Orientation is the entry perspective — first item selected on first load.
+		actorRef.send({
+			type: "SWITCH_PERSPECTIVE",
+			perspectiveId: "persp-orientation",
+		});
+
+		// Select the first orientation item so the content panel renders immediately
+		if (seedOrientationItems.length > 0) {
+			actorRef.send({ type: "JUMP_TO_ORIENTATION", index: 0 });
 		}
 	}
 }

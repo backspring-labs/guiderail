@@ -293,6 +293,7 @@ export function reconcileProcessSwitch(
 	return {
 		...ctx,
 		activeProcessId: processId,
+		activeStageIndex: null,
 		activeFocusTargets: focusTargets,
 		viewportAnchor,
 	};
@@ -433,6 +434,7 @@ export function reconcileSequenceSwitch(
 	return {
 		...ctx,
 		activeSequenceId: sequenceId,
+		activeMessageIndex: null,
 		activeDomainId,
 		activeCapabilityId,
 		activeJourneyId,
@@ -447,5 +449,63 @@ export function reconcileSequenceClear(ctx: NavigationContext): NavigationContex
 	return {
 		...ctx,
 		activeSequenceId: null,
+		activeMessageIndex: null,
+	};
+}
+
+/**
+ * 18. Stage change: update activeStageIndex, set focus targets to stage's nodeIds.
+ */
+export function reconcileStageChange(
+	ctx: NavigationContext,
+	stageIndex: number,
+	stages: ProcessStage[],
+	graph: TerrainGraph,
+): NavigationContext {
+	const stage = stages.find((s) => s.sequenceNumber === stageIndex);
+	if (!stage) return ctx;
+
+	const focusTargets: FocusTarget[] = stage.nodeIds.map((nodeId) => ({
+		type: "node" as const,
+		targetId: nodeId,
+	}));
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const viewportAnchor = primaryNode
+		? viewportForNode(primaryNode, ctx.activePerspectiveId, graph, ctx.viewportAnchor.zoom)
+		: ctx.viewportAnchor;
+
+	return {
+		...ctx,
+		activeStageIndex: stageIndex,
+		activeFocusTargets: focusTargets,
+		selectedNodeId: primaryNode,
+		selectedEdgeId: null,
+		viewportAnchor,
+	};
+}
+
+/**
+ * 19. Message change: update activeMessageIndex, highlight the current message.
+ */
+export function reconcileMessageChange(
+	ctx: NavigationContext,
+	messageIndex: number,
+): NavigationContext {
+	return {
+		...ctx,
+		activeMessageIndex: messageIndex,
+	};
+}
+
+/**
+ * 20. Orientation change: update activeOrientationIndex for concept deck stepper.
+ */
+export function reconcileOrientationChange(
+	ctx: NavigationContext,
+	orientationIndex: number,
+): NavigationContext {
+	return {
+		...ctx,
+		activeOrientationIndex: orientationIndex,
 	};
 }

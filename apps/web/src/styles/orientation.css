@@ -1,0 +1,202 @@
+/* --- Orientation Perspective: Concept Deck --- */
+
+/* Full canvas overlay — centers the card */
+.orientation-deck {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	justify-content: center;
+	z-index: 4;
+	padding: 32px 32px 0;
+	background: var(--color-bg);
+}
+
+/* The card: tabs left, content right — extends to bottom edge */
+.orientation-deck__card {
+	display: flex;
+	max-width: 1100px;
+	width: 100%;
+	height: 100%;
+	background: var(--color-bg-panel);
+	border: 1px solid var(--color-border);
+	border-bottom: none;
+	border-radius: 10px 10px 0 0;
+	overflow: hidden;
+}
+
+/* Left tab column */
+.orientation-deck__tabs {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	flex-shrink: 0;
+	width: 240px;
+	border-right: 1px solid var(--color-border);
+	background: var(--color-bg);
+	padding: 0;
+}
+
+.orientation-deck__tab {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	border: none;
+	background: transparent;
+	color: var(--color-text-secondary);
+	font-size: var(--font-size-base);
+	text-align: left;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+	border-left: 3px solid transparent;
+}
+
+.orientation-deck__tab:hover {
+	background: var(--color-bg-secondary);
+	color: var(--color-text);
+}
+
+.orientation-deck__tab--active {
+	color: var(--color-text);
+	background: var(--color-bg-panel);
+	border-left-color: var(--color-accent);
+}
+
+.orientation-deck__tab:first-child {
+	border-top-left-radius: 10px;
+}
+
+.orientation-deck__tab-num {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--color-bg-secondary);
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	font-weight: 600;
+	flex-shrink: 0;
+}
+
+.orientation-deck__tab--active .orientation-deck__tab-num {
+	background: var(--color-accent);
+	color: white;
+}
+
+.orientation-deck__tab-label {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Right content area */
+.orientation-deck__content {
+	flex: 1;
+	padding: 32px 40px;
+	overflow-y: auto;
+}
+
+/* Body text with markdown rendering */
+.orientation-deck__body {
+	font-size: 1rem;
+	line-height: 1.7;
+	color: var(--color-text);
+	margin-bottom: 24px;
+}
+
+.orientation-deck__body p {
+	margin-bottom: 12px;
+}
+
+.orientation-deck__body ul,
+.orientation-deck__body ol {
+	margin: 8px 0 16px 24px;
+	padding: 0;
+}
+
+.orientation-deck__body li {
+	margin-bottom: 6px;
+	padding-left: 4px;
+}
+
+.orientation-deck__body ul {
+	list-style: disc;
+}
+
+.orientation-deck__body ol {
+	list-style: decimal;
+}
+
+.orientation-deck__body blockquote {
+	margin: 12px 0;
+	padding: 8px 16px;
+	border-left: 3px solid var(--color-accent);
+	color: var(--color-text-secondary);
+	font-style: italic;
+}
+
+.orientation-deck__body strong {
+	color: var(--color-text);
+	font-weight: 600;
+}
+
+/* Terms section */
+.orientation-deck__section-heading {
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin-bottom: 10px;
+}
+
+.orientation-deck__term-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 20px;
+}
+
+.orientation-deck__term-entry {
+	padding: 8px 12px;
+	background: var(--color-bg);
+	border-radius: 4px;
+	border-left: 3px solid var(--color-accent);
+}
+
+.orientation-deck__term {
+	font-weight: 600;
+	color: var(--color-text);
+	font-size: var(--font-size-sm);
+	margin-bottom: 2px;
+}
+
+.orientation-deck__definition {
+	font-size: var(--font-size-sm);
+	line-height: 1.4;
+	color: var(--color-text-secondary);
+}
+
+/* Links */
+.orientation-deck__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.orientation-deck__link {
+	padding: 6px 14px;
+	background: var(--color-bg);
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	color: var(--color-text);
+	font-size: var(--font-size-sm);
+	cursor: pointer;
+	transition: border-color 0.15s;
+}
+
+.orientation-deck__link:hover {
+	border-color: var(--color-accent);
+}

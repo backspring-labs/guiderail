@@ -2,6 +2,7 @@ import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
 import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
 import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-layout.js";
 import { computeLandscapeLayout } from "@/lib/landscape-layout.js";
+import { computeOrientationLayout } from "@/lib/orientation-layout.js";
 import {
 	getHighlightedEdgeIds,
 	getHighlightedNodeIds,
@@ -21,6 +22,7 @@ import {
 	seedJourneys,
 	seedMessages,
 	seedNodes,
+	seedOrientationItems,
 	seedPerspectives,
 	seedProcessStages,
 	seedProviderAssociations,
@@ -50,6 +52,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const isSequencePerspective = perspectiveType === "sequence";
 	const isJourneyPerspective = perspectiveType === "journey";
 	const isLandscapePerspective = perspectiveType === "landscape";
+	const isOrientationPerspective = perspectiveType === "orientation";
 
 	// Compute ELK layout when perspective changes (terrain perspectives only)
 	useEffect(() => {
@@ -58,7 +61,8 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			isProcessPerspective ||
 			isSequencePerspective ||
 			isJourneyPerspective ||
-			isLandscapePerspective
+			isLandscapePerspective ||
+			isOrientationPerspective
 		)
 			return;
 		if (nav.activePerspectiveId === lastPerspectiveRef.current && elkPositions.size > 0) return;
@@ -89,6 +93,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		isSequencePerspective,
 		isJourneyPerspective,
 		isLandscapePerspective,
+		isOrientationPerspective,
 		perspectiveType,
 	]);
 
@@ -130,6 +135,12 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		return computeJourneyPickerLayout(seedJourneys);
 	}, [isJourneyPerspective, nav.activeJourneyId]);
 
+	// Orientation layout (synchronous)
+	const orientationLayout = useMemo(() => {
+		if (!isOrientationPerspective) return null;
+		return computeOrientationLayout(seedOrientationItems);
+	}, [isOrientationPerspective]);
+
 	// Landscape layout (synchronous)
 	const landscapeLayout = useMemo(() => {
 		if (!isLandscapePerspective) return null;
@@ -146,31 +157,48 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const rfNodes = useMemo(() => {
 		if (!graph) return [];
 
-		// Process perspective: render BPMN nodes
+		// Orientation perspective: render agenda nodes with active highlighting
+		if (isOrientationPerspective && orientationLayout) {
+			return buildOrientationNodes(nav, orientationLayout.nodes);
+		}
+
+		// Process perspective: render BPMN nodes with stage highlighting
 		if (isProcessPerspective && bpmnLayout) {
 			return buildBpmnNodes(nav, bpmnLayout.positions);
 		}
 
-		// Sequence perspective: render lifeline + message nodes with selection state
+		// Sequence perspective: render lifeline + message nodes with selection + stepper state
 		if (isSequencePerspective && sequenceLayout) {
 			const selectedId = nav.selectedNodeId;
 			const isLifelineSelected = selectedId?.startsWith("lifeline-") ?? false;
+			const activeIdx = nav.activeMessageIndex;
 			return sequenceLayout.nodes.map((node) => {
 				const isSelected = node.id === selectedId;
+				const data = node.data as Record<string, unknown>;
+				const isActive =
+					node.type === "sequence_message" &&
+					activeIdx != null &&
+					data.sequenceNumber === activeIdx;
 				if (node.type === "sequence_message" && isLifelineSelected) {
 					return {
 						...node,
 						selected: isSelected,
-						data: { ...node.data, selectedLifelineId: selectedId },
+						data: { ...data, selectedLifelineId: selectedId, isActive },
 					};
 				}
-				return { ...node, selected: isSelected };
+				return { ...node, selected: isSelected, data: { ...data, isActive } };
 			});
 		}
 
-		// Journey perspective: render step nodes or journey picker
+		// Journey perspective: render step nodes with stepper highlighting
 		if (isJourneyPerspective && journeyLayout) {
-			return journeyLayout.nodes;
+			const activeIdx = nav.activeStepIndex;
+			return journeyLayout.nodes.map((node) => {
+				const data = node.data as Record<string, unknown>;
+				const isActive =
+					node.type === "journey_step" && activeIdx != null && data.sequenceNumber === activeIdx;
+				return { ...node, data: { ...data, isActive } };
+			});
 		}
 
 		// Landscape perspective: render capability map with domain/capability selection
@@ -190,12 +218,19 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		sequenceLayout,
 		isJourneyPerspective,
 		journeyLayout,
+		isOrientationPerspective,
+		orientationLayout,
 		isLandscapePerspective,
 		landscapeLayout,
 	]);
 
 	const rfEdges = useMemo(() => {
 		if (!graph) return [];
+
+		// Orientation perspective: no edges
+		if (isOrientationPerspective) {
+			return [];
+		}
 
 		// Process perspective: render BPMN edges
 		if (isProcessPerspective) {
@@ -222,6 +257,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	}, [
 		nav,
 		graph,
+		isOrientationPerspective,
 		isProcessPerspective,
 		isSequencePerspective,
 		isJourneyPerspective,
@@ -418,6 +454,23 @@ function resolveControlIndicators(terrainNodeId: string | undefined) {
 			severity: cp.severity,
 			status: cp.status,
 		}));
+}
+
+function buildOrientationNodes(
+	nav: NavigationContext,
+	nodes: Array<{
+		id: string;
+		type: string;
+		position: { x: number; y: number };
+		draggable: boolean;
+		data: { sequenceNumber: number; [key: string]: unknown };
+	}>,
+) {
+	const activeIdx = nav.activeOrientationIndex;
+	return nodes.map((node) => {
+		const isActive = activeIdx != null && node.data.sequenceNumber === activeIdx;
+		return { ...node, data: { ...node.data, isActive } };
+	});
 }
 
 function resolveProviderNames(capabilityId: string): string[] {

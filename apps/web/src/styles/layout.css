@@ -28,9 +28,9 @@
 
 /* Top Bar */
 .top-bar {
-	display: flex;
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
 	align-items: center;
-	gap: 16px;
 	height: var(--top-bar-height);
 	padding: 0 16px;
 	background: var(--color-bg-panel);
@@ -38,11 +38,57 @@
 	flex-shrink: 0;
 }
 
+.top-bar__left {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.top-bar__right {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
 .top-bar__title {
 	font-size: var(--font-size-lg);
 	font-weight: 600;
 	color: var(--color-text);
-	margin-right: auto;
+}
+
+.top-bar__search {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 12px;
+	min-width: 200px;
+	height: 30px;
+	border: 1px solid var(--color-border);
+	border-radius: 6px;
+	background: var(--color-bg);
+	cursor: pointer;
+	transition: border-color 0.15s ease;
+}
+
+.top-bar__search:hover {
+	border-color: var(--color-text-secondary);
+}
+
+.top-bar__search-text {
+	font-size: var(--font-size-sm);
+	color: var(--color-text-secondary);
+	flex: 1;
+}
+
+.top-bar__search-hint {
+	font-size: 11px;
+	color: var(--color-text-secondary);
+	padding: 1px 5px;
+	border: 1px solid var(--color-border);
+	border-radius: 4px;
+	background: var(--color-bg-panel);
+	line-height: 1.2;
 }
 
 .top-bar__mode-badge {

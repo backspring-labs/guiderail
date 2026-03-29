@@ -8,6 +8,7 @@ import { LandscapeActorNode } from "./LandscapeActorNode.js";
 import { LandscapeCapabilityNode } from "./LandscapeCapabilityNode.js";
 import { LandscapeDomainNode } from "./LandscapeDomainNode.js";
 import { LifelineNode } from "./LifelineNode.js";
+import { OrientationItemNode } from "./OrientationItemNode.js";
 import { ScreenNode } from "./ScreenNode.js";
 import { SequenceMessageNode } from "./SequenceMessageNode.js";
 import { SequencePickerNode } from "./SequencePickerNode.js";
@@ -30,4 +31,5 @@ export const nodeTypes = {
 	landscape_capability: LandscapeCapabilityNode,
 	landscape_actor: LandscapeActorNode,
 	sequence_picker: SequencePickerNode,
+	orientation_item: OrientationItemNode,
 };

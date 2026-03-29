@@ -93,6 +93,9 @@ export type { InterfaceProtocol, Interface } from "./interface.js";
 export { MessageTypeSchema, MessageSchema } from "./message.js";
 export type { MessageType, Message } from "./message.js";
 
+export { OrientationItemSchema } from "./orientation-item.js";
+export type { OrientationItem } from "./orientation-item.js";
+
 export {
 	ControlSeveritySchema,
 	ControlTypeSchema,

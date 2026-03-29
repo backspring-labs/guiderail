@@ -3,6 +3,8 @@ import {
 	seedCapabilities,
 	seedDomains,
 	seedJourneys,
+	seedNodes,
+	seedProcessStages,
 	seedProcesses,
 	seedProviderAssociations,
 	seedProviders,
@@ -26,6 +28,7 @@ interface LeftPanelProps {
 	onSelectProcess: (processId: string) => void;
 	onSelectSequence: (sequenceId: string) => void;
 	onStartRoute: (routeId: string) => void;
+	onSelectNode: (nodeId: string) => void;
 	onClearDomain: () => void;
 }
 
@@ -79,6 +82,9 @@ export function LeftPanel(props: LeftPanelProps) {
 		: props.activeCapabilityId
 			? resolveProviders(props.activeCapabilityId, "")
 			: [];
+	const systemItems = isFiltering
+		? seedNodes.filter((n) => matchesFilter(n.label))
+		: resolveSystemNodes(props.activeProcessId, props.activeCapabilityId);
 	const guideItems = seedStoryRoutes.filter((r) => matchesFilter(r.title));
 
 	return (
@@ -181,7 +187,27 @@ export function LeftPanel(props: LeftPanelProps) {
 						forceExpanded={isFiltering}
 					>
 						{providerItems.map((p) => (
-							<SectionItem key={p.id} label={p.label} active={false} onClick={() => {}} />
+							<SectionItem
+								key={p.id}
+								label={p.label}
+								active={false}
+								onClick={() => props.onSelectNode(p.id)}
+							/>
+						))}
+					</CollapsibleSection>
+
+					<CollapsibleSection
+						label="Systems"
+						count={systemItems.length}
+						forceExpanded={isFiltering}
+					>
+						{systemItems.map((n) => (
+							<SectionItem
+								key={n.id}
+								label={n.label}
+								active={false}
+								onClick={() => props.onSelectNode(n.id)}
+							/>
 						))}
 					</CollapsibleSection>
 				</div>
@@ -233,4 +259,23 @@ function resolveProviders(capabilityId: string, filterLower: string) {
 	return seedProviders
 		.filter((p) => associationProviderIds.includes(p.id))
 		.filter((p) => !filterLower || p.label.toLowerCase().includes(filterLower));
+}
+
+function resolveSystemNodes(activeProcessId: string | null, activeCapabilityId: string | null) {
+	if (activeProcessId) {
+		const stageNodeIds = new Set(
+			seedProcessStages.filter((s) => s.processId === activeProcessId).flatMap((s) => s.nodeIds),
+		);
+		return seedNodes.filter((n) => stageNodeIds.has(n.id));
+	}
+	if (activeCapabilityId) {
+		const processIds = seedProcesses
+			.filter((p) => p.capabilityIds.includes(activeCapabilityId))
+			.map((p) => p.id);
+		const stageNodeIds = new Set(
+			seedProcessStages.filter((s) => processIds.includes(s.processId)).flatMap((s) => s.nodeIds),
+		);
+		return seedNodes.filter((n) => stageNodeIds.has(n.id));
+	}
+	return [];
 }

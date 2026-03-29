@@ -30,6 +30,11 @@ export const NavigationContextSchema = z.object({
 	// 0.4.0 additions
 	activeCanvasMode: z.string().nullable().default(null),
 	activeSequenceId: z.string().nullable().default(null),
+	// 0.6.0 additions — stepper indices for Process and Sequence perspectives
+	activeStageIndex: z.number().int().nullable().default(null),
+	activeMessageIndex: z.number().int().nullable().default(null),
+	// 0.7.0 additions — Orientation perspective stepper
+	activeOrientationIndex: z.number().int().nullable().default(null),
 });
 
 export type NavigationContext = z.infer<typeof NavigationContextSchema>;
@@ -54,5 +59,8 @@ export function createInitialNavigationContext(perspectiveId: string): Navigatio
 		routeState: "inactive",
 		activeCanvasMode: null,
 		activeSequenceId: null,
+		activeStageIndex: null,
+		activeMessageIndex: null,
+		activeOrientationIndex: null,
 	};
 }

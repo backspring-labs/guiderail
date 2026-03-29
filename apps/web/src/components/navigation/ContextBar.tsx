@@ -89,28 +89,19 @@ interface BreadcrumbTrailProps {
 	onClearCapability: () => void;
 }
 
+function findById<T extends { id: string }>(items: T[], id: string | null): T | null {
+	if (!id) return null;
+	return items.find((item) => item.id === id) ?? null;
+}
+
 function BreadcrumbTrail(props: BreadcrumbTrailProps) {
-	const domain = props.activeDomainId
-		? seedDomains.find((d) => d.id === props.activeDomainId)
-		: null;
-	const capability = props.activeCapabilityId
-		? seedCapabilities.find((c) => c.id === props.activeCapabilityId)
-		: null;
-	const journey = props.activeJourneyId
-		? seedJourneys.find((j) => j.id === props.activeJourneyId)
-		: null;
-	const valueStream = props.activeValueStreamId
-		? seedValueStreams.find((vs) => vs.id === props.activeValueStreamId)
-		: null;
-	const process = props.activeProcessId
-		? seedProcesses.find((p) => p.id === props.activeProcessId)
-		: null;
-	const sequence = props.activeSequenceId
-		? seedSequences.find((s) => s.id === props.activeSequenceId)
-		: null;
-	const storyRoute = props.activeStoryRouteId
-		? seedStoryRoutes.find((sr) => sr.id === props.activeStoryRouteId)
-		: null;
+	const domain = findById(seedDomains, props.activeDomainId);
+	const capability = findById(seedCapabilities, props.activeCapabilityId);
+	const journey = findById(seedJourneys, props.activeJourneyId);
+	const valueStream = findById(seedValueStreams, props.activeValueStreamId);
+	const process = findById(seedProcesses, props.activeProcessId);
+	const sequence = findById(seedSequences, props.activeSequenceId);
+	const storyRoute = findById(seedStoryRoutes, props.activeStoryRouteId);
 
 	return (
 		<div className="context-bar__breadcrumb">

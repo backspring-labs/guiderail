@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const PerspectiveTypeSchema = z.enum([
+	"orientation",
 	"landscape",
 	"journey",
 	"process",

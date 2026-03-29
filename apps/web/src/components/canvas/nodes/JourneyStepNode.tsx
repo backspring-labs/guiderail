@@ -27,12 +27,14 @@ const STEP_TYPE_ICONS: Record<string, string> = {
 };
 
 export function JourneyStepNode({ data, selected }: JourneyStepNodeProps) {
+	const isActive = (data as Record<string, unknown>).isActive === true;
 	const selectedClass = selected ? "journey-step--selected" : "";
+	const activeClass = isActive ? "journey-step--active" : "";
 	const actorClass = data.actor === "Customer" ? "journey-step--customer" : "journey-step--system";
 	const typeClass = `journey-step--${data.stepType}`;
 
 	return (
-		<div className={`journey-step ${actorClass} ${typeClass} ${selectedClass}`}>
+		<div className={`journey-step ${actorClass} ${typeClass} ${selectedClass} ${activeClass}`}>
 			<div className={`journey-step__seq journey-step__seq--${data.stepType}`}>
 				{STEP_TYPE_ICONS[data.stepType] ?? data.sequenceNumber + 1}
 			</div>

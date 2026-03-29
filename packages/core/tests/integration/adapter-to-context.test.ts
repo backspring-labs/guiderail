@@ -30,13 +30,13 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		expect(artifacts.length).toBeGreaterThan(0);
 
 		const domainManifests = await adapter.listDomains();
-		expect(domainManifests.length).toBe(9);
+		expect(domainManifests.length).toBe(7);
 
 		const capabilityManifests = await adapter.listCapabilities();
-		expect(capabilityManifests.length).toBe(16);
+		expect(capabilityManifests.length).toBe(20);
 
 		const entityManifests = await adapter.listEntities();
-		expect(entityManifests.length).toBe(48);
+		expect(entityManifests.length).toBe(24);
 
 		const researchManifests = await adapter.listResearch();
 		expect(researchManifests.length).toBeGreaterThan(0);
@@ -45,34 +45,34 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		const normalizer = new MockNormalizer(connection.sourceId);
 
 		const normalizedDomains = normalizer.normalizeDomains(domains);
-		expect(normalizedDomains.length).toBe(9);
+		expect(normalizedDomains.length).toBe(7);
 
 		const normalizedCapabilities = normalizer.normalizeCapabilities(capabilities);
-		expect(normalizedCapabilities.length).toBe(16);
+		expect(normalizedCapabilities.length).toBe(20);
 
 		const normalizedNodes = normalizer.normalizeNodes(nodes);
-		expect(normalizedNodes.length).toBe(48);
+		expect(normalizedNodes.length).toBe(24);
 
 		const normalizedEdges = normalizer.normalizeEdges(edges);
-		expect(normalizedEdges.length).toBe(45);
+		expect(normalizedEdges.length).toBe(25);
 
 		const normalizedJourneys = normalizer.normalizeJourneys(journeys);
-		expect(normalizedJourneys.length).toBe(1);
+		expect(normalizedJourneys.length).toBe(3);
 
 		// 4. Verify provenance can be resolved
 		const prov = normalizer.resolveProvenance(
 			{ id: normalizedDomains[0]?.id ?? "" },
-			"domains/customer.yaml",
+			"domains/core-kernel.yaml",
 			"root",
 		);
 		expect(prov.sourceId).toBe("mock-source-1");
-		expect(prov.sourceFile).toBe("domains/customer.yaml");
+		expect(prov.sourceFile).toBe("domains/core-kernel.yaml");
 		expect(prov.confidence).toBe("high");
 
 		// 5. Create graph from normalized entities
 		const graph = createGraph(normalizedNodes, normalizedEdges);
-		expect(graph.nodes.size).toBe(48);
-		expect(graph.edges.size).toBe(45);
+		expect(graph.nodes.size).toBe(24);
+		expect(graph.edges.size).toBe(25);
 
 		// 6. Initialize context machine with the graph
 		const actor = createActor(contextMachine).start();
@@ -86,16 +86,15 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		expect(actor.getSnapshot().value).toBe("ready");
 
 		// 7. Navigate: domain → capability → journey
-		actor.send({ type: "SELECT_DOMAIN", domainId: "dom-customer" });
-		expect(nav(actor).activeDomainId).toBe("dom-customer");
+		actor.send({ type: "SELECT_DOMAIN", domainId: "dom-core-kernel" });
+		expect(nav(actor).activeDomainId).toBe("dom-core-kernel");
 
-		actor.send({ type: "SELECT_CAPABILITY", capabilityId: "cap-onboarding" });
-		expect(nav(actor).activeCapabilityId).toBe("cap-onboarding");
+		actor.send({ type: "SELECT_CAPABILITY", capabilityId: "cap-context-machine" });
+		expect(nav(actor).activeCapabilityId).toBe("cap-context-machine");
 
-		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-open-savings" });
-		expect(nav(actor).activeJourneyId).toBe("j-open-savings");
+		actor.send({ type: "SELECT_JOURNEY", journeyId: "j-full-descent" });
+		expect(nav(actor).activeJourneyId).toBe("j-full-descent");
 		expect(nav(actor).activeStepIndex).toBe(0);
-		expect(nav(actor).activeSceneId).toBe("sc-1");
 
 		// 8. Step through and verify context sync
 		actor.send({ type: "STEP_FORWARD" });
@@ -104,14 +103,9 @@ describe("End-to-end: adapter → normalizer → graph → context", () => {
 		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-architecture" });
 		expect(nav(actor).activePerspectiveId).toBe("persp-architecture");
 		expect(nav(actor).activeStepIndex).toBe(1);
-		expect(nav(actor).activeDomainId).toBe("dom-customer");
+		expect(nav(actor).activeDomainId).toBe("dom-core-kernel");
 
-		// 9. Resolve evidence links from adapter for a node on the path
-		const links = await adapter.resolveLinks("n-identity-svc");
-		expect(links.length).toBeGreaterThan(0);
-		expect(links[0]?.title).toBe("KYC Policy Requirements");
-
-		// 10. Disconnect
+		// 9. Disconnect
 		await adapter.disconnect();
 	});
 });

@@ -11,9 +11,6 @@ import {
 	getNodesForLayer,
 	getPathNodes,
 	getProcessesForCapability,
-	getProvidersForCapability,
-	getProvidersForValueStream,
-	getValueStreamsForDomain,
 } from "../../src/graph/index.js";
 import { bfsTraverse } from "../../src/graph/index.js";
 import { filterGraph, filterNodesByTags, filterNodesByType } from "../../src/graph/index.js";
@@ -24,28 +21,26 @@ import {
 	layers,
 	nodes,
 	processes,
-	providerAssociations,
 	steps,
-	valueStreams,
 } from "../../src/test-fixtures/index.js";
 
 const graph = createGraph(nodes, edges);
 
 describe("createGraph", () => {
 	it("creates a graph with correct node count", () => {
-		expect(graph.nodes.size).toBe(48);
+		expect(graph.nodes.size).toBe(24);
 	});
 
 	it("creates a graph with correct edge count", () => {
-		expect(graph.edges.size).toBe(45);
+		expect(graph.edges.size).toBe(25);
 	});
 });
 
 describe("getNode / getEdge", () => {
 	it("retrieves a node by id", () => {
-		const node = getNode(graph, "n-customer");
+		const node = getNode(graph, "n-context-machine");
 		expect(node).toBeDefined();
-		expect(node?.label).toBe("Customer");
+		expect(node?.label).toBe("Context Machine");
 	});
 
 	it("returns undefined for missing node", () => {
@@ -53,7 +48,7 @@ describe("getNode / getEdge", () => {
 	});
 
 	it("retrieves an edge by id", () => {
-		const edge = getEdge(graph, "e-cust-app");
+		const edge = getEdge(graph, "e-user-shell");
 		expect(edge).toBeDefined();
 		expect(edge?.type).toBe("user_interaction");
 	});
@@ -61,48 +56,47 @@ describe("getNode / getEdge", () => {
 
 describe("getNeighbors", () => {
 	it("returns outbound neighbors", () => {
-		const neighbors = getNeighbors(graph, "n-api-gateway", "out");
+		const neighbors = getNeighbors(graph, "n-app-shell", "out");
 		const ids = neighbors.map((n) => n.id);
-		expect(ids).toContain("n-identity-svc");
-		expect(ids).toContain("n-account-svc");
-		expect(ids).toContain("n-payment-orch");
-		expect(ids).not.toContain("n-mobile-app");
+		expect(ids).toContain("n-use-context-machine");
+		expect(ids).toContain("n-use-perspective-provider");
+		expect(ids).toContain("n-left-panel");
 	});
 
 	it("returns inbound neighbors", () => {
-		const neighbors = getNeighbors(graph, "n-api-gateway", "in");
+		const neighbors = getNeighbors(graph, "n-app-shell", "in");
 		const ids = neighbors.map((n) => n.id);
-		expect(ids).toContain("n-mobile-app");
-		expect(ids).not.toContain("n-identity-svc");
+		expect(ids).toContain("n-user");
 	});
 
 	it("returns both directions by default", () => {
-		const neighbors = getNeighbors(graph, "n-api-gateway");
+		const neighbors = getNeighbors(graph, "n-app-shell");
 		const ids = neighbors.map((n) => n.id);
-		expect(ids).toContain("n-mobile-app");
-		expect(ids).toContain("n-identity-svc");
+		expect(ids).toContain("n-user");
+		expect(ids).toContain("n-use-context-machine");
 	});
 });
 
 describe("getEdgesForNode", () => {
 	it("returns outbound edges", () => {
-		const result = getEdgesForNode(graph, "n-account-svc", "out");
-		expect(result.length).toBe(2);
-		const types = result.map((e) => e.type);
-		expect(types).toContain("ledger_posting");
-		expect(types).toContain("event");
+		const result = getEdgesForNode(graph, "n-use-perspective-provider", "out");
+		expect(result.length).toBe(4);
+		const targets = result.map((e) => e.targetNodeId);
+		expect(targets).toContain("n-bpmn-layout");
+		expect(targets).toContain("n-journey-layout");
 	});
 
 	it("returns inbound edges", () => {
-		const result = getEdgesForNode(graph, "n-core-ledger", "in");
-		expect(result.length).toBe(3);
+		const result = getEdgesForNode(graph, "n-reconciler", "in");
+		expect(result.length).toBe(1);
+		expect(result[0]?.sourceNodeId).toBe("n-context-machine");
 	});
 });
 
 describe("filterNodes", () => {
 	it("filters by type", () => {
 		const services = filterNodes(graph, (n) => n.type === "service");
-		expect(services.length).toBe(26);
+		expect(services.length).toBe(19);
 	});
 
 	it("filters by tag", () => {
@@ -112,32 +106,30 @@ describe("filterNodes", () => {
 });
 
 describe("getNodesForCapability", () => {
-	it("returns correct nodes for onboarding capability", () => {
-		const cap = capabilities.find((c) => c.id === "cap-onboarding");
+	it("returns correct nodes for context machine capability", () => {
+		const cap = capabilities.find((c) => c.id === "cap-context-machine");
 		expect(cap).toBeDefined();
 		if (!cap) return;
 
 		const result = getNodesForCapability(graph, cap);
 		const ids = result.map((n) => n.id);
-		expect(ids).toContain("n-customer");
-		expect(ids).toContain("n-identity-svc");
-		expect(ids).toContain("n-risk-svc");
-		expect(ids).not.toContain("n-core-ledger");
+		expect(ids).toContain("n-context-machine");
 	});
 });
 
 describe("getCapabilitiesForDomain", () => {
-	it("returns capabilities for Customer domain", () => {
-		const result = getCapabilitiesForDomain("dom-customer", capabilities);
-		expect(result.length).toBe(2);
+	it("returns capabilities for Core Kernel domain", () => {
+		const result = getCapabilitiesForDomain("dom-core-kernel", capabilities);
+		expect(result.length).toBe(3);
 		const labels = result.map((c) => c.label);
-		expect(labels).toContain("Customer Onboarding");
-		expect(labels).toContain("Authentication");
+		expect(labels).toContain("Context Machine");
+		expect(labels).toContain("State Reconciliation");
+		expect(labels).toContain("Navigation Context");
 	});
 
-	it("returns capabilities for Payments domain", () => {
-		const result = getCapabilitiesForDomain("dom-payments", capabilities);
-		expect(result.length).toBe(2);
+	it("returns capabilities for Canvas Rendering domain", () => {
+		const result = getCapabilitiesForDomain("dom-canvas-rendering", capabilities);
+		expect(result.length).toBe(6);
 	});
 
 	it("returns empty for unknown domain", () => {
@@ -152,7 +144,7 @@ describe("getNodesForLayer", () => {
 		if (!defaultLayer) return;
 
 		const result = getNodesForLayer(graph, defaultLayer);
-		expect(result.length).toBe(48);
+		expect(result.length).toBe(24);
 	});
 
 	it("filters by eligible types for process layer", () => {
@@ -175,22 +167,22 @@ describe("getPathNodes", () => {
 
 		const result = getPathNodes(graph, journey, steps);
 		expect(result.length).toBeGreaterThan(0);
-		expect(result[0]?.id).toBe("n-customer");
+		// First step focuses on n-app-shell
+		expect(result[0]?.id).toBe("n-app-shell");
 	});
 });
 
 describe("bfsTraverse", () => {
-	it("traverses from customer outward", () => {
-		const result = bfsTraverse(graph, "n-customer", { direction: "out", maxDepth: 2 });
+	it("traverses from user outward", () => {
+		const result = bfsTraverse(graph, "n-user", { direction: "out", maxDepth: 2 });
 		const ids = result.map((n) => n.id);
-		expect(ids).toContain("n-customer");
-		expect(ids).toContain("n-mobile-app");
-		expect(ids).toContain("n-api-gateway");
+		expect(ids).toContain("n-user");
+		expect(ids).toContain("n-app-shell");
 	});
 
 	it("respects depth limit", () => {
-		const depth1 = bfsTraverse(graph, "n-customer", { direction: "out", maxDepth: 1 });
-		const depth2 = bfsTraverse(graph, "n-customer", { direction: "out", maxDepth: 2 });
+		const depth1 = bfsTraverse(graph, "n-user", { direction: "out", maxDepth: 1 });
+		const depth2 = bfsTraverse(graph, "n-user", { direction: "out", maxDepth: 2 });
 		expect(depth2.length).toBeGreaterThanOrEqual(depth1.length);
 	});
 });
@@ -206,85 +198,29 @@ describe("filterGraph", () => {
 });
 
 describe("filterNodesByTags", () => {
-	it("finds nodes with security tag", () => {
-		const result = filterNodesByTags(graph, ["security"]);
-		expect(result.some((n) => n.id === "n-identity-svc")).toBe(true);
+	it("finds nodes with core tag", () => {
+		const result = filterNodesByTags(graph, ["core"]);
+		expect(result.some((n) => n.id === "n-context-machine")).toBe(true);
 	});
 });
 
 describe("filterNodesByType", () => {
 	it("finds actor nodes", () => {
 		const result = filterNodesByType(graph, ["actor"]);
-		expect(result.length).toBe(2);
-		expect(result.some((n) => n.id === "n-customer")).toBe(true);
-	});
-});
-
-describe("getProvidersForCapability", () => {
-	it("returns providers for payment processing", () => {
-		const result = getProvidersForCapability("cap-payment-processing", providerAssociations);
-		expect(result).toContain("prov-visa");
-		expect(result).toContain("prov-mastercard");
-	});
-
-	it("returns providers for money movement", () => {
-		const result = getProvidersForCapability("cap-money-movement", providerAssociations);
-		expect(result).toContain("prov-rtp");
-		expect(result).toContain("prov-fednow");
-	});
-
-	it("returns empty for capability with no providers", () => {
-		const result = getProvidersForCapability("cap-account-servicing", providerAssociations);
-		expect(result).toEqual([]);
-	});
-
-	it("deduplicates provider IDs", () => {
-		const result = getProvidersForCapability("cap-payment-processing", providerAssociations);
-		expect(new Set(result).size).toBe(result.length);
-	});
-});
-
-describe("getProvidersForValueStream", () => {
-	it("returns providers for retail payments value stream", () => {
-		const result = getProvidersForValueStream("vs-retail-payments", providerAssociations);
-		expect(result).toContain("prov-rtp");
-		expect(result).toContain("prov-fednow");
-	});
-
-	it("returns empty for unknown value stream", () => {
-		const result = getProvidersForValueStream("vs-nonexistent", providerAssociations);
-		expect(result).toEqual([]);
-	});
-});
-
-describe("getValueStreamsForDomain", () => {
-	it("returns value streams for payments domain", () => {
-		const result = getValueStreamsForDomain("dom-payments", valueStreams);
-		expect(result.length).toBe(2);
-		expect(result.some((vs) => vs.label === "Retail Payments")).toBe(true);
-	});
-
-	it("returns value streams for accounts domain", () => {
-		const result = getValueStreamsForDomain("dom-accounts", valueStreams);
 		expect(result.length).toBe(1);
-		expect(result[0]?.label).toBe("Account Origination");
-	});
-
-	it("returns empty for domain with no value streams", () => {
-		const result = getValueStreamsForDomain("dom-customer", valueStreams);
-		expect(result).toEqual([]);
+		expect(result.some((n) => n.id === "n-user")).toBe(true);
 	});
 });
 
 describe("getProcessesForCapability", () => {
-	it("returns processes for payment processing capability", () => {
-		const result = getProcessesForCapability("cap-payment-processing", processes);
-		expect(result.length).toBe(1);
-		expect(result[0]?.label).toBe("Payment Authorization");
+	it("returns processes for state reconciliation capability", () => {
+		const result = getProcessesForCapability("cap-state-reconciliation", processes);
+		expect(result.length).toBeGreaterThanOrEqual(1);
+		expect(result.some((p) => p.label === "Perspective Switch with Shared Context")).toBe(true);
 	});
 
 	it("returns empty for capability with no processes", () => {
-		const result = getProcessesForCapability("cap-auth", processes);
+		const result = getProcessesForCapability("cap-navigation-context", processes);
 		expect(result).toEqual([]);
 	});
 });
