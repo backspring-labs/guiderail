@@ -1,5 +1,6 @@
 import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
 import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
+import type { JourneyLayoutResult, JourneyNode } from "@/lib/journey-layout.js";
 import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-layout.js";
 import { computeLandscapeLayout } from "@/lib/landscape-layout.js";
 import { computeOrientationLayout } from "@/lib/orientation-layout.js";
@@ -10,6 +11,7 @@ import {
 	getVisibleNodeIds,
 } from "@/lib/projection.js";
 import { toReactFlowEdges, toReactFlowNodes } from "@/lib/react-flow-adapter.js";
+import type { SequenceLayoutResult, SequenceNode } from "@/lib/sequence-layout.js";
 import { computeSequenceLayout, computeSequencePickerLayout } from "@/lib/sequence-layout.js";
 import {
 	seedBpmnEdges,
@@ -154,116 +156,58 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		);
 	}, [isLandscapePerspective]);
 
-	const rfNodes = useMemo(() => {
-		if (!graph) return [];
+	const rfNodes = useMemo(
+		() =>
+			resolveNodes(nav, graph, elkPositions, {
+				isOrientationPerspective,
+				orientationLayout,
+				isProcessPerspective,
+				bpmnLayout,
+				isSequencePerspective,
+				sequenceLayout,
+				isJourneyPerspective,
+				journeyLayout,
+				isLandscapePerspective,
+				landscapeLayout,
+			}),
+		[
+			nav,
+			graph,
+			elkPositions,
+			isProcessPerspective,
+			bpmnLayout,
+			isSequencePerspective,
+			sequenceLayout,
+			isJourneyPerspective,
+			journeyLayout,
+			isOrientationPerspective,
+			orientationLayout,
+			isLandscapePerspective,
+			landscapeLayout,
+		],
+	);
 
-		// Orientation perspective: render agenda nodes with active highlighting
-		if (isOrientationPerspective && orientationLayout) {
-			return buildOrientationNodes(nav, orientationLayout.nodes);
-		}
-
-		// Process perspective: render BPMN nodes with stage highlighting
-		if (isProcessPerspective && bpmnLayout) {
-			return buildBpmnNodes(nav, bpmnLayout.positions);
-		}
-
-		// Sequence perspective: render lifeline + message nodes with selection + stepper state
-		if (isSequencePerspective && sequenceLayout) {
-			const selectedId = nav.selectedNodeId;
-			const isLifelineSelected = selectedId?.startsWith("lifeline-") ?? false;
-			const activeIdx = nav.activeMessageIndex;
-			return sequenceLayout.nodes.map((node) => {
-				const isSelected = node.id === selectedId;
-				const data = node.data as Record<string, unknown>;
-				const isActive =
-					node.type === "sequence_message" &&
-					activeIdx != null &&
-					data.sequenceNumber === activeIdx;
-				if (node.type === "sequence_message" && isLifelineSelected) {
-					return {
-						...node,
-						selected: isSelected,
-						data: { ...data, selectedLifelineId: selectedId, isActive },
-					};
-				}
-				return { ...node, selected: isSelected, data: { ...data, isActive } };
-			});
-		}
-
-		// Journey perspective: render step nodes with stepper highlighting
-		if (isJourneyPerspective && journeyLayout) {
-			const activeIdx = nav.activeStepIndex;
-			return journeyLayout.nodes.map((node) => {
-				const data = node.data as Record<string, unknown>;
-				const isActive =
-					node.type === "journey_step" && activeIdx != null && data.sequenceNumber === activeIdx;
-				return { ...node, data: { ...data, isActive } };
-			});
-		}
-
-		// Landscape perspective: render capability map with domain/capability selection
-		if (isLandscapePerspective && landscapeLayout) {
-			return buildLandscapeNodes(nav, landscapeLayout.nodes);
-		}
-
-		// All other perspectives: render terrain nodes with ELK
-		return buildTerrainNodes(nav, graph, elkPositions);
-	}, [
-		nav,
-		graph,
-		elkPositions,
-		isProcessPerspective,
-		bpmnLayout,
-		isSequencePerspective,
-		sequenceLayout,
-		isJourneyPerspective,
-		journeyLayout,
-		isOrientationPerspective,
-		orientationLayout,
-		isLandscapePerspective,
-		landscapeLayout,
-	]);
-
-	const rfEdges = useMemo(() => {
-		if (!graph) return [];
-
-		// Orientation perspective: no edges
-		if (isOrientationPerspective) {
-			return [];
-		}
-
-		// Process perspective: render BPMN edges
-		if (isProcessPerspective) {
-			return buildBpmnEdges(nav);
-		}
-
-		// Sequence perspective: no edges (messages rendered as nodes)
-		if (isSequencePerspective) {
-			return [];
-		}
-
-		// Landscape perspective: no edges (capability map, not node graph)
-		if (isLandscapePerspective) {
-			return [];
-		}
-
-		// Journey perspective: step flow edges
-		if (isJourneyPerspective && journeyLayout) {
-			return journeyLayout.edges;
-		}
-
-		// All other perspectives: render terrain edges
-		return buildTerrainEdges(nav, graph);
-	}, [
-		nav,
-		graph,
-		isOrientationPerspective,
-		isProcessPerspective,
-		isSequencePerspective,
-		isJourneyPerspective,
-		isLandscapePerspective,
-		journeyLayout,
-	]);
+	const rfEdges = useMemo(
+		() =>
+			resolveEdges(nav, graph, {
+				isOrientationPerspective,
+				isProcessPerspective,
+				isSequencePerspective,
+				isLandscapePerspective,
+				isJourneyPerspective,
+				journeyLayout,
+			}),
+		[
+			nav,
+			graph,
+			isOrientationPerspective,
+			isProcessPerspective,
+			isSequencePerspective,
+			isJourneyPerspective,
+			isLandscapePerspective,
+			journeyLayout,
+		],
+	);
 
 	const swimLanes = isProcessPerspective ? (bpmnLayout?.swimLanes ?? []) : [];
 
@@ -469,6 +413,93 @@ function buildOrientationNodes(
 	const activeIdx = nav.activeOrientationIndex;
 	return nodes.map((node) => {
 		const isActive = activeIdx != null && node.data.sequenceNumber === activeIdx;
+		return { ...node, data: { ...node.data, isActive } };
+	});
+}
+
+function resolveNodes(
+	nav: NavigationContext,
+	graph: TerrainGraph | null,
+	elkPositions: Map<string, { x: number; y: number }>,
+	ctx: {
+		isOrientationPerspective: boolean;
+		orientationLayout: ReturnType<typeof computeOrientationLayout> | null;
+		isProcessPerspective: boolean;
+		bpmnLayout: ReturnType<typeof computeBpmnLayout> | null;
+		isSequencePerspective: boolean;
+		sequenceLayout: SequenceLayoutResult | null;
+		isJourneyPerspective: boolean;
+		journeyLayout: JourneyLayoutResult | null;
+		isLandscapePerspective: boolean;
+		landscapeLayout: ReturnType<typeof computeLandscapeLayout> | null;
+	},
+): unknown[] {
+	if (!graph) return [];
+	if (ctx.isOrientationPerspective && ctx.orientationLayout) {
+		return buildOrientationNodes(nav, ctx.orientationLayout.nodes);
+	}
+	if (ctx.isProcessPerspective && ctx.bpmnLayout) {
+		return buildBpmnNodes(nav, ctx.bpmnLayout.positions);
+	}
+	if (ctx.isSequencePerspective && ctx.sequenceLayout) {
+		return buildSequenceNodes(nav, ctx.sequenceLayout.nodes);
+	}
+	if (ctx.isJourneyPerspective && ctx.journeyLayout) {
+		return buildJourneyNodes(nav, ctx.journeyLayout.nodes);
+	}
+	if (ctx.isLandscapePerspective && ctx.landscapeLayout) {
+		return buildLandscapeNodes(nav, ctx.landscapeLayout.nodes);
+	}
+	return buildTerrainNodes(nav, graph, elkPositions);
+}
+
+function resolveEdges(
+	nav: NavigationContext,
+	graph: TerrainGraph | null,
+	ctx: {
+		isOrientationPerspective: boolean;
+		isProcessPerspective: boolean;
+		isSequencePerspective: boolean;
+		isLandscapePerspective: boolean;
+		isJourneyPerspective: boolean;
+		journeyLayout: JourneyLayoutResult | null;
+	},
+): unknown[] {
+	if (!graph) return [];
+	if (ctx.isOrientationPerspective) return [];
+	if (ctx.isProcessPerspective) return buildBpmnEdges(nav);
+	if (ctx.isSequencePerspective) return [];
+	if (ctx.isLandscapePerspective) return [];
+	if (ctx.isJourneyPerspective && ctx.journeyLayout) return ctx.journeyLayout.edges;
+	return buildTerrainEdges(nav, graph);
+}
+
+function buildSequenceNodes(nav: NavigationContext, nodes: SequenceNode[]) {
+	const selectedId = nav.selectedNodeId;
+	const isLifelineSelected = selectedId?.startsWith("lifeline-") ?? false;
+	const activeIdx = nav.activeMessageIndex;
+	return nodes.map((node) => {
+		const isSelected = node.id === selectedId;
+		const isActive =
+			node.type === "sequence_message" &&
+			activeIdx != null &&
+			node.data.sequenceNumber === activeIdx;
+		if (node.type === "sequence_message" && isLifelineSelected) {
+			return {
+				...node,
+				selected: isSelected,
+				data: { ...node.data, selectedLifelineId: selectedId, isActive },
+			};
+		}
+		return { ...node, selected: isSelected, data: { ...node.data, isActive } };
+	});
+}
+
+function buildJourneyNodes(nav: NavigationContext, nodes: JourneyNode[]) {
+	const activeIdx = nav.activeStepIndex;
+	return nodes.map((node) => {
+		const isActive =
+			node.type === "journey_step" && activeIdx != null && node.data.sequenceNumber === activeIdx;
 		return { ...node, data: { ...node.data, isActive } };
 	});
 }

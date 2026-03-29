@@ -6,7 +6,7 @@ const STEP_START_Y = 60;
 const BRANCH_OFFSET_Y = 180;
 const JOURNEY_PICKER_SPACING = 200;
 
-interface JourneyNode {
+export interface JourneyNode {
 	id: string;
 	type: string;
 	position: { x: number; y: number };

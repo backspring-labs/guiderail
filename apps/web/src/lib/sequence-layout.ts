@@ -6,7 +6,7 @@ const LIFELINE_START_Y = 0;
 const LIFELINE_HEADER_HEIGHT = 80;
 const LIFELINE_WIDTH = 160;
 
-interface SequenceNode {
+export interface SequenceNode {
 	id: string;
 	type: string;
 	position: { x: number; y: number };

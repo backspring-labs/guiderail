@@ -156,6 +156,23 @@ function deriveStepperState(
 	return resolver ? resolver(nav) : null;
 }
 
+function deriveRouteState(nav: {
+	activeStoryRouteId: string | null;
+	activeWaypointIndex: number | null;
+}) {
+	const activeRoute = nav.activeStoryRouteId
+		? (seedStoryRoutes.find((sr) => sr.id === nav.activeStoryRouteId) ?? null)
+		: null;
+	const routeWaypoints = activeRoute
+		? seedStoryWaypoints
+				.filter((sw) => sw.storyRouteId === activeRoute.id)
+				.sort((a, b) => a.sequenceNumber - b.sequenceNumber)
+		: [];
+	const currentWaypoint =
+		nav.activeWaypointIndex != null ? (routeWaypoints[nav.activeWaypointIndex] ?? null) : null;
+	return { activeRoute, routeWaypoints, currentWaypoint };
+}
+
 function handleNodeClick(nodeId: string, send: SendFn) {
 	for (const handler of NODE_CLICK_HANDLERS) {
 		if (nodeId.startsWith(handler.prefix)) {
@@ -215,17 +232,7 @@ export function AppShell() {
 		? seedSteps.filter((s) => s.journeyId === nav.activeJourneyId)
 		: [];
 
-	// Derive current story route and waypoint from nav state
-	const activeRoute = nav.activeStoryRouteId
-		? (seedStoryRoutes.find((sr) => sr.id === nav.activeStoryRouteId) ?? null)
-		: null;
-	const routeWaypoints = activeRoute
-		? seedStoryWaypoints
-				.filter((sw) => sw.storyRouteId === activeRoute.id)
-				.sort((a, b) => a.sequenceNumber - b.sequenceNumber)
-		: [];
-	const currentWaypoint =
-		nav.activeWaypointIndex != null ? (routeWaypoints[nav.activeWaypointIndex] ?? null) : null;
+	const { activeRoute, routeWaypoints, currentWaypoint } = deriveRouteState(nav);
 
 	return (
 		<div className="app-shell">
