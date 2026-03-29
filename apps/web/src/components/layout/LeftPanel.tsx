@@ -32,6 +32,58 @@ interface LeftPanelProps {
 	onClearDomain: () => void;
 }
 
+function resolveSections(filter: string, props: LeftPanelProps) {
+	const filterLower = filter.toLowerCase();
+	const matchesFilter = (label: string) => !filter || label.toLowerCase().includes(filterLower);
+	const isFiltering = filter.length > 0;
+	const activeCap = props.activeCapabilityId;
+
+	const domains = seedDomains.filter((d) => matchesFilter(d.label));
+	const capabilities = isFiltering
+		? seedCapabilities.filter((c) => matchesFilter(c.label))
+		: props.activeDomainId
+			? seedCapabilities.filter((c) => c.domainId === props.activeDomainId)
+			: [];
+	const journeys = isFiltering
+		? seedJourneys.filter((j) => matchesFilter(j.label))
+		: activeCap
+			? seedJourneys.filter(
+					(j) => j.capabilityIds.includes(activeCap) || j.entryCapabilityId === activeCap,
+				)
+			: [];
+	const processes = isFiltering
+		? seedProcesses.filter((p) => matchesFilter(p.label))
+		: activeCap
+			? seedProcesses.filter((p) => p.capabilityIds.includes(activeCap))
+			: [];
+	const sequences = isFiltering
+		? seedSequences.filter((s) => matchesFilter(s.label))
+		: seedSequences.filter(
+				(s) => s.capabilityId === props.activeCapabilityId || s.processId === props.activeProcessId,
+			);
+	const providers = isFiltering
+		? seedProviders.filter((p) => matchesFilter(p.label))
+		: props.activeCapabilityId
+			? resolveProviders(props.activeCapabilityId, "")
+			: [];
+	const systems = isFiltering
+		? seedNodes.filter((n) => matchesFilter(n.label))
+		: resolveSystemNodes(props.activeProcessId, props.activeCapabilityId);
+	const guides = seedStoryRoutes.filter((r) => matchesFilter(r.title));
+
+	return {
+		domains,
+		capabilities,
+		journeys,
+		processes,
+		sequences,
+		providers,
+		systems,
+		guides,
+		isFiltering,
+	};
+}
+
 export function LeftPanel(props: LeftPanelProps) {
 	const { leftPanelOpen, toggleLeftPanel } = useUIStore();
 	const [filter, setFilter] = useState("");
@@ -46,46 +98,7 @@ export function LeftPanel(props: LeftPanelProps) {
 		);
 	}
 
-	const filterLower = filter.toLowerCase();
-	const matchesFilter = (label: string) => !filter || label.toLowerCase().includes(filterLower);
-
-	// When filtering, show all matching items regardless of scoping.
-	// When not filtering, scope to active selection.
-	const isFiltering = filter.length > 0;
-	const activeCap = props.activeCapabilityId;
-
-	const domainItems = seedDomains.filter((d) => matchesFilter(d.label));
-	const capItems = isFiltering
-		? seedCapabilities.filter((c) => matchesFilter(c.label))
-		: props.activeDomainId
-			? seedCapabilities.filter((c) => c.domainId === props.activeDomainId)
-			: [];
-	const journeyItems = isFiltering
-		? seedJourneys.filter((j) => matchesFilter(j.label))
-		: activeCap
-			? seedJourneys.filter(
-					(j) => j.capabilityIds.includes(activeCap) || j.entryCapabilityId === activeCap,
-				)
-			: [];
-	const processItems = isFiltering
-		? seedProcesses.filter((p) => matchesFilter(p.label))
-		: activeCap
-			? seedProcesses.filter((p) => p.capabilityIds.includes(activeCap))
-			: [];
-	const sequenceItems = isFiltering
-		? seedSequences.filter((s) => matchesFilter(s.label))
-		: seedSequences.filter(
-				(s) => s.capabilityId === props.activeCapabilityId || s.processId === props.activeProcessId,
-			);
-	const providerItems = isFiltering
-		? seedProviders.filter((p) => matchesFilter(p.label))
-		: props.activeCapabilityId
-			? resolveProviders(props.activeCapabilityId, "")
-			: [];
-	const systemItems = isFiltering
-		? seedNodes.filter((n) => matchesFilter(n.label))
-		: resolveSystemNodes(props.activeProcessId, props.activeCapabilityId);
-	const guideItems = seedStoryRoutes.filter((r) => matchesFilter(r.title));
+	const sections = resolveSections(filter, props);
 
 	return (
 		<div className="left-panel left-panel--open">
@@ -115,11 +128,11 @@ export function LeftPanel(props: LeftPanelProps) {
 				<div className="left-panel__entity-zone">
 					<CollapsibleSection
 						label="Domains"
-						count={domainItems.length}
+						count={sections.domains.length}
 						defaultExpanded
-						forceExpanded={isFiltering}
+						forceExpanded={sections.isFiltering}
 					>
-						{domainItems.map((d) => (
+						{sections.domains.map((d) => (
 							<SectionItem
 								key={d.id}
 								label={d.label}
@@ -131,11 +144,11 @@ export function LeftPanel(props: LeftPanelProps) {
 
 					<CollapsibleSection
 						label="Capabilities"
-						count={capItems.length}
+						count={sections.capabilities.length}
 						defaultExpanded
-						forceExpanded={isFiltering}
+						forceExpanded={sections.isFiltering}
 					>
-						{capItems.map((c) => (
+						{sections.capabilities.map((c) => (
 							<SectionItem
 								key={c.id}
 								label={c.label}
@@ -147,10 +160,10 @@ export function LeftPanel(props: LeftPanelProps) {
 
 					<CollapsibleSection
 						label="Journeys"
-						count={journeyItems.length}
-						forceExpanded={isFiltering}
+						count={sections.journeys.length}
+						forceExpanded={sections.isFiltering}
 					>
-						{journeyItems.map((j) => (
+						{sections.journeys.map((j) => (
 							<SectionItem
 								key={j.id}
 								label={j.label}
@@ -162,10 +175,10 @@ export function LeftPanel(props: LeftPanelProps) {
 
 					<CollapsibleSection
 						label="Processes"
-						count={processItems.length}
-						forceExpanded={isFiltering}
+						count={sections.processes.length}
+						forceExpanded={sections.isFiltering}
 					>
-						{processItems.map((p) => (
+						{sections.processes.map((p) => (
 							<SectionItem
 								key={p.id}
 								label={p.label}
@@ -177,10 +190,10 @@ export function LeftPanel(props: LeftPanelProps) {
 
 					<CollapsibleSection
 						label="Sequences"
-						count={sequenceItems.length}
-						forceExpanded={isFiltering}
+						count={sections.sequences.length}
+						forceExpanded={sections.isFiltering}
 					>
-						{sequenceItems.map((s) => (
+						{sections.sequences.map((s) => (
 							<SectionItem
 								key={s.id}
 								label={s.label}
@@ -192,10 +205,10 @@ export function LeftPanel(props: LeftPanelProps) {
 
 					<CollapsibleSection
 						label="Providers"
-						count={providerItems.length}
-						forceExpanded={isFiltering}
+						count={sections.providers.length}
+						forceExpanded={sections.isFiltering}
 					>
-						{providerItems.map((p) => (
+						{sections.providers.map((p) => (
 							<SectionItem
 								key={p.id}
 								label={p.label}
@@ -207,10 +220,10 @@ export function LeftPanel(props: LeftPanelProps) {
 
 					<CollapsibleSection
 						label="Systems"
-						count={systemItems.length}
-						forceExpanded={isFiltering}
+						count={sections.systems.length}
+						forceExpanded={sections.isFiltering}
 					>
-						{systemItems.map((n) => (
+						{sections.systems.map((n) => (
 							<SectionItem
 								key={n.id}
 								label={n.label}
@@ -224,11 +237,11 @@ export function LeftPanel(props: LeftPanelProps) {
 				<div className="left-panel__teaching-zone">
 					<CollapsibleSection
 						label="Guides"
-						count={guideItems.length}
+						count={sections.guides.length}
 						defaultExpanded
-						forceExpanded={isFiltering}
+						forceExpanded={sections.isFiltering}
 					>
-						{guideItems.map((r) => (
+						{sections.guides.map((r) => (
 							<SectionItem
 								key={r.id}
 								label={r.title}
