@@ -9,9 +9,12 @@ Closes #
 | Command | Result |
 |---|---|
 | `pnpm exec biome ci --error-on-warnings .` | |
+| `pnpm check:boundaries` | |
 | `pnpm build` | |
 | `pnpm typecheck` | |
 | `pnpm test:coverage` | |
+| `pnpm check:package` | |
+| `pnpm test:e2e` | |
 
 ## Visible changes
 <!-- Screenshots or a short recording for UI changes. "None" if there are none. -->
