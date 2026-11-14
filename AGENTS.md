@@ -18,6 +18,7 @@ pnpm check:fix      # Biome auto-fix
 pnpm typecheck      # tsc over tests, fixtures and config files, no emit
 pnpm test:coverage  # tests with coverage and the per-package thresholds (what CI runs)
 pnpm check:package  # pack core, install it outside the workspace, import and typecheck every export
+pnpm check:boundaries  # web imports core only via built entry points; the kernel imports no UI or demo data
 pnpm test:e2e       # build, then run the browser smoke test against the production build
 ```
 
@@ -31,6 +32,7 @@ What each command proves:
 | `test` | Behaviour covered by tests | That the tests compile: Vitest strips types without checking them |
 | `test:coverage` | The same, plus coverage has not dropped below the recorded floor | That covered code is correct |
 | `check:package` | The packed core resolves for a consumer | Anything about the web app |
+| `check:boundaries` | Import rules between web, kernel, demo corpus and fixtures hold | That the code behind an allowed import is correct |
 | `test:e2e` | The built app opens in a real browser and the Sequence stepper works end to end | Any other perspective or flow (#24) |
 
 Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core sits in the mid-80s. The web app is at about 9%, so a green run says little about the UI.
@@ -39,7 +41,8 @@ Things the command names do not tell you:
 
 - **Build before `pnpm dev` on a fresh checkout.** The web app resolves `@guiderail/core` from `packages/core/dist`.
 - **`check` is Biome only.** Type errors surface in `pnpm build` and `pnpm typecheck`, not in `check`.
-- **`src/test-fixtures/` in core is internal.** It holds the demo corpus, mocks and factories. It is excluded from the build and not exported; only core's own tests (and, for now, the web app's `@seed` alias) read it.
+- **`src/test-fixtures/` in core is internal.** It holds mocks and entity factories, and is excluded from the build and not exported.
+- **The demo corpus lives in `packages/core/src/demo/`** and is built as the `@guiderail/core/demo` entry point. It is in core because the kernel's tests use it as their fixture, and a separate package that core's tests depended on would be a dependency cycle. It is data, not kernel API: kernel source must not import it.
 - **`test:e2e` needs a browser installed once:** `pnpm --filter @guiderail/web exec playwright install chromium`.
 - **Git hooks may not be installed on a fresh clone.** pnpm does not run lefthook's install script. Run `pnpm exec lefthook install` once; the pre-commit hook then runs `pnpm check`.
 
@@ -86,7 +89,7 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 3. **Zustand owns UI-only state.** Panel visibility, animation flags, hover. Never canonical navigation state.
 4. **React Flow is render-only.** Node and edge types are delivery structures, not semantic truth.
 5. **No domain-model renaming from package renames.** The project was previously called Viewscape. `mode: "viewscape" | "guiderail"` is a domain enum (free exploration vs guided traversal), not a package name. Leave it alone.
-6. **`@seed` is a temporary bridge.** See "Known limitations".
+6. **The demo corpus is one dataset, not the content contract.** It is built as `@guiderail/core/demo`. The web app must never import core's source.
 7. **Seven-perspective progression.** Each perspective answers a different question about the same terrain.
 8. **Canvas modes are perspective-internal.** Same topology, different emphasis.
 9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". See "Navigation contract" below for exactly what persists and what resets.
@@ -165,7 +168,7 @@ These are tracked defects and bridges, not design intent. Check the issue before
 
 | Limitation | Issue |
 |---|---|
-| The app imports demo data from core's source via the `@seed` alias, and components read `seed*` arrays directly instead of kernel state | #13 |
+| Components read the demo corpus's `seed*` arrays directly instead of one dataset shared with the kernel, so other content cannot be supplied | #13 |
 
 Remove a row in the same PR that fixes it.
 

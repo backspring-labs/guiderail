@@ -1,12 +1,11 @@
 /**
- * Temporary development data bridge.
+ * The demo corpus, re-exported under the names the app uses.
  *
- * Imports seed data directly from @guiderail/core source via @seed alias.
- * This will be replaced by a real ContentRepoAdapter when the backend is added.
- * Do not treat this as a long-term content loading contract.
+ * It comes from the built `@guiderail/core/demo` entry point, never from core's
+ * source. Components still read these arrays directly; issue #13 replaces that
+ * with one typed dataset boundary so other content can be supplied.
  */
 
-import { createGraph } from "@guiderail/core/graph";
 import {
 	annotations,
 	bpmnEdges,
@@ -33,7 +32,8 @@ import {
 	storyRoutes,
 	storyWaypoints,
 	valueStreams,
-} from "@seed/seed-banking.js";
+} from "@guiderail/core/demo";
+import { createGraph } from "@guiderail/core/graph";
 
 export const seedGraph = createGraph(nodes, edges);
 export const seedDomains = domains;

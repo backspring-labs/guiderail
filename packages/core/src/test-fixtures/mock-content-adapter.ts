@@ -9,8 +9,8 @@ import type {
 	ArtifactManifest,
 	SourceConnection,
 } from "../adapters/source-adapter.js";
+import { capabilities, domains, edges, evidenceRefs, nodes } from "../demo/index.js";
 import type { EvidenceRef } from "../entities/evidence-ref.js";
-import { capabilities, domains, edges, evidenceRefs, nodes } from "./seed-banking.js";
 
 export class MockContentRepoAdapter implements ContentRepoAdapter {
 	readonly type = "content_repo" as const;

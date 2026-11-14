@@ -1,5 +1,6 @@
 /**
- * Internal test support: the demo corpus, mock adapters and entity factories.
+ * Internal test support: mock adapters and entity factories, plus the demo
+ * corpus re-exported from src/demo for the tests that use it as their fixture.
  *
  * This directory is not part of the published package. It is excluded from the
  * build (tsconfig.build.json) and has no entry in package.json "exports". Tests
@@ -31,7 +32,7 @@ export {
 	messages,
 	sequences,
 	orientationItems,
-} from "./seed-banking.js";
+} from "../demo/index.js";
 
 export { MockContentRepoAdapter } from "./mock-content-adapter.js";
 export { MockNormalizer } from "./mock-normalizer.js";

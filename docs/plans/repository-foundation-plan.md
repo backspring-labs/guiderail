@@ -37,12 +37,22 @@ This file is the plan. It does not track progress.
 | Topic | Decision | Issues |
 |---|---|---|
 | Node support | 26 is the primary runtime, 24 is kept compatible, 22 is not supported | HY-19 |
-| Demo data | Moves to a private workspace package, `packages/demo-content`; core's `./test-fixtures` export is removed | HY-13, HY-07 |
+| Demo data | A built entry point of core, `@guiderail/core/demo`; core's `./test-fixtures` export is removed. Revised: see below | HY-13, HY-07, #62 |
 | npm publication | Core is not published in this campaign, but must be correct when packed | HY-07, HY-18 |
 | Zod advisory | Tooling upgrades first; the Zod 4 migration follows parser regression tests | HY-05, HY-23 |
 | Security contact | GitHub private vulnerability reporting, enabled in Wave A | HY-06, HY-17 |
 | Single maintainer | 0 required approvals; milestone and labels instead of a Project board | HY-02, HY-03 |
 | Versioning | Core and web version in lockstep | HY-18 |
+
+### Revised decision: where the demo corpus lives
+
+The first decision was a separate private package, `packages/demo-content`. It was changed during HY-13, because it cannot be done cleanly today:
+
+- Fourteen of the kernel's test files use the demo corpus as their fixture.
+- A demo-content package needs core for types and schemas. If core's tests depend on it, the two form a cycle, and turbo refuses to run. This was verified, not assumed.
+- The ways around the cycle are test-only path aliases into a sibling package's source, which is the kind of hack HY-13 exists to remove, or a JSON dump of the corpus, which the 0.5.0 plan rules out.
+
+So the corpus is a built entry point of core. The web app consumes a built package and never core's source, which was the point. The cost is that a published core would carry sample data. #62 tracks giving the kernel its own fixtures so the corpus can move out, and should come before any decision to publish.
 
 ---
 

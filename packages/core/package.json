@@ -52,6 +52,10 @@
 			"import": "./dist/provenance/index.js",
 			"types": "./dist/provenance/index.d.ts"
 		},
+		"./demo": {
+			"import": "./dist/demo/index.js",
+			"types": "./dist/demo/index.d.ts"
+		},
 		"./content": {
 			"import": "./dist/content/index.js",
 			"types": "./dist/content/index.d.ts"

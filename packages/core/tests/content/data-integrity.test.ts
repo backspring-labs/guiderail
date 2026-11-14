@@ -9,8 +9,8 @@ import {
 	parseContentBundle,
 	validateContentBundle,
 } from "../../src/content/index.js";
+import { demoContent } from "../../src/demo/index.js";
 import * as entities from "../../src/entities/index.js";
-import * as seed from "../../src/test-fixtures/seed-banking.js";
 
 /**
  * Regression cases for docs/architecture/data-integrity.md. Each describe block
@@ -361,11 +361,13 @@ describe("collection registry", () => {
 });
 
 describe("the demo corpus", () => {
-	const bundle: ContentBundle = { ...emptyContentBundle(), ...seed };
+	const bundle: ContentBundle = demoContent;
 
-	it("supplies every collection the registry knows", () => {
-		const missing = CONTENT_COLLECTION_NAMES.filter((name) => !(name in seed));
-		expect(missing).toEqual([]);
+	it("supplies exactly the collections the registry knows", () => {
+		expect(Object.keys(bundle).sort()).toEqual([...CONTENT_COLLECTION_NAMES].sort());
+		for (const name of CONTENT_COLLECTION_NAMES) {
+			expect(Array.isArray(bundle[name])).toBe(true);
+		}
 	});
 
 	it("satisfies the contract: no duplicate ids, dangling references or ambiguous order", () => {
@@ -375,7 +377,7 @@ describe("the demo corpus", () => {
 	});
 
 	it("round-trips through the parser unchanged in size", () => {
-		const result = parseContentBundle(JSON.parse(JSON.stringify(seed)), "seed.json");
+		const result = parseContentBundle(JSON.parse(JSON.stringify(bundle)), "demo.json");
 		expect(result.errors.map((e) => `${e.code}: ${e.message}`)).toEqual([]);
 		for (const name of CONTENT_COLLECTION_NAMES) {
 			expect(result.bundle[name]).toHaveLength(bundle[name].length);

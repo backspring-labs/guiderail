@@ -318,7 +318,7 @@ export const nodes: Node[] = [
 		id: "n-vite-dev-server",
 		type: "system",
 		label: "Vite Dev Server",
-		description: "HMR, module bundling, path resolution including @seed alias",
+		description: "HMR, module bundling, path resolution",
 		tags: ["runtime", "vite", "tooling"],
 		metadata: { runtimeIdentity: "vite.config.ts" },
 		layoutByPerspective: {
