@@ -31,7 +31,10 @@ export function RightPanel({
 	const { rightPanelOpen, toggleRightPanel } = useUIStore();
 
 	return (
-		<div className={`right-panel ${rightPanelOpen ? "right-panel--open" : "right-panel--closed"}`}>
+		<aside
+			className={`right-panel ${rightPanelOpen ? "right-panel--open" : "right-panel--closed"}`}
+			aria-label="Details"
+		>
 			<button type="button" className="right-panel__toggle" onClick={toggleRightPanel}>
 				{rightPanelOpen ? "\u25B6" : "\u25C0"}
 			</button>
@@ -51,6 +54,6 @@ export function RightPanel({
 					/>
 				</div>
 			)}
-		</div>
+		</aside>
 	);
 }

@@ -1,4 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
+import { pickFromLeftPanel } from "./support.js";
 
 /**
  * Selecting a journey, process or sequence shows it, from every entry point.
@@ -12,11 +13,6 @@ const JOURNEY = "The Full Descent";
 const activeTab = (page: Page) => page.locator(".perspective-switcher__tab--active");
 const counter = (page: Page) => page.locator(".stepper-control__counter");
 const breadcrumb = (page: Page) => page.locator(".context-bar__breadcrumb");
-
-async function viaLeftPanel(page: Page, label: string) {
-	await page.locator(".left-panel__filter-input").fill(label);
-	await page.locator(".section-item", { hasText: label }).first().click();
-}
 
 async function viaSearch(page: Page, label: string) {
 	await page.locator(".top-bar__search").click();
@@ -43,7 +39,7 @@ async function landing(page: Page) {
 
 test("search navigates to a journey, the same as the left panel", async ({ page }) => {
 	await page.goto("/");
-	await viaLeftPanel(page, JOURNEY);
+	await pickFromLeftPanel(page, "Journeys", JOURNEY);
 	await expect(activeTab(page)).toHaveText("Journey");
 	const fromLeftPanel = await landing(page);
 
@@ -57,7 +53,7 @@ test("the left panel, search and the right panel land on the same process view",
 	page,
 }) => {
 	await page.goto("/");
-	await viaLeftPanel(page, PROCESS);
+	await pickFromLeftPanel(page, "Processes", PROCESS);
 	await expect(activeTab(page)).toHaveText("Process");
 	await expect(counter(page)).toHaveText("Stage 1 of 8");
 	const fromLeftPanel = await landing(page);

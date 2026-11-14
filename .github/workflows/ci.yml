@@ -71,10 +71,10 @@ jobs:
       - name: Package check (packed core installs and resolves outside the workspace)
         run: pnpm check:package
 
-  # Runs the production build in a real browser. Kept small on purpose: it proves
-  # the artifact users run actually opens and that kernel and view agree.
+  # Runs the production build and the static Storybook build in a real browser:
+  # every perspective, keyboard flows, accessibility scans and every story.
   smoke:
-    name: Browser smoke test
+    name: Browser tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -98,17 +98,14 @@ jobs:
       - name: Install Chromium
         run: pnpm --filter @guiderail/web exec playwright install --with-deps chromium
 
-      - name: Build
-        run: pnpm build
-
-      - name: Smoke test against the production build
-        run: pnpm --filter @guiderail/web test:e2e
+      - name: Build the app and Storybook, then run the browser suite against both
+        run: pnpm test:e2e
 
       - name: Keep failure traces and screenshots
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: browser-smoke-failure
+          name: browser-test-failure
           path: |
             apps/web/test-results
             apps/web/playwright-report

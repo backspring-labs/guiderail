@@ -17,14 +17,14 @@ export function DomainDetailPanel({ domain, onSelectCapability }: DomainDetailPa
 				<span className="detail-panel__type-badge" data-type="domain">
 					domain
 				</span>
-				<h3 className="detail-panel__title">{domain.label}</h3>
+				<h2 className="detail-panel__title">{domain.label}</h2>
 			</div>
 
 			{domain.description && <p className="detail-panel__description">{domain.description}</p>}
 
 			{capabilities.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Capabilities</h4>
+					<h3 className="detail-panel__section-title">Capabilities</h3>
 					<ul className="detail-panel__list">
 						{capabilities.map((cap) => (
 							<li key={cap.id}>

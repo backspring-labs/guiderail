@@ -19,7 +19,7 @@ pnpm typecheck      # tsc over tests, fixtures and config files, no emit
 pnpm test:coverage  # tests with coverage and the per-package thresholds (what CI runs)
 pnpm check:package  # pack core, install it outside the workspace, import and typecheck every export
 pnpm check:boundaries  # web imports core only via built entry points; the kernel imports no UI or demo data
-pnpm test:e2e       # build, then run the browser smoke test against the production build
+pnpm test:e2e       # build the app and Storybook, then run the browser suite against both
 ```
 
 What each command proves:
@@ -33,7 +33,7 @@ What each command proves:
 | `test:coverage` | The same, plus coverage has not dropped below the recorded floor | That covered code is correct |
 | `check:package` | The packed core resolves for a consumer | Anything about the web app |
 | `check:boundaries` | Import rules between web, kernel, demo corpus and fixtures hold | That the code behind an allowed import is correct |
-| `test:e2e` | The built app opens in a real browser and the Sequence stepper works end to end | Any other perspective or flow (#24) |
+| `test:e2e` | In a real browser, against built output: every perspective renders, steppers and search work from the keyboard, navigation is consistent, every Storybook story renders, and the automated accessibility scan passes | Colour contrast (a tracked exception, #66); anything a screen reader or a human eye would catch that axe does not |
 
 Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core sits in the mid-80s. The web app is at about 9%, so a green run says little about the UI.
 
@@ -110,6 +110,13 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 The Process mode ids differ from their UI labels: `activity` is shown as "Decision" and `risk_controls` as "Controls".
 
 Orientation is the entry perspective on first load.
+
+### Accessibility
+
+- The page has landmarks: a banner, one `main` (the canvas), a navigation landmark for the context bar, and two labelled complementary regions (the Browse and Details panels). The title is the page's only `h1`; a detail panel's title is an `h2` and its sections are `h3`.
+- The search palette is a labelled dialog. Closing it returns focus to where it was.
+- `apps/web/e2e/a11y.spec.ts` and `storybook.spec.ts` run axe on every view and every story. A rule that is known to fail goes in `KNOWN_A11Y_EXCEPTIONS` in `e2e/support.ts` with an issue number, never silently disabled. Today that list has one entry: colour contrast (#66).
+- Stories type their data with `satisfies`, so a story cannot drift from its component's props.
 
 ### Data boundary
 

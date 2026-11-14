@@ -31,7 +31,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 				<span className="detail-panel__type-badge" data-type={node.type}>
 					{node.type}
 				</span>
-				<h3 className="detail-panel__title">{node.label}</h3>
+				<h2 className="detail-panel__title">{node.label}</h2>
 			</div>
 
 			{node.description && <p className="detail-panel__description">{node.description}</p>}
@@ -48,7 +48,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 
 			{nodeProviders.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Providers</h4>
+					<h3 className="detail-panel__section-title">Providers</h3>
 					<ul className="detail-panel__list">
 						{nodeProviders.map((p) => (
 							<li key={p.id} className="detail-panel__list-item">
@@ -64,7 +64,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 
 			{capabilities.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Capabilities</h4>
+					<h3 className="detail-panel__section-title">Capabilities</h3>
 					<ul className="detail-panel__list">
 						{capabilities.map((cap) => (
 							<li key={cap.id} className="detail-panel__list-item">
@@ -77,7 +77,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 
 			{neighbors.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Connected Nodes</h4>
+					<h3 className="detail-panel__section-title">Connected Nodes</h3>
 					<ul className="detail-panel__list">
 						{neighbors.map((n) => (
 							<li key={n.id}>
@@ -97,7 +97,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 
 			{edges.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Edges</h4>
+					<h3 className="detail-panel__section-title">Edges</h3>
 					<ul className="detail-panel__list">
 						{edges.map((e) => (
 							<li key={e.id}>
@@ -117,7 +117,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 
 			{annotations.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Notes</h4>
+					<h3 className="detail-panel__section-title">Notes</h3>
 					{annotations.map((a) => (
 						<div key={a.id} className="detail-panel__annotation">
 							<span className="detail-panel__annotation-type">{a.type}</span>
@@ -129,7 +129,7 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 
 			{evidenceRefs.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Documents</h4>
+					<h3 className="detail-panel__section-title">Documents</h3>
 					{evidenceRefs.map((e) => (
 						<div key={e.id} className="detail-panel__evidence">
 							<span className="detail-panel__evidence-title">{e.title}</span>

@@ -18,11 +18,11 @@ export function EdgeDetailPanel({ edge, graph, onSelectNode }: EdgeDetailPanelPr
 				<span className="detail-panel__type-badge" data-type="edge">
 					{edge.type}
 				</span>
-				<h3 className="detail-panel__title">{edge.label ?? "Edge"}</h3>
+				<h2 className="detail-panel__title">{edge.label ?? "Edge"}</h2>
 			</div>
 
 			<div className="detail-panel__section">
-				<h4 className="detail-panel__section-title">Connection</h4>
+				<h3 className="detail-panel__section-title">Connection</h3>
 				<div className="detail-panel__edge-direction">
 					<button
 						type="button"

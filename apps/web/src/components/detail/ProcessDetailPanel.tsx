@@ -20,7 +20,7 @@ export function ProcessDetailPanel({ process, graph, onSelectNode }: ProcessDeta
 				<span className="detail-panel__type-badge" data-type="process">
 					process
 				</span>
-				<h3 className="detail-panel__title">{process.label}</h3>
+				<h2 className="detail-panel__title">{process.label}</h2>
 			</div>
 
 			{process.description && <p className="detail-panel__description">{process.description}</p>}
@@ -37,7 +37,7 @@ export function ProcessDetailPanel({ process, graph, onSelectNode }: ProcessDeta
 
 			{stages.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Stages</h4>
+					<h3 className="detail-panel__section-title">Stages</h3>
 					<div className="detail-panel__stages">
 						{stages.map((stage, index) => (
 							<div key={stage.id} className="detail-panel__stage">

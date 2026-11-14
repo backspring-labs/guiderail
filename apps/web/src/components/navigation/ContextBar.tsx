@@ -42,7 +42,7 @@ export function ContextBar(props: ContextBarProps) {
 		dataset.perspectives.find((p) => p.id === props.activePerspectiveId)?.type ?? "landscape";
 
 	return (
-		<div className="context-bar">
+		<nav className="context-bar" aria-label="Current context">
 			<BreadcrumbTrail
 				activeDomainId={props.activeDomainId}
 				activeCapabilityId={props.activeCapabilityId}
@@ -65,7 +65,7 @@ export function ContextBar(props: ContextBarProps) {
 					onSwitchCanvasMode={props.onSwitchCanvasMode}
 				/>
 			)}
-		</div>
+		</nav>
 	);
 }
 

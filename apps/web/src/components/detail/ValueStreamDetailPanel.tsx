@@ -24,7 +24,7 @@ export function ValueStreamDetailPanel({
 				<span className="detail-panel__type-badge" data-type="value-stream">
 					value stream
 				</span>
-				<h3 className="detail-panel__title">{valueStream.label}</h3>
+				<h2 className="detail-panel__title">{valueStream.label}</h2>
 			</div>
 
 			{valueStream.description && (
@@ -43,7 +43,7 @@ export function ValueStreamDetailPanel({
 
 			{linkedCapabilities.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Capabilities</h4>
+					<h3 className="detail-panel__section-title">Capabilities</h3>
 					<ul className="detail-panel__list">
 						{linkedCapabilities.map((cap) => (
 							<li key={cap.id}>
@@ -63,7 +63,7 @@ export function ValueStreamDetailPanel({
 
 			{linkedProviders.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Providers</h4>
+					<h3 className="detail-panel__section-title">Providers</h3>
 					<ul className="detail-panel__list">
 						{linkedProviders.map((p) => (
 							<li key={p.id} className="detail-panel__list-item">

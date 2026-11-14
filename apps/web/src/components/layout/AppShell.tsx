@@ -212,7 +212,7 @@ export function AppShell() {
 					onSelectNode={(id) => send({ type: "SELECT_NODE", nodeId: id })}
 					onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				/>
-				<div
+				<main
 					className={`app-shell__canvas ${nav.routeState !== "inactive" ? "app-shell__canvas--route-active" : ""}`}
 				>
 					{isOrientationPerspective ? (
@@ -311,7 +311,7 @@ export function AppShell() {
 							onEnd={() => send({ type: "STEPPER_END" })}
 						/>
 					)}
-				</div>
+				</main>
 				{graph && (
 					<RightPanel
 						nav={nav}

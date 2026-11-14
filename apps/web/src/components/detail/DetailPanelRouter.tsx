@@ -168,7 +168,7 @@ function resolveSequencePickerDetail(
 				<span className="detail-panel__type-badge" data-type="interface">
 					sequence
 				</span>
-				<h3 className="detail-panel__title">{sequence.label}</h3>
+				<h2 className="detail-panel__title">{sequence.label}</h2>
 			</div>
 			{sequence.description && <p className="detail-panel__description">{sequence.description}</p>}
 			<div className="detail-panel__section">
@@ -201,7 +201,7 @@ function resolveJourneyPickerDetail(
 				<span className="detail-panel__type-badge" data-type="journey">
 					journey
 				</span>
-				<h3 className="detail-panel__title">{journey.label}</h3>
+				<h2 className="detail-panel__title">{journey.label}</h2>
 			</div>
 			{journey.description && <p className="detail-panel__description">{journey.description}</p>}
 			<div className="detail-panel__section">
@@ -230,18 +230,18 @@ function resolveJourneyStepDetail(dataset: Dataset, stepId: string): ReactNode |
 				<span className="detail-panel__type-badge" data-type="step">
 					step {position + 1}
 				</span>
-				<h3 className="detail-panel__title">{step.title}</h3>
+				<h2 className="detail-panel__title">{step.title}</h2>
 			</div>
 			{step.narrative && <p className="detail-panel__description">{step.narrative}</p>}
 			{step.actor && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Actor</h4>
+					<h3 className="detail-panel__section-title">Actor</h3>
 					<span className="detail-panel__tag">{step.actor}</span>
 				</div>
 			)}
 			{step.expectedAction && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Expected Action</h4>
+					<h3 className="detail-panel__section-title">Expected Action</h3>
 					<p className="detail-panel__description">{step.expectedAction}</p>
 				</div>
 			)}

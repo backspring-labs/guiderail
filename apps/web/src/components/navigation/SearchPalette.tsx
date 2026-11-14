@@ -150,8 +150,9 @@ export function SearchPalette({
 			document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		setQuery("");
 		setSelectedIndex(0);
-		const timer = setTimeout(() => inputRef.current?.focus(), 0);
-		return () => clearTimeout(timer);
+		// The input is already mounted when this effect runs. Focusing it now, not
+		// on a timer, means keys typed straight after the shortcut are not lost.
+		inputRef.current?.focus();
 	}, [open]);
 
 	const allItems = useMemo(
@@ -224,6 +225,10 @@ export function SearchPalette({
 		>
 			<div
 				className="search-palette"
+				// biome-ignore lint/a11y/useSemanticElements: a native <dialog> brings user-agent positioning and styling this overlay does not use; the role gives the same semantics.
+				role="dialog"
+				aria-modal="true"
+				aria-label="Search"
 				onClick={(e) => e.stopPropagation()}
 				onKeyDown={handleKeyDown}
 			>
