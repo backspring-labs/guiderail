@@ -69,7 +69,7 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 6. **`@seed` is a temporary bridge.** See "Known limitations".
 7. **Seven-perspective progression.** Each perspective answers a different question about the same terrain.
 8. **Canvas modes are perspective-internal.** Same topology, different emphasis.
-9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". Domain, capability, journey, process and route context survive it; selection and canvas mode reset.
+9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". Domain, capability, journey, process and route context survive it; selection and canvas mode reset. Other fields (value stream, sequence, stepper indices, focus targets) also persist today, but that is not yet a decided contract. #12 pins the full list; do not write tests that assume it before then.
 10. **Content loading.** `@guiderail/core/content` exports `parseContentBundle()` (Zod validation, non-fatal error collection) and `mergeContentBundles()`. The web app does not use them yet.
 
 ## Perspectives
@@ -107,6 +107,7 @@ These are tracked defects and bridges, not design intent. Check the issue before
 |---|---|
 | The app imports demo data from core's source via the `@seed` alias, and components read `seed*` arrays directly instead of kernel state | #13 |
 | The kernel is initialised without `messages` or `interfaces`, so the Sequence stepper cannot advance | #8 |
+| Graph queries ignore the `directed` edge flag | #32 |
 | The Process canvas renders the same BPMN nodes whichever process is active | #21 |
 | Stepper indices mix `sequenceNumber` lookups with array positions | #22 |
 | `@guiderail/core` advertises a `./test-fixtures` export that is not built | #7 |
@@ -116,7 +117,8 @@ Remove a row in the same PR that fixes it.
 
 ## How work is authorised
 
-- Work starts from a GitHub issue. The hygiene campaign is tracked in #25; issue numbers #1–#24 match backlog ids HY-01–HY-24.
+- Work starts from a GitHub issue. The hygiene campaign is tracked in #25; issue numbers #1–#24 match backlog ids HY-01–HY-24, and HY-25–HY-27 are #31–#33.
+- CI is enforced first: nothing else in the campaign merges until the CI gate is proven and `main` is protected (#1, #2).
 - An issue is Ready when it states problem, scope, non-goals, acceptance and dependencies.
 - Branch from `main`. Do not push to `main` directly.
 - One concern per PR. An issue may take several PRs; it closes only when every acceptance item has evidence.
