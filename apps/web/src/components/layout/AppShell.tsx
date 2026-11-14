@@ -15,12 +15,10 @@ import { useInitializeContext, useNavigation } from "@/hooks/use-context-machine
 import { useOrientationEvents } from "@/hooks/use-orientation-events.js";
 import { usePerspectiveProvider } from "@/hooks/use-perspective-provider.js";
 import { useStepperKeyboard } from "@/hooks/use-stepper-keyboard.js";
+import { deriveStepperState } from "@/lib/stepper-state.js";
 import {
-	seedMessages,
 	seedOrientationItems,
 	seedPerspectives,
-	seedProcessStages,
-	seedSequences,
 	seedSteps,
 	seedStoryRoutes,
 	seedStoryWaypoints,
@@ -77,84 +75,6 @@ const NODE_CLICK_HANDLERS: Array<{ prefix: string; action: (id: string, send: Se
 		action: (id, send) => send({ type: "SELECT_DOMAIN", domainId: id }),
 	},
 ];
-
-interface StepperState {
-	currentIndex: number;
-	totalItems: number;
-	itemLabel: string;
-}
-
-function countJourneySteps(journeyId: string): number {
-	return seedSteps.filter((s) => s.journeyId === journeyId).length;
-}
-
-function countProcessStages(processId: string): number {
-	return seedProcessStages.filter((s) => s.processId === processId).length;
-}
-
-function countSequenceMessages(sequenceId: string): number {
-	const seq = seedSequences.find((s) => s.id === sequenceId);
-	return seq ? seedMessages.filter((m) => seq.messageIds.includes(m.id)).length : 0;
-}
-
-function deriveOrientationStepper(nav: {
-	activeOrientationIndex: number | null;
-}): StepperState | null {
-	if (seedOrientationItems.length === 0) return null;
-	return {
-		currentIndex: nav.activeOrientationIndex ?? 0,
-		totalItems: seedOrientationItems.length,
-		itemLabel: "Item",
-	};
-}
-
-function deriveJourneyStepper(nav: {
-	activeJourneyId: string | null;
-	activeStepIndex: number | null;
-}): StepperState | null {
-	if (!nav.activeJourneyId) return null;
-	const total = countJourneySteps(nav.activeJourneyId);
-	return total > 0
-		? { currentIndex: nav.activeStepIndex ?? 0, totalItems: total, itemLabel: "Step" }
-		: null;
-}
-
-function deriveProcessStepper(nav: {
-	activeProcessId: string | null;
-	activeStageIndex: number | null;
-}): StepperState | null {
-	if (!nav.activeProcessId) return null;
-	const total = countProcessStages(nav.activeProcessId);
-	return total > 0
-		? { currentIndex: nav.activeStageIndex ?? 0, totalItems: total, itemLabel: "Stage" }
-		: null;
-}
-
-function deriveSequenceStepper(nav: {
-	activeSequenceId: string | null;
-	activeMessageIndex: number | null;
-}): StepperState | null {
-	if (!nav.activeSequenceId) return null;
-	const total = countSequenceMessages(nav.activeSequenceId);
-	return total > 0
-		? { currentIndex: nav.activeMessageIndex ?? 0, totalItems: total, itemLabel: "Message" }
-		: null;
-}
-
-const STEPPER_RESOLVERS: Record<string, (nav: Record<string, unknown>) => StepperState | null> = {
-	orientation: deriveOrientationStepper as (nav: Record<string, unknown>) => StepperState | null,
-	journey: deriveJourneyStepper as (nav: Record<string, unknown>) => StepperState | null,
-	process: deriveProcessStepper as (nav: Record<string, unknown>) => StepperState | null,
-	sequence: deriveSequenceStepper as (nav: Record<string, unknown>) => StepperState | null,
-};
-
-function deriveStepperState(
-	nav: Record<string, unknown>,
-	perspectiveType: string,
-): StepperState | null {
-	const resolver = STEPPER_RESOLVERS[perspectiveType];
-	return resolver ? resolver(nav) : null;
-}
 
 function deriveRouteState(nav: {
 	activeStoryRouteId: string | null;
