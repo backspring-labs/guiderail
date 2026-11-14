@@ -1,8 +1,10 @@
+import { parentProcessOf } from "@/lib/process-diagram.js";
 import {
 	seedCapabilities,
 	seedDomains,
 	seedJourneys,
 	seedPerspectives,
+	seedProcessStages,
 	seedProcesses,
 	seedSequences,
 	seedStoryRoutes,
@@ -41,6 +43,7 @@ interface ContextBarProps {
 	onClearDomain: () => void;
 	onClearCapability: () => void;
 	onSwitchCanvasMode: (mode: string) => void;
+	onSelectProcess: (processId: string) => void;
 }
 
 export function ContextBar(props: ContextBarProps) {
@@ -62,6 +65,7 @@ export function ContextBar(props: ContextBarProps) {
 				routeState={props.routeState}
 				onClearDomain={props.onClearDomain}
 				onClearCapability={props.onClearCapability}
+				onSelectProcess={props.onSelectProcess}
 			/>
 			{CANVAS_MODES[perspectiveType] && (
 				<CanvasModeSwitcher
@@ -87,6 +91,7 @@ interface BreadcrumbTrailProps {
 	routeState: "inactive" | "active" | "paused";
 	onClearDomain: () => void;
 	onClearCapability: () => void;
+	onSelectProcess: (processId: string) => void;
 }
 
 function findById<T extends { id: string }>(items: T[], id: string | null): T | null {
@@ -100,6 +105,10 @@ function BreadcrumbTrail(props: BreadcrumbTrailProps) {
 	const journey = findById(seedJourneys, props.activeJourneyId);
 	const valueStream = findById(seedValueStreams, props.activeValueStreamId);
 	const process = findById(seedProcesses, props.activeProcessId);
+	// When the active process is a sub-process, its parent is the way back.
+	const parentProcess = process
+		? parentProcessOf(process.id, { processes: seedProcesses, processStages: seedProcessStages })
+		: null;
 	const sequence = findById(seedSequences, props.activeSequenceId);
 	const storyRoute = findById(seedStoryRoutes, props.activeStoryRouteId);
 
@@ -130,6 +139,19 @@ function BreadcrumbTrail(props: BreadcrumbTrailProps) {
 					<span className="context-bar__segment context-bar__segment--current">
 						{capability.label}
 					</span>
+				</>
+			)}
+			{parentProcess && (
+				<>
+					<span className="context-bar__separator">&rsaquo;</span>
+					<button
+						type="button"
+						className="context-bar__segment context-bar__segment--parent-process"
+						title="Back to the parent process"
+						onClick={() => props.onSelectProcess(parentProcess.id)}
+					>
+						{parentProcess.label}
+					</button>
 				</>
 			)}
 			{process && (
