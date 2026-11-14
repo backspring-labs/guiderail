@@ -204,7 +204,7 @@ const howBuiltWaypoints: StoryWaypoint[] = [
 		whyItMatters:
 			"The reconciler is the operational implementation of the shared context contract.",
 		perspectiveId: "persp-process",
-		focusTargets: [{ type: "process_stage", targetId: "bpmn-ps-reconcile" }],
+		focusTargets: [{ type: "process_stage", targetId: "ps-ps-3" }],
 	},
 	{
 		id: "sw-hb-5",

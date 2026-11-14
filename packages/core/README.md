@@ -18,7 +18,7 @@ Requires Node.js 24 or 26. ESM only.
 | `@guiderail/core/context` | `contextMachine`, the single authority for navigation state, and its reconcilers |
 | `@guiderail/core/machines` | Smaller XState machines used by the kernel |
 | `@guiderail/core/perspective` | Perspective provider contracts and layer resolution |
-| `@guiderail/core/content` | `parseContentBundle`, `mergeContentBundles` for loading content from JSON |
+| `@guiderail/core/content` | `parseContentBundle`, `validateContentBundle`, `mergeContentBundles` and `orderBySequence`: loading content from JSON with diagnostics for anything unusable |
 | `@guiderail/core/adapters` | Source adapter contracts |
 | `@guiderail/core/indexing` | Index generation helpers |
 | `@guiderail/core/provenance` | Provenance reference schema |

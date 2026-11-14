@@ -129,8 +129,9 @@ describe("mergeContentBundles", () => {
 		b.domains = [{ id: "d-2", label: "B", tags: [], metadata: {} }];
 
 		const merged = mergeContentBundles(a, b);
-		expect(merged.domains.length).toBe(2);
-		expect(merged.domains[0]?.id).toBe("d-1");
-		expect(merged.domains[1]?.id).toBe("d-2");
+		expect(merged.errors).toEqual([]);
+		expect(merged.bundle.domains.length).toBe(2);
+		expect(merged.bundle.domains[0]?.id).toBe("d-1");
+		expect(merged.bundle.domains[1]?.id).toBe("d-2");
 	});
 });
