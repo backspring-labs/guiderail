@@ -40,7 +40,7 @@
 	},
 	"overrides": [
 		{
-			"include": ["vite.config.ts", "vitest.config.ts", "**/main.tsx"],
+			"include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "**/main.tsx"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -71,6 +71,15 @@
 		}
 	],
 	"files": {
-		"ignore": ["node_modules", "dist", "dist-node", "coverage", "storybook-static", ".turbo"]
+		"ignore": [
+			"node_modules",
+			"dist",
+			"dist-node",
+			"coverage",
+			"storybook-static",
+			".turbo",
+			"test-results",
+			"playwright-report"
+		]
 	}
 }
