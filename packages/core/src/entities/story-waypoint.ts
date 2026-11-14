@@ -11,7 +11,7 @@ export const StoryWaypointSchema = z.object({
 	focusTargets: z.array(FocusTargetSchema).default([]),
 	perspectiveId: z.string().optional(),
 	evidenceRefIds: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type StoryWaypoint = z.infer<typeof StoryWaypointSchema>;

@@ -8,7 +8,7 @@ export const EdgeSchema = z.object({
 	type: z.string(),
 	label: z.string().optional(),
 	directed: z.boolean().default(true),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

@@ -12,7 +12,7 @@ export const MessageSchema = z.object({
 	label: z.string(),
 	description: z.string().optional(),
 	payloadSummary: z.string().optional(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

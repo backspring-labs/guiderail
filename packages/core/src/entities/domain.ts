@@ -6,7 +6,7 @@ export const DomainSchema = z.object({
 	label: z.string(),
 	description: z.string().optional(),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

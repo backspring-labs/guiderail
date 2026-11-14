@@ -10,7 +10,7 @@ export const ProcessStageSchema = z.object({
 	edgeIds: z.array(z.string()).default([]),
 	controlPoints: z.array(z.string()).default([]),
 	subProcessId: z.string().optional(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type ProcessStage = z.infer<typeof ProcessStageSchema>;

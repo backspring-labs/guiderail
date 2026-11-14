@@ -15,7 +15,7 @@ export const SourceSchema = z.object({
 	type: SourceTypeSchema,
 	uri: z.string(),
 	label: z.string(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type SourceType = z.infer<typeof SourceTypeSchema>;

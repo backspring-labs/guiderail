@@ -15,8 +15,8 @@ export const PerspectiveSchema = z.object({
 	type: PerspectiveTypeSchema,
 	label: z.string(),
 	description: z.string().optional(),
-	highlightRules: z.record(z.unknown()).default({}),
-	visibilityRules: z.record(z.unknown()).default({}),
+	highlightRules: z.record(z.string(), z.unknown()).default({}),
+	visibilityRules: z.record(z.string(), z.unknown()).default({}),
 	defaultLayerId: z.string().optional(),
 });
 

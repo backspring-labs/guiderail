@@ -6,7 +6,7 @@ export const RouteDefinitionSchema = z.object({
 	path: z.string(),
 	method: z.string().optional(),
 	handler: z.string().optional(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const ServiceDefinitionSchema = z.object({
@@ -14,7 +14,7 @@ export const ServiceDefinitionSchema = z.object({
 	name: z.string(),
 	path: z.string(),
 	type: z.string().optional(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const DiagramArtifactSchema = z.object({
