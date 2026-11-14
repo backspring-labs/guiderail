@@ -23,7 +23,7 @@ export function ControlDetailPanel({
 					<span className="detail-panel__type-badge" data-type="control">
 						controls
 					</span>
-					<h3 className="detail-panel__title">{nodeLabel}</h3>
+					<h2 className="detail-panel__title">{nodeLabel}</h2>
 				</div>
 				<p className="detail-panel__description">No control points associated with this element.</p>
 			</div>
@@ -36,11 +36,11 @@ export function ControlDetailPanel({
 				<span className="detail-panel__type-badge" data-type="control">
 					controls
 				</span>
-				<h3 className="detail-panel__title">{nodeLabel}</h3>
+				<h2 className="detail-panel__title">{nodeLabel}</h2>
 			</div>
 
 			<div className="detail-panel__section">
-				<h4 className="detail-panel__section-title">Control Points</h4>
+				<h3 className="detail-panel__section-title">Control Points</h3>
 				{relevantControls.map((cp) => (
 					<div key={cp.id} className="detail-panel__control-item">
 						<div className="detail-panel__control-header">

@@ -71,7 +71,7 @@ function LifelineDetail({ ifaceId, sequenceMessages, graph, onSelectNode }: Life
 				<span className="detail-panel__type-badge" data-type="interface">
 					interface
 				</span>
-				<h3 className="detail-panel__title">{iface.label}</h3>
+				<h2 className="detail-panel__title">{iface.label}</h2>
 			</div>
 
 			{iface.description && <p className="detail-panel__description">{iface.description}</p>}
@@ -84,7 +84,7 @@ function LifelineDetail({ ifaceId, sequenceMessages, graph, onSelectNode }: Life
 
 			{terrainNode && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">System</h4>
+					<h3 className="detail-panel__section-title">System</h3>
 					<button
 						type="button"
 						className="detail-panel__link"
@@ -97,7 +97,7 @@ function LifelineDetail({ ifaceId, sequenceMessages, graph, onSelectNode }: Life
 
 			{originatingMessages.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Sends ({originatingMessages.length})</h4>
+					<h3 className="detail-panel__section-title">Sends ({originatingMessages.length})</h3>
 					{originatingMessages.map(({ msg, position }) => {
 						const targetIface = dataset.interfaces.find((i) => i.id === msg.targetInterfaceId);
 						return (
@@ -135,13 +135,13 @@ function MessageDetail({
 				<span className="detail-panel__type-badge" data-type="message">
 					{position >= 0 ? `message #${position + 1}` : "message"}
 				</span>
-				<h3 className="detail-panel__title">{msg.label}</h3>
+				<h2 className="detail-panel__title">{msg.label}</h2>
 			</div>
 
 			{msg.description && <p className="detail-panel__description">{msg.description}</p>}
 
 			<div className="detail-panel__section">
-				<h4 className="detail-panel__section-title">Flow</h4>
+				<h3 className="detail-panel__section-title">Flow</h3>
 				<div className="detail-panel__message-flow">
 					<span className="detail-panel__tag">{msg.type}</span>
 					<span className="detail-panel__message-from">
@@ -156,7 +156,7 @@ function MessageDetail({
 
 			{msg.payloadSummary && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Payload</h4>
+					<h3 className="detail-panel__section-title">Payload</h3>
 					<pre className="detail-panel__payload">{msg.payloadSummary}</pre>
 				</div>
 			)}

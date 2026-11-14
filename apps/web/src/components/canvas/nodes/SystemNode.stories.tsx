@@ -1,3 +1,4 @@
+import type { TerrainNodeData } from "@/lib/react-flow-adapter.js";
 import type { StoryObj } from "@storybook/react";
 import { ReactFlow, ReactFlowProvider } from "@xyflow/react";
 import { nodeTypes } from "./node-types.js";
@@ -23,9 +24,10 @@ const baseNode = {
 			layoutByPerspective: {},
 		},
 		dimmed: false,
+		providerBadges: [],
 		label: "Core Ledger",
 		highlighted: false,
-	},
+	} satisfies TerrainNodeData,
 };
 
 function NodeStory({ dimmed = false, highlighted = false }) {

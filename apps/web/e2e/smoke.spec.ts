@@ -1,4 +1,5 @@
-import { type Page, expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { trackErrors } from "./support.js";
 
 /**
  * Minimal smoke test of the built app: it opens, and the Sequence stepper walks
@@ -8,15 +9,6 @@ import { type Page, expect, test } from "@playwright/test";
  * This is the browser evidence for the kernel receiving messages at
  * initialization. Without that, the counter shows a total but Next does nothing.
  */
-
-function trackErrors(page: Page): string[] {
-	const errors: string[] = [];
-	page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
-	page.on("console", (message) => {
-		if (message.type() === "error") errors.push(`console.error: ${message.text()}`);
-	});
-	return errors;
-}
 
 test("the built app opens without errors", async ({ page }) => {
 	const errors = trackErrors(page);

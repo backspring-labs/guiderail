@@ -81,18 +81,18 @@ export function LeftPanel(props: LeftPanelProps) {
 
 	if (!leftPanelOpen) {
 		return (
-			<div className="left-panel left-panel--closed">
+			<aside className="left-panel left-panel--closed" aria-label="Browse">
 				<button type="button" className="left-panel__toggle" onClick={toggleLeftPanel}>
 					▶
 				</button>
-			</div>
+			</aside>
 		);
 	}
 
 	const sections = resolveSections(filter, props, dataset);
 
 	return (
-		<div className="left-panel left-panel--open">
+		<aside className="left-panel left-panel--open" aria-label="Browse">
 			<button type="button" className="left-panel__toggle" onClick={toggleLeftPanel}>
 				◀
 			</button>
@@ -243,7 +243,7 @@ export function LeftPanel(props: LeftPanelProps) {
 					</CollapsibleSection>
 				</div>
 			</div>
-		</div>
+		</aside>
 	);
 }
 

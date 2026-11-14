@@ -48,7 +48,7 @@ export function CapabilityDetailPanel({
 				<span className="detail-panel__type-badge" data-type="capability">
 					capability
 				</span>
-				<h3 className="detail-panel__title">{capability.label}</h3>
+				<h2 className="detail-panel__title">{capability.label}</h2>
 			</div>
 
 			{capability.description && (
@@ -67,7 +67,7 @@ export function CapabilityDetailPanel({
 
 			{capProviders.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Providers</h4>
+					<h3 className="detail-panel__section-title">Providers</h3>
 					<ul className="detail-panel__list">
 						{capProviders.map((p) => (
 							<li key={p.id} className="detail-panel__list-item">
@@ -83,7 +83,7 @@ export function CapabilityDetailPanel({
 
 			{referencedNodes.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Referenced Nodes</h4>
+					<h3 className="detail-panel__section-title">Referenced Nodes</h3>
 					<ul className="detail-panel__list">
 						{referencedNodes.map((n) => (
 							<li key={n.id}>
@@ -103,7 +103,7 @@ export function CapabilityDetailPanel({
 
 			{capValueStreams.length > 0 && onSelectValueStream && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Value Streams</h4>
+					<h3 className="detail-panel__section-title">Value Streams</h3>
 					<ul className="detail-panel__list">
 						{capValueStreams.map((vs) => (
 							<li key={vs.id}>
@@ -122,7 +122,7 @@ export function CapabilityDetailPanel({
 
 			{capProcesses.length > 0 && onSelectProcess && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Processes</h4>
+					<h3 className="detail-panel__section-title">Processes</h3>
 					<ul className="detail-panel__list">
 						{capProcesses.map((p) => (
 							<li key={p.id}>
@@ -141,7 +141,7 @@ export function CapabilityDetailPanel({
 
 			{availableJourneys.length > 0 && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Journeys</h4>
+					<h3 className="detail-panel__section-title">Journeys</h3>
 					<ul className="detail-panel__list">
 						{availableJourneys.map((j) => (
 							<li key={j.id}>
@@ -160,7 +160,7 @@ export function CapabilityDetailPanel({
 
 			{capStoryRoutes.length > 0 && onStartRoute && (
 				<div className="detail-panel__section">
-					<h4 className="detail-panel__section-title">Guided Routes</h4>
+					<h3 className="detail-panel__section-title">Guided Routes</h3>
 					<ul className="detail-panel__list">
 						{capStoryRoutes.map((sr) => (
 							<li key={sr.id}>

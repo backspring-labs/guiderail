@@ -1,4 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
+import { pickFromLeftPanel, visibleTexts } from "./support.js";
 
 /**
  * The Process canvas shows the active process and nothing else. Before this was
@@ -16,8 +17,7 @@ const counter = (page: Page) => page.locator(".stepper-control__counter");
 const highlighted = (page: Page) => page.locator(".bpmn-node--highlighted .bpmn-task__label");
 
 async function selectProcess(page: Page, label: string) {
-	await page.locator(".left-panel__filter-input").fill(label);
-	await page.locator(".section-item", { hasText: label }).first().click();
+	await pickFromLeftPanel(page, "Processes", label);
 	await expect(page.locator(".perspective-switcher__tab--active")).toHaveText("Process");
 }
 
@@ -43,26 +43,28 @@ test("the stepper highlights the stages of the process on screen", async ({ page
 	await page.goto("/");
 	await selectProcess(page, ENTITY_SELECTION);
 
-	const labels = await tasks(page).allInnerTexts();
-	await expect(highlighted(page)).toHaveText(labels[0] ?? "");
+	const labels = await visibleTexts(tasks(page));
+	expect(labels).toHaveLength(7);
+	await expect(highlighted(page)).toHaveText(labels[0] ?? "(none)");
 
 	await page.locator(".stepper-control").getByTitle("Next (→)").click();
 	await expect(counter(page)).toHaveText("Stage 2 of 7");
 	await expect(highlighted(page)).toHaveCount(1);
-	await expect(highlighted(page)).toHaveText(labels[1] ?? "");
+	await expect(highlighted(page)).toHaveText(labels[1] ?? "(none)");
 });
 
 test("drilling into a sub-process and going back both change the diagram", async ({ page }) => {
 	await page.goto("/");
 	await selectProcess(page, PERSPECTIVE_SWITCH);
-	const parentTasks = await tasks(page).allInnerTexts();
+	const parentTasks = await visibleTexts(tasks(page));
+	expect(parentTasks).toHaveLength(7);
 
 	// Drill in through the + marker on the stage that has a sub-process.
 	await page.locator(".bpmn-task__subprocess-marker").click();
 	await expect(counter(page)).toHaveText("Stage 1 of 4");
 	await expect(tasks(page)).toHaveCount(4);
 	await expect(lanes(page)).toHaveText(RECONCILE, { ignoreCase: true });
-	expect(await tasks(page).allInnerTexts()).not.toEqual(parentTasks);
+	expect(await visibleTexts(tasks(page))).not.toEqual(parentTasks);
 
 	// The breadcrumb shows the parent and leads back to it.
 	const back = page.locator(".context-bar__segment--parent-process");
