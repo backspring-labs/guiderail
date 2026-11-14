@@ -28,5 +28,8 @@ Closes #
 - **Security:**
 - **Release:**
 
+## Changelog
+<!-- The line added under "Unreleased" in CHANGELOG.md, or "Not user-visible". -->
+
 ## Remaining work
 <!-- Anything left over, as a linked issue with a disposition. "None" if the issue is fully met. -->

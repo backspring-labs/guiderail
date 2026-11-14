@@ -214,6 +214,12 @@ Serialise changes to these; do not open parallel PRs against the same one.
 - `apps/web/src/hooks/use-perspective-provider.ts`
 - `apps/web/src/components/layout/AppShell.tsx`
 
+### Changelog and releases
+
+- A change a user or a consumer of the kernel would notice gets a line in `CHANGELOG.md` under `## [Unreleased]`, in the same pull request.
+- Core and web share one version. Only the maintainer tags and releases; the steps, the compatibility policy and what counts as the public surface are in [docs/releasing.md](docs/releasing.md).
+- Do not create, move or delete `v*` tags.
+
 ### Pull request contents
 
 - Link the issue.
