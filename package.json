@@ -11,6 +11,8 @@
 	"scripts": {
 		"build": "turbo build",
 		"test": "turbo test",
+		"test:coverage": "turbo test:coverage",
+		"typecheck": "turbo typecheck",
 		"check": "turbo check",
 		"dev": "turbo dev",
 		"check:fix": "turbo check:fix",

@@ -18,6 +18,6 @@
 			"@seed/*": ["../../packages/core/src/test-fixtures/*"]
 		}
 	},
-	"include": ["src"],
+	"include": ["src", ".storybook"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

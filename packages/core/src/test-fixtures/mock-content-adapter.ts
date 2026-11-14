@@ -82,6 +82,7 @@ export class MockContentRepoAdapter implements ContentRepoAdapter {
 			type: "domain",
 			path: `domains/${d.label.toLowerCase()}.yaml`,
 			label: d.label,
+			metadata: {},
 		}));
 	}
 
@@ -91,6 +92,7 @@ export class MockContentRepoAdapter implements ContentRepoAdapter {
 			type: "capability",
 			path: `capabilities/${c.id}.yaml`,
 			label: c.label,
+			metadata: {},
 		}));
 	}
 
@@ -100,6 +102,7 @@ export class MockContentRepoAdapter implements ContentRepoAdapter {
 			type: n.type,
 			path: `entities/${n.id}.yaml`,
 			label: n.label,
+			metadata: {},
 		}));
 	}
 
