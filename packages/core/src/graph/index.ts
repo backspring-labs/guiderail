@@ -17,5 +17,6 @@ export {
 export type { TerrainGraph } from "./graph.js";
 
 export { bfsTraverse } from "./traversal.js";
+export type { Direction } from "./adjacency.js";
 
 export { filterGraph, filterNodesByTags, filterNodesByType } from "./filter.js";
