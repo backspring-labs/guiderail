@@ -64,5 +64,17 @@ An exception is a known advisory accepted for a limited time. Each one names the
 | Advisory | Affected | Why exposure is low | Condition | Owner | Expires | Tracking |
 |---|---|---|---|---|---|---|
 | GHSA-mrhx-c7xc-m3w5: Zod can exhaust memory validating oversized constrained collections (high) | `zod` 3.x in `@guiderail/core` | The parser only receives demo data bundled at build time. No untrusted input reaches it | Holds only while that stays true. It lapses if untrusted content loading is enabled before the fix | Maintainer | 2027-02-12 | #23 |
+| GHSA-3g3m-2fjr-6pw4 (`glob`), GHSA-g3hv-75wg-m249 (`minimatch`), GHSA-w5hq-g745-h8pq (`uuid`); all moderate | Dependencies of Storybook 8 (`@storybook/react-vite`, `@storybook/addon-essentials`) | Development tooling only: reached when building or running Storybook locally or in CI, never shipped in the app | No fix exists inside the Storybook 8 line; cleared by the Storybook major upgrade | Maintainer | 2027-02-12 | #46 |
 
-Advisories in development tooling are dispositioned in #5.
+### Dispositions from the first audit
+
+The audit at the baseline reported 48 advisories. Their dispositions:
+
+| Advisories | Disposition |
+|---|---|
+| Vite, Storybook, Turbo and their transitive dependencies (38 records) | Remediated by in-range upgrades in #5 |
+| Vitest and its dependencies (`tinypool`, `@vitest/mocker`), including 3 critical | Remediated by the Vitest 4 upgrade in #5 |
+| Zod (1 high, production) | Exception above; remediated by #23 |
+| `glob`, `minimatch`, `uuid` under Storybook 8 (3 moderate) | Exception above; remediated by #46 |
+
+Advisory counts are records in a database, not demonstrated exploits. Every record above is in development tooling except Zod.
