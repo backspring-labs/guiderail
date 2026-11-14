@@ -1,6 +1,7 @@
+import { type LayoutRequest, layoutKey, useElkLayout } from "@/hooks/use-elk-layout.js";
 import type { SwimLane } from "@/lib/bpmn-layout.js";
 import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
-import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
+import { getLayoutDirection } from "@/lib/elk-layout.js";
 import type { JourneyLayoutResult, JourneyNode } from "@/lib/journey-layout.js";
 import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-layout.js";
 import { computeLandscapeLayout } from "@/lib/landscape-layout.js";
@@ -39,19 +40,13 @@ import {
 } from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { TerrainGraph } from "@guiderail/core/graph";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 
 /**
  * Derives React Flow nodes and edges from kernel navigation state.
  * Uses BPMN layout for Process perspective, ELK for all others.
  */
 export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGraph | null) {
-	const [elkPositions, setElkPositions] = useState<Map<string, { x: number; y: number }>>(
-		new Map(),
-	);
-	const [layoutLoading, setLayoutLoading] = useState(false);
-	const lastPerspectiveRef = useRef(nav.activePerspectiveId);
-
 	const perspectiveType =
 		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
 	const isProcessPerspective = perspectiveType === "process";
@@ -60,48 +55,33 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const isLandscapePerspective = perspectiveType === "landscape";
 	const isOrientationPerspective = perspectiveType === "orientation";
 
-	// Compute ELK layout when perspective changes (terrain perspectives only)
-	useEffect(() => {
-		if (
-			!graph ||
-			isProcessPerspective ||
-			isSequencePerspective ||
-			isJourneyPerspective ||
-			isLandscapePerspective ||
-			isOrientationPerspective
-		)
-			return;
-		if (nav.activePerspectiveId === lastPerspectiveRef.current && elkPositions.size > 0) return;
-		lastPerspectiveRef.current = nav.activePerspectiveId;
-
-		setLayoutLoading(true);
-		const direction = getLayoutDirection(perspectiveType);
-		const elkNodes = seedNodes.map((n) => ({ id: n.id, position: { x: 0, y: 0 }, data: {} }));
-		const elkEdges = seedEdges.map((e) => ({
+	// Terrain perspectives (Architecture, System) are laid out by ELK. The request
+	// is identified by everything that affects the result, so a layout is reused
+	// across perspectives that share it and recomputed only when its inputs change.
+	const needsElkLayout =
+		graph != null &&
+		!isProcessPerspective &&
+		!isSequencePerspective &&
+		!isJourneyPerspective &&
+		!isLandscapePerspective &&
+		!isOrientationPerspective;
+	const layoutDirection = getLayoutDirection(perspectiveType);
+	const layoutRequest = useMemo<LayoutRequest | null>(() => {
+		if (!needsElkLayout) return null;
+		const edges = seedEdges.map((e) => ({
 			id: e.id,
 			source: e.sourceNodeId,
 			target: e.targetNodeId,
 		}));
-
-		computeElkLayout(elkNodes, elkEdges, { direction })
-			.then((positions) => {
-				setElkPositions(positions);
-				setLayoutLoading(false);
-			})
-			.catch(() => {
-				setLayoutLoading(false);
-			});
-	}, [
-		nav.activePerspectiveId,
-		graph,
-		elkPositions.size,
-		isProcessPerspective,
-		isSequencePerspective,
-		isJourneyPerspective,
-		isLandscapePerspective,
-		isOrientationPerspective,
-		perspectiveType,
-	]);
+		return {
+			key: layoutKey(layoutDirection, seedNodes, seedEdges),
+			nodes: seedNodes,
+			edges,
+			direction: layoutDirection,
+		};
+	}, [needsElkLayout, layoutDirection]);
+	const elkLayout = useElkLayout(layoutRequest);
+	const elkPositions = elkLayout.positions;
 
 	// The one process the Process canvas shows: the active process, with its own
 	// BPMN nodes or a flow derived from its stages.
@@ -234,7 +214,10 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	return {
 		rfNodes,
 		rfEdges,
-		layoutLoading,
+		layoutLoading: elkLayout.status === "loading",
+		// True when automatic layout failed and a grid is shown instead.
+		layoutError: elkLayout.status === "error",
+		retryLayout: elkLayout.retry,
 		swimLanes,
 		// "authored", "derived" or "empty" on the Process perspective; null elsewhere.
 		processDiagramSource: processDiagram?.source ?? null,

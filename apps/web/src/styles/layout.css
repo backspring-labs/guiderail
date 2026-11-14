@@ -17,6 +17,33 @@
 	position: relative;
 }
 
+.app-shell__canvas-notice {
+	position: absolute;
+	top: 12px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 14px;
+	border: 1px solid #f59e0b;
+	border-radius: 6px;
+	background: #1e293b;
+	color: #fde68a;
+	font-size: 13px;
+}
+
+.app-shell__canvas-notice-action {
+	padding: 4px 10px;
+	border: 1px solid #f59e0b;
+	border-radius: 4px;
+	background: transparent;
+	color: inherit;
+	font-size: 13px;
+	cursor: pointer;
+}
+
 .app-shell__canvas-empty {
 	position: absolute;
 	inset: 0;
