@@ -1,6 +1,6 @@
-import { seedNodes, seedPerspectives, seedProcessStages, seedSteps } from "@/store/seed-loader.js";
+import type { Dataset } from "@/data/dataset.js";
 import type { NavigationContext } from "@guiderail/core/context";
-import type { Capability, Domain, ProcessStage } from "@guiderail/core/entities";
+import type { Capability } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
 import { getCapabilitiesForDomain } from "@guiderail/core/graph";
 
@@ -13,55 +13,56 @@ import { getCapabilitiesForDomain } from "@guiderail/core/graph";
  * 3. Domain selected — show all nodes from that domain's capabilities
  * 4. Nothing selected — all nodes visible
  */
-export function getVisibleNodeIds(
-	nav: NavigationContext,
-	graph: TerrainGraph,
-	domains: Domain[],
-	capabilities: Capability[],
-): Set<string> {
+export function getVisibleNodeIds(nav: NavigationContext, data: ProjectionData): Set<string> {
 	return (
-		resolveSystemScope(nav) ??
-		resolveProcessScope(nav) ??
-		resolveCapabilityScope(nav, capabilities) ??
-		resolveDomainScope(nav, capabilities) ??
-		allNodeIds(graph)
+		resolveSystemScope(nav, data) ??
+		resolveProcessScope(nav, data) ??
+		resolveCapabilityScope(nav, data.capabilities) ??
+		resolveDomainScope(nav, data.capabilities) ??
+		allNodeIds(data.graph)
 	);
 }
+
+/** The parts of the dataset that decide which nodes are visible. */
+export type ProjectionData = Pick<
+	Dataset,
+	"graph" | "capabilities" | "perspectives" | "nodes" | "steps" | "processStages"
+>;
 
 /**
  * System perspective: scope to nodes participating in the current process or journey.
  * Falls back to all nodes if no process or journey is active (graceful degradation).
  */
-function resolveSystemScope(nav: NavigationContext): Set<string> | null {
-	const perspective = seedPerspectives.find((p) => p.id === nav.activePerspectiveId);
+function resolveSystemScope(nav: NavigationContext, data: ProjectionData): Set<string> | null {
+	const perspective = data.perspectives.find((p) => p.id === nav.activePerspectiveId);
 	if (perspective?.type !== "system") return null;
 
 	let parentNodes: Set<string> | null = null;
 
 	// Scope to process stage nodes if a process is active
 	if (nav.activeProcessId) {
-		const stageNodes = getProcessStageNodeIds(nav.activeProcessId);
+		const stageNodes = getProcessStageNodeIds(nav.activeProcessId, data);
 		if (stageNodes.size > 0) parentNodes = stageNodes;
 	}
 
 	// Scope to journey step focus target nodes if a journey is active
 	if (!parentNodes && nav.activeJourneyId) {
-		const journeyNodes = getJourneyNodeIds(nav.activeJourneyId);
+		const journeyNodes = getJourneyNodeIds(nav.activeJourneyId, data);
 		if (journeyNodes.size > 0) parentNodes = journeyNodes;
 	}
 
 	if (!parentNodes) return null;
 
 	// Expand to include child components of participating systems
-	return expandWithChildComponents(parentNodes);
+	return expandWithChildComponents(parentNodes, data);
 }
 
 /**
  * Expand a set of node IDs to include any child components (nodes with parentNodeId in the set).
  */
-function expandWithChildComponents(nodeIds: Set<string>): Set<string> {
+function expandWithChildComponents(nodeIds: Set<string>, data: ProjectionData): Set<string> {
 	const expanded = new Set(nodeIds);
-	for (const node of seedNodes) {
+	for (const node of data.nodes) {
 		if (node.parentNodeId && nodeIds.has(node.parentNodeId)) {
 			expanded.add(node.id);
 		}
@@ -69,11 +70,11 @@ function expandWithChildComponents(nodeIds: Set<string>): Set<string> {
 	return expanded;
 }
 
-function resolveProcessScope(nav: NavigationContext): Set<string> | null {
+function resolveProcessScope(nav: NavigationContext, data: ProjectionData): Set<string> | null {
 	if (!nav.activeProcessId) return null;
-	const perspective = seedPerspectives.find((p) => p.id === nav.activePerspectiveId);
+	const perspective = data.perspectives.find((p) => p.id === nav.activePerspectiveId);
 	if (perspective?.type !== "process") return null;
-	const stageNodes = getProcessStageNodeIds(nav.activeProcessId);
+	const stageNodes = getProcessStageNodeIds(nav.activeProcessId, data);
 	return stageNodes.size > 0 ? stageNodes : null;
 }
 
@@ -146,16 +147,12 @@ export function getHighlightedEdgeIds(nav: NavigationContext): Set<string> {
 }
 
 /**
- * Get node IDs from a process's stages.
- * Used to scope visibility when Process perspective is active with an active process.
- */
-/**
  * Get node IDs from a journey's step focus targets.
  * Used to scope System perspective to participating nodes.
  */
-function getJourneyNodeIds(journeyId: string): Set<string> {
+function getJourneyNodeIds(journeyId: string, data: ProjectionData): Set<string> {
 	const nodeIds = new Set<string>();
-	const steps = seedSteps.filter((s) => s.journeyId === journeyId);
+	const steps = data.steps.filter((s) => s.journeyId === journeyId);
 	for (const step of steps) {
 		for (const ft of step.focusTargets) {
 			if (ft.type === "node") {
@@ -166,9 +163,13 @@ function getJourneyNodeIds(journeyId: string): Set<string> {
 	return nodeIds;
 }
 
-function getProcessStageNodeIds(processId: string): Set<string> {
+/**
+ * Get node IDs from a process's stages.
+ * Used to scope visibility when Process perspective is active with an active process.
+ */
+function getProcessStageNodeIds(processId: string, data: ProjectionData): Set<string> {
 	const nodeIds = new Set<string>();
-	const stages = seedProcessStages.filter((s) => s.processId === processId);
+	const stages = data.processStages.filter((s) => s.processId === processId);
 	for (const stage of stages) {
 		for (const nodeId of stage.nodeIds) {
 			nodeIds.add(nodeId);

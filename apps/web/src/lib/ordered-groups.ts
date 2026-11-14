@@ -1,11 +1,4 @@
-import {
-	seedMessages,
-	seedOrientationItems,
-	seedProcessStages,
-	seedSequences,
-	seedSteps,
-	seedStoryWaypoints,
-} from "@/store/seed-loader.js";
+import type { Dataset } from "@/data/dataset.js";
 import { orderBySequence } from "@guiderail/core/content";
 import type {
 	Message,
@@ -17,33 +10,47 @@ import type {
 
 /*
  * The ordered groups the steppers walk, built with the same function the kernel
- * uses. Every index the kernel holds (step, stage, message, waypoint,
- * orientation) is a POSITION in one of these arrays.
+ * uses, from the same dataset the kernel was initialised with. Every index the
+ * kernel holds (step, stage, message, waypoint, orientation) is a POSITION in
+ * one of these arrays.
  *
  * Never compare a kernel index with an item's sequenceNumber: sequence numbers
  * only decide order, and need not start at 0 or be contiguous. See
  * docs/architecture/data-integrity.md, section 5.
  */
 
-export const orderedOrientationItems: OrientationItem[] = orderBySequence(seedOrientationItems);
-
-export function orderedStepsOf(journeyId: string): Step[] {
-	return orderBySequence(seedSteps.filter((s) => s.journeyId === journeyId));
+export function orderedOrientationItems(
+	dataset: Pick<Dataset, "orientationItems">,
+): OrientationItem[] {
+	return orderBySequence(dataset.orientationItems);
 }
 
-export function orderedStagesOf(processId: string): ProcessStage[] {
-	return orderBySequence(seedProcessStages.filter((s) => s.processId === processId));
+export function orderedStepsOf(dataset: Pick<Dataset, "steps">, journeyId: string): Step[] {
+	return orderBySequence(dataset.steps.filter((s) => s.journeyId === journeyId));
+}
+
+export function orderedStagesOf(
+	dataset: Pick<Dataset, "processStages">,
+	processId: string,
+): ProcessStage[] {
+	return orderBySequence(dataset.processStages.filter((s) => s.processId === processId));
 }
 
 /** The messages a sequence lists that actually exist, in order. */
-export function orderedMessagesOf(sequenceId: string): Message[] {
-	const sequence = seedSequences.find((s) => s.id === sequenceId);
+export function orderedMessagesOf(
+	dataset: Pick<Dataset, "sequences" | "messages">,
+	sequenceId: string,
+): Message[] {
+	const sequence = dataset.sequences.find((s) => s.id === sequenceId);
 	if (!sequence) return [];
-	return orderBySequence(seedMessages.filter((m) => sequence.messageIds.includes(m.id)));
+	return orderBySequence(dataset.messages.filter((m) => sequence.messageIds.includes(m.id)));
 }
 
-export function orderedWaypointsOf(storyRouteId: string): StoryWaypoint[] {
-	return orderBySequence(seedStoryWaypoints.filter((w) => w.storyRouteId === storyRouteId));
+export function orderedWaypointsOf(
+	dataset: Pick<Dataset, "storyWaypoints">,
+	storyRouteId: string,
+): StoryWaypoint[] {
+	return orderBySequence(dataset.storyWaypoints.filter((w) => w.storyRouteId === storyRouteId));
 }
 
 /** Position of the item with `id` in an ordered group, or -1 if it is not there. */

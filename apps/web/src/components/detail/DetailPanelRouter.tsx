@@ -1,13 +1,6 @@
+import { useDataset } from "@/data/dataset-context.js";
+import type { Dataset } from "@/data/dataset.js";
 import { orderedStepsOf, positionOf } from "@/lib/ordered-groups.js";
-import {
-	seedCapabilities,
-	seedDomains,
-	seedJourneys,
-	seedProcesses,
-	seedSequences,
-	seedSteps,
-	seedValueStreams,
-} from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { TerrainGraph } from "@guiderail/core/graph";
 import { getEdge, getNode } from "@guiderail/core/graph";
@@ -47,6 +40,7 @@ interface DetailPanelRouterProps {
  */
 
 function resolveSelectedNode(
+	dataset: Dataset,
 	nav: NavigationContext,
 	graph: TerrainGraph,
 	onSelectNode: (id: string) => void,
@@ -71,19 +65,19 @@ function resolveSelectedNode(
 	// Sequence picker card
 	if (nav.selectedNodeId.startsWith("sequence-pick-")) {
 		const sequenceId = nav.selectedNodeId.replace("sequence-pick-", "");
-		return resolveSequencePickerDetail(sequenceId, onSelectSequence);
+		return resolveSequencePickerDetail(dataset, sequenceId, onSelectSequence);
 	}
 
 	// Journey picker card
 	if (nav.selectedNodeId.startsWith("journey-pick-")) {
 		const journeyId = nav.selectedNodeId.replace("journey-pick-", "");
-		return resolveJourneyPickerDetail(journeyId, onSelectJourney);
+		return resolveJourneyPickerDetail(dataset, journeyId, onSelectJourney);
 	}
 
 	// Journey step node
 	if (nav.selectedNodeId.startsWith("journey-step-")) {
 		const stepId = nav.selectedNodeId.replace("journey-step-", "");
-		return resolveJourneyStepDetail(stepId);
+		return resolveJourneyStepDetail(dataset, stepId);
 	}
 
 	// Terrain nodes
@@ -111,17 +105,19 @@ function resolveSelectedEdge(
 }
 
 function resolveActiveProcess(
+	dataset: Dataset,
 	nav: NavigationContext,
 	graph: TerrainGraph,
 	onSelectNode: (id: string) => void,
 ): ReactNode | null {
 	if (!nav.activeProcessId) return null;
-	const process = seedProcesses.find((p) => p.id === nav.activeProcessId);
+	const process = dataset.processes.find((p) => p.id === nav.activeProcessId);
 	if (!process) return null;
 	return <ProcessDetailPanel process={process} graph={graph} onSelectNode={onSelectNode} />;
 }
 
 function resolveActiveCapability(
+	dataset: Dataset,
 	nav: NavigationContext,
 	graph: TerrainGraph,
 	props: Pick<
@@ -130,7 +126,7 @@ function resolveActiveCapability(
 	>,
 ): ReactNode | null {
 	if (!nav.activeCapabilityId) return null;
-	const capability = seedCapabilities.find((c) => c.id === nav.activeCapabilityId);
+	const capability = dataset.capabilities.find((c) => c.id === nav.activeCapabilityId);
 	if (!capability) return null;
 	return (
 		<CapabilityDetailPanel
@@ -146,11 +142,12 @@ function resolveActiveCapability(
 }
 
 function resolveActiveValueStream(
+	dataset: Dataset,
 	nav: NavigationContext,
 	onSelectCapability: (id: string) => void,
 ): ReactNode | null {
 	if (!nav.activeValueStreamId) return null;
-	const valueStream = seedValueStreams.find((vs) => vs.id === nav.activeValueStreamId);
+	const valueStream = dataset.valueStreams.find((vs) => vs.id === nav.activeValueStreamId);
 	if (!valueStream) return null;
 	return (
 		<ValueStreamDetailPanel valueStream={valueStream} onSelectCapability={onSelectCapability} />
@@ -158,10 +155,11 @@ function resolveActiveValueStream(
 }
 
 function resolveSequencePickerDetail(
+	dataset: Dataset,
 	sequenceId: string,
 	onSelectSequence: (id: string) => void,
 ): ReactNode | null {
-	const sequence = seedSequences.find((s) => s.id === sequenceId);
+	const sequence = dataset.sequences.find((s) => s.id === sequenceId);
 	if (!sequence) return null;
 
 	return (
@@ -189,12 +187,13 @@ function resolveSequencePickerDetail(
 }
 
 function resolveJourneyPickerDetail(
+	dataset: Dataset,
 	journeyId: string,
 	onSelectJourney: (id: string) => void,
 ): ReactNode | null {
-	const journey = seedJourneys.find((j) => j.id === journeyId);
+	const journey = dataset.journeys.find((j) => j.id === journeyId);
 	if (!journey) return null;
-	const stepCount = seedSteps.filter((s) => s.journeyId === journeyId).length;
+	const stepCount = dataset.steps.filter((s) => s.journeyId === journeyId).length;
 
 	return (
 		<div className="detail-panel">
@@ -219,11 +218,11 @@ function resolveJourneyPickerDetail(
 	);
 }
 
-function resolveJourneyStepDetail(stepId: string): ReactNode | null {
-	const step = seedSteps.find((s) => s.id === stepId);
+function resolveJourneyStepDetail(dataset: Dataset, stepId: string): ReactNode | null {
+	const step = dataset.steps.find((s) => s.id === stepId);
 	if (!step) return null;
 	// The badge shows the step's place in the journey, matching the stepper.
-	const position = positionOf(orderedStepsOf(step.journeyId), step.id);
+	const position = positionOf(orderedStepsOf(dataset, step.journeyId), step.id);
 
 	return (
 		<div className="detail-panel">
@@ -251,20 +250,23 @@ function resolveJourneyStepDetail(stepId: string): ReactNode | null {
 }
 
 function resolveActiveDomain(
+	dataset: Dataset,
 	nav: NavigationContext,
 	onSelectCapability: (id: string) => void,
 ): ReactNode | null {
 	if (!nav.activeDomainId) return null;
-	const domain = seedDomains.find((d) => d.id === nav.activeDomainId);
+	const domain = dataset.domains.find((d) => d.id === nav.activeDomainId);
 	if (!domain) return null;
 	return <DomainDetailPanel domain={domain} onSelectCapability={onSelectCapability} />;
 }
 
 export function DetailPanelRouter(props: DetailPanelRouterProps) {
 	const { nav, graph, onSelectNode, onSelectEdge, onSelectCapability } = props;
+	const dataset = useDataset();
 
 	return (
 		resolveSelectedNode(
+			dataset,
 			nav,
 			graph,
 			onSelectNode,
@@ -273,10 +275,10 @@ export function DetailPanelRouter(props: DetailPanelRouterProps) {
 			props.onSelectSequence ?? (() => {}),
 		) ??
 		resolveSelectedEdge(nav, graph, onSelectNode) ??
-		resolveActiveProcess(nav, graph, onSelectNode) ??
-		resolveActiveCapability(nav, graph, props) ??
-		resolveActiveValueStream(nav, onSelectCapability) ??
-		resolveActiveDomain(nav, onSelectCapability) ?? (
+		resolveActiveProcess(dataset, nav, graph, onSelectNode) ??
+		resolveActiveCapability(dataset, nav, graph, props) ??
+		resolveActiveValueStream(dataset, nav, onSelectCapability) ??
+		resolveActiveDomain(dataset, nav, onSelectCapability) ?? (
 			<div className="detail-panel detail-panel--empty">
 				<p className="detail-panel__empty-text">
 					Select a domain, capability, or node to see details.

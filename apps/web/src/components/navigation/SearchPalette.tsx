@@ -1,13 +1,5 @@
-import {
-	seedCapabilities,
-	seedDomains,
-	seedJourneys,
-	seedNodes,
-	seedProcesses,
-	seedProviders,
-	seedSequences,
-	seedStoryRoutes,
-} from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
+import type { Dataset } from "@/data/dataset.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface SearchResult {
@@ -46,18 +38,21 @@ function fuzzyMatch(text: string, query: string): number {
 	return 0;
 }
 
-function buildSearchItems(callbacks: {
-	onSelectDomain: (id: string) => void;
-	onSelectCapability: (id: string) => void;
-	onSelectNode: (id: string) => void;
-	onSelectProcess: (id: string) => void;
-	onSelectJourney: (id: string) => void;
-	onSelectSequence: (id: string) => void;
-	onStartRoute: (id: string) => void;
-}): SearchResult[] {
+function buildSearchItems(
+	dataset: Dataset,
+	callbacks: {
+		onSelectDomain: (id: string) => void;
+		onSelectCapability: (id: string) => void;
+		onSelectNode: (id: string) => void;
+		onSelectProcess: (id: string) => void;
+		onSelectJourney: (id: string) => void;
+		onSelectSequence: (id: string) => void;
+		onStartRoute: (id: string) => void;
+	},
+): SearchResult[] {
 	const items: SearchResult[] = [];
 
-	for (const d of seedDomains) {
+	for (const d of dataset.domains) {
 		items.push({
 			id: d.id,
 			label: d.label,
@@ -65,7 +60,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectDomain(d.id),
 		});
 	}
-	for (const c of seedCapabilities) {
+	for (const c of dataset.capabilities) {
 		items.push({
 			id: c.id,
 			label: c.label,
@@ -73,7 +68,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectCapability(c.id),
 		});
 	}
-	for (const n of seedNodes) {
+	for (const n of dataset.nodes) {
 		items.push({
 			id: n.id,
 			label: n.label,
@@ -81,7 +76,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectNode(n.id),
 		});
 	}
-	for (const p of seedProviders) {
+	for (const p of dataset.providers) {
 		items.push({
 			id: p.id,
 			label: p.label,
@@ -89,7 +84,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectNode(p.id),
 		});
 	}
-	for (const j of seedJourneys) {
+	for (const j of dataset.journeys) {
 		items.push({
 			id: j.id,
 			label: j.label,
@@ -97,7 +92,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectJourney(j.id),
 		});
 	}
-	for (const p of seedProcesses) {
+	for (const p of dataset.processes) {
 		items.push({
 			id: p.id,
 			label: p.label,
@@ -105,7 +100,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectProcess(p.id),
 		});
 	}
-	for (const s of seedSequences) {
+	for (const s of dataset.sequences) {
 		items.push({
 			id: s.id,
 			label: s.label,
@@ -113,7 +108,7 @@ function buildSearchItems(callbacks: {
 			action: () => callbacks.onSelectSequence(s.id),
 		});
 	}
-	for (const r of seedStoryRoutes) {
+	for (const r of dataset.storyRoutes) {
 		items.push({
 			id: r.id,
 			label: r.title,
@@ -136,6 +131,7 @@ export function SearchPalette({
 	onSelectSequence,
 	onStartRoute,
 }: SearchPaletteProps) {
+	const dataset = useDataset();
 	const [query, setQuery] = useState("");
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -151,7 +147,7 @@ export function SearchPalette({
 
 	const allItems = useMemo(
 		() =>
-			buildSearchItems({
+			buildSearchItems(dataset, {
 				onSelectDomain,
 				onSelectCapability,
 				onSelectNode,
@@ -161,6 +157,7 @@ export function SearchPalette({
 				onStartRoute,
 			}),
 		[
+			dataset,
 			onSelectDomain,
 			onSelectCapability,
 			onSelectNode,

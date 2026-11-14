@@ -1,6 +1,6 @@
 import type { NavigationContext } from "@guiderail/core/context";
 import { createInitialNavigationContext } from "@guiderail/core/context";
-import type { Capability, Domain } from "@guiderail/core/entities";
+import type { Capability } from "@guiderail/core/entities";
 import { createGraph } from "@guiderail/core/graph";
 import { describe, expect, it } from "vitest";
 import {
@@ -9,11 +9,6 @@ import {
 	getVisibleEdgeIds,
 	getVisibleNodeIds,
 } from "./projection.js";
-
-const domains: Domain[] = [
-	{ id: "dom-a", label: "Domain A", tags: [], metadata: {} },
-	{ id: "dom-b", label: "Domain B", tags: [], metadata: {} },
-];
 
 const capabilities: Capability[] = [
 	{
@@ -75,19 +70,29 @@ const graph = createGraph(
 	],
 );
 
+// Everything visibility is computed from. Nothing else is consulted.
+const data = {
+	graph,
+	capabilities,
+	perspectives: [],
+	nodes: [...graph.nodes.values()],
+	steps: [],
+	processStages: [],
+};
+
 function baseCtx(overrides: Partial<NavigationContext> = {}): NavigationContext {
 	return { ...createInitialNavigationContext("persp-landscape"), ...overrides };
 }
 
 describe("getVisibleNodeIds", () => {
 	it("returns all nodes when no domain selected", () => {
-		const result = getVisibleNodeIds(baseCtx(), graph, domains, capabilities);
+		const result = getVisibleNodeIds(baseCtx(), data);
 		expect(result.size).toBe(4);
 	});
 
 	it("returns domain nodes when domain selected", () => {
 		const ctx = baseCtx({ activeDomainId: "dom-a" });
-		const result = getVisibleNodeIds(ctx, graph, domains, capabilities);
+		const result = getVisibleNodeIds(ctx, data);
 		expect(result.has("n-1")).toBe(true);
 		expect(result.has("n-2")).toBe(true);
 		expect(result.has("n-3")).toBe(true);
@@ -96,7 +101,7 @@ describe("getVisibleNodeIds", () => {
 
 	it("returns capability nodes when capability selected", () => {
 		const ctx = baseCtx({ activeDomainId: "dom-a", activeCapabilityId: "cap-1" });
-		const result = getVisibleNodeIds(ctx, graph, domains, capabilities);
+		const result = getVisibleNodeIds(ctx, data);
 		expect(result.has("n-1")).toBe(true);
 		expect(result.has("n-2")).toBe(true);
 		expect(result.has("n-3")).toBe(false);

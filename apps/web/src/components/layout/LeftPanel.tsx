@@ -1,16 +1,6 @@
 import { CollapsibleSection } from "@/components/navigation/CollapsibleSection.js";
-import {
-	seedCapabilities,
-	seedDomains,
-	seedJourneys,
-	seedNodes,
-	seedProcessStages,
-	seedProcesses,
-	seedProviderAssociations,
-	seedProviders,
-	seedSequences,
-	seedStoryRoutes,
-} from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
+import type { Dataset } from "@/data/dataset.js";
 import { useUIStore } from "@/store/ui-store.js";
 import { useState } from "react";
 
@@ -32,44 +22,44 @@ interface LeftPanelProps {
 	onClearDomain: () => void;
 }
 
-function resolveSections(filter: string, props: LeftPanelProps) {
+function resolveSections(filter: string, props: LeftPanelProps, dataset: Dataset) {
 	const filterLower = filter.toLowerCase();
 	const matchesFilter = (label: string) => !filter || label.toLowerCase().includes(filterLower);
 	const isFiltering = filter.length > 0;
 	const activeCap = props.activeCapabilityId;
 
-	const domains = seedDomains.filter((d) => matchesFilter(d.label));
+	const domains = dataset.domains.filter((d) => matchesFilter(d.label));
 	const capabilities = isFiltering
-		? seedCapabilities.filter((c) => matchesFilter(c.label))
+		? dataset.capabilities.filter((c) => matchesFilter(c.label))
 		: props.activeDomainId
-			? seedCapabilities.filter((c) => c.domainId === props.activeDomainId)
+			? dataset.capabilities.filter((c) => c.domainId === props.activeDomainId)
 			: [];
 	const journeys = isFiltering
-		? seedJourneys.filter((j) => matchesFilter(j.label))
+		? dataset.journeys.filter((j) => matchesFilter(j.label))
 		: activeCap
-			? seedJourneys.filter(
+			? dataset.journeys.filter(
 					(j) => j.capabilityIds.includes(activeCap) || j.entryCapabilityId === activeCap,
 				)
 			: [];
 	const processes = isFiltering
-		? seedProcesses.filter((p) => matchesFilter(p.label))
+		? dataset.processes.filter((p) => matchesFilter(p.label))
 		: activeCap
-			? seedProcesses.filter((p) => p.capabilityIds.includes(activeCap))
+			? dataset.processes.filter((p) => p.capabilityIds.includes(activeCap))
 			: [];
 	const sequences = isFiltering
-		? seedSequences.filter((s) => matchesFilter(s.label))
-		: seedSequences.filter(
+		? dataset.sequences.filter((s) => matchesFilter(s.label))
+		: dataset.sequences.filter(
 				(s) => s.capabilityId === props.activeCapabilityId || s.processId === props.activeProcessId,
 			);
 	const providers = isFiltering
-		? seedProviders.filter((p) => matchesFilter(p.label))
+		? dataset.providers.filter((p) => matchesFilter(p.label))
 		: props.activeCapabilityId
-			? resolveProviders(props.activeCapabilityId, "")
+			? resolveProviders(props.activeCapabilityId, "", dataset)
 			: [];
 	const systems = isFiltering
-		? seedNodes.filter((n) => matchesFilter(n.label))
-		: resolveSystemNodes(props.activeProcessId, props.activeCapabilityId);
-	const guides = seedStoryRoutes.filter((r) => matchesFilter(r.title));
+		? dataset.nodes.filter((n) => matchesFilter(n.label))
+		: resolveSystemNodes(props.activeProcessId, props.activeCapabilityId, dataset);
+	const guides = dataset.storyRoutes.filter((r) => matchesFilter(r.title));
 
 	return {
 		domains,
@@ -85,6 +75,7 @@ function resolveSections(filter: string, props: LeftPanelProps) {
 }
 
 export function LeftPanel(props: LeftPanelProps) {
+	const dataset = useDataset();
 	const { leftPanelOpen, toggleLeftPanel } = useUIStore();
 	const [filter, setFilter] = useState("");
 
@@ -98,7 +89,7 @@ export function LeftPanel(props: LeftPanelProps) {
 		);
 	}
 
-	const sections = resolveSections(filter, props);
+	const sections = resolveSections(filter, props, dataset);
 
 	return (
 		<div className="left-panel left-panel--open">
@@ -274,30 +265,38 @@ function SectionItem({ label, active, onClick }: SectionItemProps) {
 	);
 }
 
-function resolveProviders(capabilityId: string, filterLower: string) {
-	const associationProviderIds = seedProviderAssociations
+function resolveProviders(capabilityId: string, filterLower: string, dataset: Dataset) {
+	const associationProviderIds = dataset.providerAssociations
 		.filter((pa) => pa.targetType === "capability" && pa.targetId === capabilityId)
 		.map((pa) => pa.providerId);
-	return seedProviders
+	return dataset.providers
 		.filter((p) => associationProviderIds.includes(p.id))
 		.filter((p) => !filterLower || p.label.toLowerCase().includes(filterLower));
 }
 
-function resolveSystemNodes(activeProcessId: string | null, activeCapabilityId: string | null) {
+function resolveSystemNodes(
+	activeProcessId: string | null,
+	activeCapabilityId: string | null,
+	dataset: Dataset,
+) {
 	if (activeProcessId) {
 		const stageNodeIds = new Set(
-			seedProcessStages.filter((s) => s.processId === activeProcessId).flatMap((s) => s.nodeIds),
+			dataset.processStages
+				.filter((s) => s.processId === activeProcessId)
+				.flatMap((s) => s.nodeIds),
 		);
-		return seedNodes.filter((n) => stageNodeIds.has(n.id));
+		return dataset.nodes.filter((n) => stageNodeIds.has(n.id));
 	}
 	if (activeCapabilityId) {
-		const processIds = seedProcesses
+		const processIds = dataset.processes
 			.filter((p) => p.capabilityIds.includes(activeCapabilityId))
 			.map((p) => p.id);
 		const stageNodeIds = new Set(
-			seedProcessStages.filter((s) => processIds.includes(s.processId)).flatMap((s) => s.nodeIds),
+			dataset.processStages
+				.filter((s) => processIds.includes(s.processId))
+				.flatMap((s) => s.nodeIds),
 		);
-		return seedNodes.filter((n) => stageNodeIds.has(n.id));
+		return dataset.nodes.filter((n) => stageNodeIds.has(n.id));
 	}
 	return [];
 }

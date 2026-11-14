@@ -1,3 +1,5 @@
+import { useDataset } from "@/data/dataset-context.js";
+import type { Dataset } from "@/data/dataset.js";
 import { type LayoutRequest, layoutKey, useElkLayout } from "@/hooks/use-elk-layout.js";
 import type { SwimLane } from "@/lib/bpmn-layout.js";
 import { computeBpmnLayout } from "@/lib/bpmn-layout.js";
@@ -17,27 +19,6 @@ import {
 import { toReactFlowEdges, toReactFlowNodes } from "@/lib/react-flow-adapter.js";
 import type { SequenceLayoutResult, SequenceNode } from "@/lib/sequence-layout.js";
 import { computeSequenceLayout, computeSequencePickerLayout } from "@/lib/sequence-layout.js";
-import {
-	seedBpmnEdges,
-	seedBpmnNodes,
-	seedCapabilities,
-	seedControlPoints,
-	seedDomains,
-	seedEdges,
-	seedInterfaces,
-	seedJourneys,
-	seedMessages,
-	seedNodes,
-	seedOrientationItems,
-	seedPerspectives,
-	seedProcessStages,
-	seedProcesses,
-	seedProviderAssociations,
-	seedProviders,
-	seedSequences,
-	seedSteps,
-	seedValueStreams,
-} from "@/store/seed-loader.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { TerrainGraph } from "@guiderail/core/graph";
 import { useMemo } from "react";
@@ -47,8 +28,10 @@ import { useMemo } from "react";
  * Uses BPMN layout for Process perspective, ELK for all others.
  */
 export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGraph | null) {
+	// The same dataset the kernel was initialised with.
+	const dataset = useDataset();
 	const perspectiveType =
-		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
+		dataset.perspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
 	const isProcessPerspective = perspectiveType === "process";
 	const isSequencePerspective = perspectiveType === "sequence";
 	const isJourneyPerspective = perspectiveType === "journey";
@@ -68,18 +51,18 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const layoutDirection = getLayoutDirection(perspectiveType);
 	const layoutRequest = useMemo<LayoutRequest | null>(() => {
 		if (!needsElkLayout) return null;
-		const edges = seedEdges.map((e) => ({
+		const edges = dataset.edges.map((e) => ({
 			id: e.id,
 			source: e.sourceNodeId,
 			target: e.targetNodeId,
 		}));
 		return {
-			key: layoutKey(layoutDirection, seedNodes, seedEdges),
-			nodes: seedNodes,
+			key: layoutKey(layoutDirection, dataset.nodes, dataset.edges),
+			nodes: dataset.nodes,
 			edges,
 			direction: layoutDirection,
 		};
-	}, [needsElkLayout, layoutDirection]);
+	}, [needsElkLayout, layoutDirection, dataset]);
 	const elkLayout = useElkLayout(layoutRequest);
 	const elkPositions = elkLayout.positions;
 
@@ -88,12 +71,12 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const processDiagram = useMemo(() => {
 		if (!isProcessPerspective) return null;
 		return resolveProcessDiagram(nav.activeProcessId, {
-			processes: seedProcesses,
-			processStages: seedProcessStages,
-			bpmnNodes: seedBpmnNodes,
-			bpmnEdges: seedBpmnEdges,
+			processes: dataset.processes,
+			processStages: dataset.processStages,
+			bpmnNodes: dataset.bpmnNodes,
+			bpmnEdges: dataset.bpmnEdges,
 		});
-	}, [isProcessPerspective, nav.activeProcessId]);
+	}, [isProcessPerspective, nav.activeProcessId, dataset]);
 
 	// BPMN layout (synchronous, recomputed when the process changes)
 	const bpmnLayout = useMemo(
@@ -105,56 +88,59 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const sequenceLayout = useMemo(() => {
 		if (!isSequencePerspective) return null;
 		const activeSequence = nav.activeSequenceId
-			? seedSequences.find((s) => s.id === nav.activeSequenceId)
+			? dataset.sequences.find((s) => s.id === nav.activeSequenceId)
 			: null;
 		if (activeSequence) {
-			const filteredInterfaces = seedInterfaces.filter((i) =>
+			const filteredInterfaces = dataset.interfaces.filter((i) =>
 				activeSequence.interfaceIds.includes(i.id),
 			);
-			const filteredMessages = seedMessages.filter((m) => activeSequence.messageIds.includes(m.id));
+			const filteredMessages = dataset.messages.filter((m) =>
+				activeSequence.messageIds.includes(m.id),
+			);
 			return computeSequenceLayout(filteredInterfaces, filteredMessages);
 		}
 		const scopedSequences = nav.activeCapabilityId
-			? seedSequences.filter((s) => s.capabilityId === nav.activeCapabilityId)
-			: seedSequences;
+			? dataset.sequences.filter((s) => s.capabilityId === nav.activeCapabilityId)
+			: dataset.sequences;
 		return computeSequencePickerLayout(scopedSequences);
-	}, [isSequencePerspective, nav.activeSequenceId, nav.activeCapabilityId]);
+	}, [isSequencePerspective, nav.activeSequenceId, nav.activeCapabilityId, dataset]);
 
 	// Journey layout (synchronous)
 	const journeyLayout = useMemo(() => {
 		if (!isJourneyPerspective) return null;
 		if (nav.activeJourneyId) {
-			const journey = seedJourneys.find((j) => j.id === nav.activeJourneyId);
+			const journey = dataset.journeys.find((j) => j.id === nav.activeJourneyId);
 			if (journey) {
-				const vs = seedValueStreams.find((v) => v.journeyIds?.includes(journey.id));
-				return computeJourneyLayout(journey, seedSteps, vs?.label ?? null);
+				const vs = dataset.valueStreams.find((v) => v.journeyIds?.includes(journey.id));
+				return computeJourneyLayout(journey, dataset.steps, vs?.label ?? null);
 			}
 		}
-		return computeJourneyPickerLayout(seedJourneys);
-	}, [isJourneyPerspective, nav.activeJourneyId]);
+		return computeJourneyPickerLayout(dataset.journeys);
+	}, [isJourneyPerspective, nav.activeJourneyId, dataset]);
 
 	// Orientation layout (synchronous)
 	const orientationLayout = useMemo(() => {
 		if (!isOrientationPerspective) return null;
-		return computeOrientationLayout(seedOrientationItems);
-	}, [isOrientationPerspective]);
+		return computeOrientationLayout(dataset.orientationItems);
+	}, [isOrientationPerspective, dataset]);
 
 	// Landscape layout (synchronous)
 	const landscapeLayout = useMemo(() => {
 		if (!isLandscapePerspective) return null;
-		const actors = seedNodes.filter((n) => n.type === "actor");
+		const actors = dataset.nodes.filter((n) => n.type === "actor");
 		return computeLandscapeLayout(
-			seedDomains,
-			seedCapabilities,
+			dataset.domains,
+			dataset.capabilities,
 			actors,
-			seedProviders,
-			seedProviderAssociations,
+			dataset.providers,
+			dataset.providerAssociations,
 		);
-	}, [isLandscapePerspective]);
+	}, [isLandscapePerspective, dataset]);
 
 	const rfNodes = useMemo(
 		() =>
 			resolveNodes(nav, graph, elkPositions, {
+				dataset,
 				isOrientationPerspective,
 				orientationLayout,
 				isProcessPerspective,
@@ -170,6 +156,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		[
 			nav,
 			graph,
+			dataset,
 			elkPositions,
 			isProcessPerspective,
 			processDiagram,
@@ -188,6 +175,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 	const rfEdges = useMemo(
 		() =>
 			resolveEdges(nav, graph, {
+				dataset,
 				isOrientationPerspective,
 				isProcessPerspective,
 				processDiagram,
@@ -199,6 +187,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		[
 			nav,
 			graph,
+			dataset,
 			isOrientationPerspective,
 			isProcessPerspective,
 			processDiagram,
@@ -233,6 +222,7 @@ function buildLandscapeNodes(
 		draggable: boolean;
 		data: Record<string, unknown>;
 	}>,
+	dataset: Dataset,
 ) {
 	const isProviderMode = nav.activeCanvasMode === "providers";
 	return nodes.map((node) => {
@@ -240,13 +230,15 @@ function buildLandscapeNodes(
 			const domainId = node.data.domainId as string;
 			const isActive =
 				domainId === nav.activeDomainId ||
-				seedCapabilities.some((c) => c.id === nav.activeCapabilityId && c.domainId === domainId);
+				dataset.capabilities.some(
+					(c) => c.id === nav.activeCapabilityId && c.domainId === domainId,
+				);
 			return { ...node, data: { ...node.data, isActive } };
 		}
 		if (node.type === "landscape_capability") {
 			const capId = node.data.capabilityId as string;
 			const isActive = capId === nav.activeCapabilityId;
-			const providerNames = isProviderMode ? resolveProviderNames(capId) : [];
+			const providerNames = isProviderMode ? resolveProviderNames(capId, dataset) : [];
 			return {
 				...node,
 				data: { ...node.data, isActive, providerNames, showProviders: isProviderMode },
@@ -265,17 +257,18 @@ function buildTerrainNodes(
 	nav: NavigationContext,
 	graph: TerrainGraph,
 	elkPositions: Map<string, { x: number; y: number }>,
+	dataset: Dataset,
 ) {
-	const visibleNodeIds = getVisibleNodeIds(nav, graph, seedDomains, seedCapabilities);
+	const visibleNodeIds = getVisibleNodeIds(nav, dataset);
 	const highlightedNodeIds = getHighlightedNodeIds(nav);
 
 	const isDeploymentMode = nav.activeCanvasMode === "deployment";
-	const nodesWithPositions = toReactFlowNodes(seedNodes, nav.activePerspectiveId, {
+	const nodesWithPositions = toReactFlowNodes(dataset.nodes, nav.activePerspectiveId, {
 		visibleNodeIds,
 		selectedNodeId: nav.selectedNodeId,
 		highlightedNodeIds,
-		providers: seedProviders,
-		providerAssociations: seedProviderAssociations,
+		providers: dataset.providers,
+		providerAssociations: dataset.providerAssociations,
 	});
 
 	return nodesWithPositions.map((rfNode) => {
@@ -283,7 +276,7 @@ function buildTerrainNodes(
 		let node = rfNode;
 		const parentNodeId = rfNode.data.kernelNode?.parentNodeId;
 		if (parentNodeId) {
-			const parentNode = seedNodes.find((n) => n.id === parentNodeId);
+			const parentNode = dataset.nodes.find((n) => n.id === parentNodeId);
 			node = {
 				...node,
 				data: {
@@ -315,27 +308,27 @@ function buildTerrainNodes(
 	});
 }
 
-function buildTerrainEdges(nav: NavigationContext, graph: TerrainGraph) {
-	const visibleNodeIds = getVisibleNodeIds(nav, graph, seedDomains, seedCapabilities);
+function buildTerrainEdges(nav: NavigationContext, graph: TerrainGraph, dataset: Dataset) {
+	const visibleNodeIds = getVisibleNodeIds(nav, dataset);
 	const visibleEdgeIds = getVisibleEdgeIds(graph, visibleNodeIds);
 	const highlightedEdgeIds = getHighlightedEdgeIds(nav);
 
-	return toReactFlowEdges(seedEdges, {
+	return toReactFlowEdges(dataset.edges, {
 		visibleEdgeIds,
 		selectedEdgeId: nav.selectedEdgeId,
 		highlightedEdgeIds,
 	});
 }
 
-function resolveSubProcess(stageId: string | undefined): string | null {
+function resolveSubProcess(stageId: string | undefined, dataset: Dataset): string | null {
 	if (!stageId) return null;
-	const stage = seedProcessStages.find((s) => s.id === stageId);
+	const stage = dataset.processStages.find((s) => s.id === stageId);
 	return stage?.subProcessId ?? null;
 }
 
-function resolveActiveStageId(nav: NavigationContext): string | null {
+function resolveActiveStageId(nav: NavigationContext, dataset: Dataset): string | null {
 	if (nav.activeStageIndex == null || !nav.activeProcessId) return null;
-	return orderedStagesOf(nav.activeProcessId)[nav.activeStageIndex]?.id ?? null;
+	return orderedStagesOf(dataset, nav.activeProcessId)[nav.activeStageIndex]?.id ?? null;
 }
 
 function buildBpmnNodes(
@@ -343,11 +336,12 @@ function buildBpmnNodes(
 	diagram: ProcessDiagram,
 	positions: Map<string, { x: number; y: number }>,
 	swimLanes: SwimLane[],
+	dataset: Dataset,
 ) {
 	const canvasMode = nav.activeCanvasMode ?? "operational";
 	const isRiskControls = canvasMode === "risk_controls";
 	const isActivity = canvasMode === "activity";
-	const activeStageId = resolveActiveStageId(nav);
+	const activeStageId = resolveActiveStageId(nav, dataset);
 	const hasStepper = activeStageId != null;
 
 	// Swim lane background nodes (rendered behind BPMN nodes)
@@ -366,7 +360,7 @@ function buildBpmnNodes(
 		const metadata = node.metadata as Record<string, unknown>;
 
 		const controlIndicators = isRiskControls
-			? resolveControlIndicators(metadata.terrainNodeId as string | undefined)
+			? resolveControlIndicators(metadata.terrainNodeId as string | undefined, dataset)
 			: [];
 
 		const isGateway = node.type === "bpmn_gateway";
@@ -390,8 +384,8 @@ function buildBpmnNodes(
 				eventKind: metadata.eventKind as string | undefined,
 				gatewayKind: metadata.gatewayKind as string | undefined,
 				controlIndicators,
-				isSubProcess: resolveSubProcess(metadata.stageId as string | undefined) != null,
-				subProcessId: resolveSubProcess(metadata.stageId as string | undefined),
+				isSubProcess: resolveSubProcess(metadata.stageId as string | undefined, dataset) != null,
+				subProcessId: resolveSubProcess(metadata.stageId as string | undefined, dataset),
 			},
 		};
 	});
@@ -425,16 +419,16 @@ function buildBpmnEdges(nav: NavigationContext, diagram: ProcessDiagram) {
 	});
 }
 
-function resolveControlIndicators(terrainNodeId: string | undefined) {
+function resolveControlIndicators(terrainNodeId: string | undefined, dataset: Dataset) {
 	if (!terrainNodeId) return [];
 
 	// Find process stages that include this terrain node
-	const stageIds = seedProcessStages
+	const stageIds = dataset.processStages
 		.filter((ps) => ps.nodeIds.includes(terrainNodeId))
 		.map((ps) => ps.id);
 
 	// Find control points for those stages
-	return seedControlPoints
+	return dataset.controlPoints
 		.filter((cp) => stageIds.includes(cp.processStageId))
 		.map((cp) => ({
 			controlPointId: cp.id,
@@ -466,6 +460,7 @@ function resolveNodes(
 	graph: TerrainGraph | null,
 	elkPositions: Map<string, { x: number; y: number }>,
 	ctx: {
+		dataset: Dataset;
 		isOrientationPerspective: boolean;
 		orientationLayout: ReturnType<typeof computeOrientationLayout> | null;
 		isProcessPerspective: boolean;
@@ -489,6 +484,7 @@ function resolveNodes(
 			ctx.processDiagram,
 			ctx.bpmnLayout.positions,
 			ctx.bpmnLayout.swimLanes,
+			ctx.dataset,
 		);
 	}
 	if (ctx.isSequencePerspective && ctx.sequenceLayout) {
@@ -498,15 +494,16 @@ function resolveNodes(
 		return buildJourneyNodes(nav, ctx.journeyLayout.nodes);
 	}
 	if (ctx.isLandscapePerspective && ctx.landscapeLayout) {
-		return buildLandscapeNodes(nav, ctx.landscapeLayout.nodes);
+		return buildLandscapeNodes(nav, ctx.landscapeLayout.nodes, ctx.dataset);
 	}
-	return buildTerrainNodes(nav, graph, elkPositions);
+	return buildTerrainNodes(nav, graph, elkPositions, ctx.dataset);
 }
 
 function resolveEdges(
 	nav: NavigationContext,
 	graph: TerrainGraph | null,
 	ctx: {
+		dataset: Dataset;
 		isOrientationPerspective: boolean;
 		isProcessPerspective: boolean;
 		processDiagram: ProcessDiagram | null;
@@ -524,7 +521,7 @@ function resolveEdges(
 	if (ctx.isSequencePerspective) return [];
 	if (ctx.isLandscapePerspective) return [];
 	if (ctx.isJourneyPerspective && ctx.journeyLayout) return ctx.journeyLayout.edges;
-	return buildTerrainEdges(nav, graph);
+	return buildTerrainEdges(nav, graph, ctx.dataset);
 }
 
 function buildSequenceNodes(nav: NavigationContext, nodes: SequenceNode[]) {
@@ -555,11 +552,11 @@ function buildJourneyNodes(nav: NavigationContext, nodes: JourneyNode[]) {
 	});
 }
 
-function resolveProviderNames(capabilityId: string): string[] {
-	const associations = seedProviderAssociations.filter(
+function resolveProviderNames(capabilityId: string, dataset: Dataset): string[] {
+	const associations = dataset.providerAssociations.filter(
 		(pa) => pa.targetType === "capability" && pa.targetId === capabilityId,
 	);
 	return associations
-		.map((a) => seedProviders.find((p) => p.id === a.providerId)?.label)
+		.map((a) => dataset.providers.find((p) => p.id === a.providerId)?.label)
 		.filter((label): label is string => label != null);
 }

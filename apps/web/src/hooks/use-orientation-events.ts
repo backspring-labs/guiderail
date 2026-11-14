@@ -1,3 +1,4 @@
+import { useDataset } from "@/data/dataset-context.js";
 import { orderedOrientationItems } from "@/lib/ordered-groups.js";
 import type { ContextMachineEvent } from "@guiderail/core/context";
 import type { OrientationItem } from "@guiderail/core/entities";
@@ -13,6 +14,7 @@ export function useOrientationEvents(
 	isOrientationPerspective: boolean,
 	activeOrientationIndex: number | null,
 ) {
+	const dataset = useDataset();
 	const handleOrientationSelect = useCallback(
 		(e: Event) => {
 			const detail = (e as CustomEvent).detail as { position: number };
@@ -43,7 +45,7 @@ export function useOrientationEvents(
 
 	const currentOrientationItem: OrientationItem | null =
 		isOrientationPerspective && activeOrientationIndex != null
-			? (orderedOrientationItems[activeOrientationIndex] ?? null)
+			? (orderedOrientationItems(dataset)[activeOrientationIndex] ?? null)
 			: null;
 
 	return { currentOrientationItem };

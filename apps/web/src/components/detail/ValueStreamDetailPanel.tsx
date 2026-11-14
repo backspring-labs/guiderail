@@ -1,4 +1,4 @@
-import { seedCapabilities, seedProviderAssociations, seedProviders } from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 import type { ValueStream } from "@guiderail/core/entities";
 import { getProvidersForValueStream } from "@guiderail/core/graph";
 
@@ -11,11 +11,12 @@ export function ValueStreamDetailPanel({
 	valueStream,
 	onSelectCapability,
 }: ValueStreamDetailPanelProps) {
-	const linkedCapabilities = seedCapabilities.filter((c) =>
+	const dataset = useDataset();
+	const linkedCapabilities = dataset.capabilities.filter((c) =>
 		valueStream.capabilityIds.includes(c.id),
 	);
-	const providerIds = getProvidersForValueStream(valueStream.id, seedProviderAssociations);
-	const linkedProviders = seedProviders.filter((p) => providerIds.includes(p.id));
+	const providerIds = getProvidersForValueStream(valueStream.id, dataset.providerAssociations);
+	const linkedProviders = dataset.providers.filter((p) => providerIds.includes(p.id));
 
 	return (
 		<div className="detail-panel">

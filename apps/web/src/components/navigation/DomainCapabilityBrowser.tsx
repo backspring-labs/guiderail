@@ -1,4 +1,4 @@
-import { seedCapabilities, seedDomains } from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 import { getCapabilitiesForDomain } from "@guiderail/core/graph";
 import { CapabilityItem } from "./CapabilityItem.js";
 import { DomainItem } from "./DomainItem.js";
@@ -18,6 +18,7 @@ export function DomainCapabilityBrowser({
 	onSelectCapability,
 	onClearDomain,
 }: DomainCapabilityBrowserProps) {
+	const dataset = useDataset();
 	return (
 		<div className="domain-browser">
 			<div className="domain-browser__header">
@@ -29,9 +30,9 @@ export function DomainCapabilityBrowser({
 				)}
 			</div>
 			<div className="domain-browser__list">
-				{seedDomains.map((domain) => {
+				{dataset.domains.map((domain) => {
 					const isActiveDomain = domain.id === activeDomainId;
-					const domainCaps = getCapabilitiesForDomain(domain.id, seedCapabilities);
+					const domainCaps = getCapabilitiesForDomain(domain.id, dataset.capabilities);
 
 					return (
 						<div key={domain.id} className="domain-browser__domain">

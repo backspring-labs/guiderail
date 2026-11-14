@@ -1,13 +1,14 @@
+import { DatasetProvider } from "@/data/dataset-context.js";
+import { demoDataset as dataset } from "@/data/demo-dataset.js";
 import { orderedMessagesOf } from "@/lib/ordered-groups.js";
-import { seedGraph, seedInterfaces, seedSequences } from "@/store/seed-loader.js";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { SequenceDetailPanel } from "./SequenceDetailPanel.js";
 
-const [sequence, otherSequence] = seedSequences;
+const [sequence, otherSequence] = dataset.sequences;
 if (!sequence || !otherSequence) throw new Error("the demo data needs two sequences for this test");
-const messages = orderedMessagesOf(sequence.id);
+const messages = orderedMessagesOf(dataset, sequence.id);
 
 function renderPanel(
 	selectedNodeId: string,
@@ -15,12 +16,14 @@ function renderPanel(
 ) {
 	const onSelectNode = vi.fn();
 	const view = render(
-		<SequenceDetailPanel
-			selectedNodeId={selectedNodeId}
-			activeSequenceId={activeSequenceId}
-			graph={seedGraph}
-			onSelectNode={onSelectNode}
-		/>,
+		<DatasetProvider dataset={dataset}>
+			<SequenceDetailPanel
+				selectedNodeId={selectedNodeId}
+				activeSequenceId={activeSequenceId}
+				graph={dataset.graph}
+				onSelectNode={onSelectNode}
+			/>
+		</DatasetProvider>,
 	);
 	return { ...view, onSelectNode };
 }
@@ -38,7 +41,7 @@ describe("SequenceDetailPanel — message", () => {
 	);
 
 	it("shows no number for a message outside the active sequence", () => {
-		const foreign = orderedMessagesOf(otherSequence.id).find(
+		const foreign = orderedMessagesOf(dataset, otherSequence.id).find(
 			(m) => !sequence.messageIds.includes(m.id),
 		);
 		if (!foreign) throw new Error("the second sequence has no message of its own");
@@ -55,7 +58,7 @@ describe("SequenceDetailPanel — message", () => {
 
 describe("SequenceDetailPanel — lifeline", () => {
 	const sender = messages[0]?.sourceInterfaceId ?? "";
-	const iface = seedInterfaces.find((i) => i.id === sender);
+	const iface = dataset.interfaces.find((i) => i.id === sender);
 	const sent = messages
 		.map((message, position) => ({ message, position }))
 		.filter(({ message }) => message.sourceInterfaceId === sender);

@@ -89,7 +89,7 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 3. **Zustand owns UI-only state.** Panel visibility, animation flags, hover. Never canonical navigation state.
 4. **React Flow is render-only.** Node and edge types are delivery structures, not semantic truth.
 5. **No domain-model renaming from package renames.** The project was previously called Viewscape. `mode: "viewscape" | "guiderail"` is a domain enum (free exploration vs guided traversal), not a package name. Leave it alone.
-6. **The demo corpus is one dataset, not the content contract.** It is built as `@guiderail/core/demo`. The web app must never import core's source.
+6. **One data boundary.** The web app takes its content as a `Dataset` through `<App dataset={…}>`. The kernel is initialised from it and every view reads it with `useDataset()`, so the two cannot disagree. The demo corpus (`@guiderail/core/demo`) is only the default, imported by one module, `apps/web/src/data/demo-dataset.ts`. No component imports content, and the web app never imports core's source.
 7. **Seven-perspective progression.** Each perspective answers a different question about the same terrain.
 8. **Canvas modes are perspective-internal.** Same topology, different emphasis.
 9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". See "Navigation contract" below for exactly what persists and what resets.
@@ -110,6 +110,14 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 The Process mode ids differ from their UI labels: `activity` is shown as "Decision" and `risk_controls` as "Controls".
 
 Orientation is the entry perspective on first load.
+
+### Data boundary
+
+- `Dataset` (`apps/web/src/data/dataset.ts`) is a `ContentBundle` plus the terrain graph built from it.
+- `<App dataset={dataset}>` provides it. `App` defaults to the demo corpus.
+- Components and hooks call `useDataset()`. Pure helpers take the dataset, or the slice they need, as a parameter.
+- To show other content, build a `ContentBundle` (for example with `parseContentBundle()`), wrap it with `createDataset()`, and pass it in. No component changes.
+- The app must render a partial dataset: omitted collections are empty, and references that do not resolve are skipped, as the [data-integrity contract](docs/architecture/data-integrity.md) requires. `App.test.tsx` mounts the real app with such a dataset.
 
 ### Navigation contract
 
@@ -168,7 +176,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 
 | Limitation | Issue |
 |---|---|
-| Components read the demo corpus's `seed*` arrays directly instead of one dataset shared with the kernel, so other content cannot be supplied | #13 |
 
 Remove a row in the same PR that fixes it.
 

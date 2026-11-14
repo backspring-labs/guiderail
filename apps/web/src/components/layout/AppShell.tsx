@@ -5,6 +5,8 @@ import { ContextBar } from "@/components/navigation/ContextBar.js";
 import { SearchPalette } from "@/components/navigation/SearchPalette.js";
 import { StepperControl } from "@/components/navigation/StepperControl.js";
 import { StoryRouteBar } from "@/components/route/StoryRouteBar.js";
+import { useDataset } from "@/data/dataset-context.js";
+import type { Dataset } from "@/data/dataset.js";
 import { useAutoPanel } from "@/hooks/use-auto-panel.js";
 import {
 	useExpandEvents,
@@ -22,7 +24,6 @@ import {
 	positionOf,
 } from "@/lib/ordered-groups.js";
 import { deriveStepperState } from "@/lib/stepper-state.js";
-import { seedPerspectives, seedSteps, seedStoryRoutes } from "@/store/seed-loader.js";
 import type { Edge as RFEdge, Node as RFNode } from "@xyflow/react";
 import {
 	Background,
@@ -50,20 +51,23 @@ const CUSTOM_SELECTION_PERSPECTIVES = new Set([
 	"process",
 ]);
 
-const NODE_CLICK_HANDLERS: Array<{ prefix: string; action: (id: string, send: SendFn) => void }> = [
+const NODE_CLICK_HANDLERS: Array<{
+	prefix: string;
+	action: (id: string, send: SendFn, dataset: Dataset) => void;
+}> = [
 	{
 		prefix: "orient-item-",
-		action: (id, send) => {
-			const position = positionOf(orderedOrientationItems, id);
+		action: (id, send, dataset) => {
+			const position = positionOf(orderedOrientationItems(dataset), id);
 			if (position >= 0) send({ type: "JUMP_TO_ORIENTATION", index: position });
 		},
 	},
 	{
 		prefix: "journey-step-",
-		action: (id, send) => {
-			const step = seedSteps.find((s) => s.id === id);
+		action: (id, send, dataset) => {
+			const step = dataset.steps.find((s) => s.id === id);
 			if (!step) return;
-			const position = positionOf(orderedStepsOf(step.journeyId), id);
+			const position = positionOf(orderedStepsOf(dataset, step.journeyId), id);
 			if (position >= 0) send({ type: "JUMP_TO_STEP", index: position });
 		},
 	},
@@ -78,23 +82,23 @@ const NODE_CLICK_HANDLERS: Array<{ prefix: string; action: (id: string, send: Se
 	},
 ];
 
-function deriveRouteState(nav: {
-	activeStoryRouteId: string | null;
-	activeWaypointIndex: number | null;
-}) {
+function deriveRouteState(
+	nav: { activeStoryRouteId: string | null; activeWaypointIndex: number | null },
+	dataset: Dataset,
+) {
 	const activeRoute = nav.activeStoryRouteId
-		? (seedStoryRoutes.find((sr) => sr.id === nav.activeStoryRouteId) ?? null)
+		? (dataset.storyRoutes.find((sr) => sr.id === nav.activeStoryRouteId) ?? null)
 		: null;
-	const routeWaypoints = activeRoute ? orderedWaypointsOf(activeRoute.id) : [];
+	const routeWaypoints = activeRoute ? orderedWaypointsOf(dataset, activeRoute.id) : [];
 	const currentWaypoint =
 		nav.activeWaypointIndex != null ? (routeWaypoints[nav.activeWaypointIndex] ?? null) : null;
 	return { activeRoute, routeWaypoints, currentWaypoint };
 }
 
-function handleNodeClick(nodeId: string, send: SendFn) {
+function handleNodeClick(nodeId: string, send: SendFn, dataset: Dataset) {
 	for (const handler of NODE_CLICK_HANDLERS) {
 		if (nodeId.startsWith(handler.prefix)) {
-			handler.action(nodeId.replace(handler.prefix, ""), send);
+			handler.action(nodeId.replace(handler.prefix, ""), send, dataset);
 			return;
 		}
 	}
@@ -102,6 +106,7 @@ function handleNodeClick(nodeId: string, send: SendFn) {
 }
 
 export function AppShell() {
+	const dataset = useDataset();
 	useInitializeContext();
 	const { nav, graph, isReady, send } = useNavigation();
 	const { rfNodes, rfEdges, layoutError, retryLayout, processDiagramSource } =
@@ -117,7 +122,7 @@ export function AppShell() {
 
 	useExpandEvents(send);
 	const perspectiveType =
-		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
+		dataset.perspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
 	// On the Process perspective a different process is a different diagram.
 	const { onInit } = useFitViewOnSwitch(
 		nav.activePerspectiveId,
@@ -146,7 +151,7 @@ export function AppShell() {
 
 	// Stepper transport control — derive state from active perspective + entity
 	const routeActive = nav.routeState !== "inactive";
-	const stepper = deriveStepperState(nav, perspectiveType);
+	const stepper = deriveStepperState(nav, perspectiveType, dataset);
 	const stepperVisible = stepper != null && !routeActive;
 
 	useStepperKeyboard(stepperVisible, send);
@@ -159,10 +164,10 @@ export function AppShell() {
 	}
 
 	const journeySteps = nav.activeJourneyId
-		? seedSteps.filter((s) => s.journeyId === nav.activeJourneyId)
+		? dataset.steps.filter((s) => s.journeyId === nav.activeJourneyId)
 		: [];
 
-	const { activeRoute, routeWaypoints, currentWaypoint } = deriveRouteState(nav);
+	const { activeRoute, routeWaypoints, currentWaypoint } = deriveRouteState(nav, dataset);
 
 	return (
 		<div className="app-shell">
@@ -212,7 +217,7 @@ export function AppShell() {
 				>
 					{isOrientationPerspective ? (
 						<OrientationDeck
-							items={orderedOrientationItems}
+							items={orderedOrientationItems(dataset)}
 							activeIndex={nav.activeOrientationIndex ?? 0}
 							onSelect={(i) => send({ type: "JUMP_TO_ORIENTATION", index: i })}
 						/>
@@ -225,7 +230,7 @@ export function AppShell() {
 							nodeTypes={nodeTypes}
 							edgeTypes={edgeTypes}
 							onInit={onInit}
-							onNodeClick={(_, node) => handleNodeClick(node.id, send)}
+							onNodeClick={(_, node) => handleNodeClick(node.id, send, dataset)}
 							onEdgeClick={(_, edge) => send({ type: "SELECT_EDGE", edgeId: edge.id })}
 							onPaneClick={() => {
 								send({ type: "CLEAR_SELECTION" });
