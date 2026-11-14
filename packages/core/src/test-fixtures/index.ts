@@ -1,3 +1,10 @@
+/**
+ * Internal test support: the demo corpus, mock adapters and entity factories.
+ *
+ * This directory is not part of the published package. It is excluded from the
+ * build (tsconfig.build.json) and has no entry in package.json "exports". Tests
+ * import it by relative path.
+ */
 export {
 	domains,
 	capabilities,
@@ -23,6 +30,7 @@ export {
 	interfaces,
 	messages,
 	sequences,
+	orientationItems,
 } from "./seed-banking.js";
 
 export { MockContentRepoAdapter } from "./mock-content-adapter.js";

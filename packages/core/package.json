@@ -4,6 +4,15 @@
 	"description": "GuideRail headless kernel — canonical domain model, state machines, context synchronization",
 	"type": "module",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/backspring-labs/guiderail.git",
+		"directory": "packages/core"
+	},
+	"homepage": "https://github.com/backspring-labs/guiderail/tree/main/packages/core#readme",
+	"bugs": {
+		"url": "https://github.com/backspring-labs/guiderail/issues"
+	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
@@ -42,10 +51,6 @@
 		"./provenance": {
 			"import": "./dist/provenance/index.js",
 			"types": "./dist/provenance/index.d.ts"
-		},
-		"./test-fixtures": {
-			"import": "./dist/test-fixtures/index.js",
-			"types": "./dist/test-fixtures/index.d.ts"
 		},
 		"./content": {
 			"import": "./dist/content/index.js",
