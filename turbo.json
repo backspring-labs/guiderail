@@ -26,6 +26,7 @@
 		"check": {},
 		"check:fix": {},
 		"dev": {
+			"dependsOn": ["^build"],
 			"cache": false,
 			"persistent": true
 		}

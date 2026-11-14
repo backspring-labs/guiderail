@@ -1,0 +1,55 @@
+{
+	"domains": [{ "id": "dom-orders", "label": "Orders" }],
+	"capabilities": [
+		{
+			"id": "cap-place-order",
+			"domainId": "dom-orders",
+			"label": "Place an order",
+			"nodeIds": ["n-storefront", "n-order-service"]
+		}
+	],
+	"nodes": [
+		{ "id": "n-storefront", "type": "screen", "label": "Storefront" },
+		{ "id": "n-order-service", "type": "service", "label": "Order service" }
+	],
+	"edges": [
+		{
+			"id": "e-storefront-orders",
+			"sourceNodeId": "n-storefront",
+			"targetNodeId": "n-order-service",
+			"type": "calls"
+		}
+	],
+	"perspectives": [
+		{ "id": "persp-landscape", "type": "landscape", "label": "Landscape" },
+		{ "id": "persp-journey", "type": "journey", "label": "Journey" },
+		{ "id": "persp-architecture", "type": "architecture", "label": "Architecture" }
+	],
+	"journeys": [
+		{
+			"id": "j-checkout",
+			"label": "Check out",
+			"entryCapabilityId": "cap-place-order",
+			"capabilityIds": ["cap-place-order"]
+		}
+	],
+	"steps": [
+		{
+			"id": "s-review",
+			"journeyId": "j-checkout",
+			"sequenceNumber": 0,
+			"capabilityId": "cap-place-order",
+			"title": "Review the basket",
+			"focusTargets": [{ "type": "node", "targetId": "n-storefront" }],
+			"transitions": [{ "targetStepId": "s-confirm" }]
+		},
+		{
+			"id": "s-confirm",
+			"journeyId": "j-checkout",
+			"sequenceNumber": 1,
+			"capabilityId": "cap-place-order",
+			"title": "Confirm the order",
+			"focusTargets": [{ "type": "node", "targetId": "n-order-service" }]
+		}
+	]
+}

@@ -11,7 +11,7 @@ Run from the repository root.
 ```bash
 pnpm install        # install all workspace dependencies
 pnpm build          # build all packages (core first, then web)
-pnpm dev            # start the web dev server
+pnpm dev            # build core, then run core in watch mode and the web dev server
 pnpm test           # run all tests (builds core first)
 pnpm check          # Biome lint + format check in each workspace
 pnpm check:fix      # Biome auto-fix
@@ -39,24 +39,27 @@ Coverage floors are measured, not aspirational, and only move up: raise them in 
 
 Things the command names do not tell you:
 
-- **Build before `pnpm dev` on a fresh checkout.** The web app resolves `@guiderail/core` from `packages/core/dist`.
+- **The web app resolves `@guiderail/core` from `packages/core/dist`.** `pnpm dev` builds core first and then watches it. If you start Vite any other way, build first.
 - **`check` is Biome only.** Type errors surface in `pnpm build` and `pnpm typecheck`, not in `check`.
 - **`src/test-fixtures/` in core is internal.** It holds mocks and entity factories, and is excluded from the build and not exported.
 - **The demo corpus lives in `packages/core/src/demo/`** and is built as the `@guiderail/core/demo` entry point. It is in core because the kernel's tests use it as their fixture, and a separate package that core's tests depended on would be a dependency cycle. It is data, not kernel API: kernel source must not import it.
 - **`test:e2e` needs a browser installed once:** `pnpm --filter @guiderail/web exec playwright install chromium`.
-- **Git hooks may not be installed on a fresh clone.** pnpm does not run lefthook's install script. Run `pnpm exec lefthook install` once; the pre-commit hook then runs `pnpm check`.
+- **`pnpm install` installs the git hooks** through the root `prepare` script (`scripts/install-hooks.mjs`), because pnpm does not run lefthook's own install script. The pre-commit hook runs `pnpm check`. CI does not rely on hooks.
 
 Supported runtimes are Node 26 (primary) and Node 24. The pnpm version is pinned in the root `package.json`.
 
 ## Before you open a pull request
 
-Run all three and record the results in the PR description:
+Run what CI runs, and record the results in the PR description:
 
 ```bash
 pnpm exec biome ci --error-on-warnings .
+pnpm check:boundaries
 pnpm build
 pnpm typecheck
 pnpm test:coverage
+pnpm check:package
+pnpm test:e2e
 ```
 
 ## Packages
