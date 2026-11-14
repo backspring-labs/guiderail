@@ -1,0 +1,35 @@
+name: Maintenance
+description: Repository, tooling, dependency, test or documentation work that does not change product behaviour.
+labels: [maintenance]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong or missing, with the evidence (command output, file and line).
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance
+      description: Checkable statements. Each one needs evidence before the issue closes.
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Issues that must land first, and decisions that are still open.
