@@ -38,7 +38,12 @@ const check = (ok, message) => {
 };
 
 // --- The version is well formed and both packages carry it -----------------
-check(/^\d+\.\d+\.\d+$/.test(version), `"${version}" is a plain MAJOR.MINOR.PATCH version`);
+// Nothing below runs on a malformed version: it is used in git and gh commands.
+if (!/^\d+\.\d+\.\d+$/.test(version)) {
+	log(`  FAIL "${version}" is not a plain MAJOR.MINOR.PATCH version`);
+	process.exit(1);
+}
+log(`  ok   "${version}" is a plain MAJOR.MINOR.PATCH version`);
 for (const manifest of ["packages/core/package.json", "apps/web/package.json"]) {
 	const actual = JSON.parse(readFileSync(join(root, manifest), "utf8")).version;
 	check(
@@ -50,16 +55,18 @@ for (const manifest of ["packages/core/package.json", "apps/web/package.json"]) 
 // --- The changelog has notes for it -----------------------------------------
 const changelogPath = join(root, "CHANGELOG.md");
 const changelog = existsSync(changelogPath) ? readFileSync(changelogPath, "utf8") : "";
-const heading = new RegExp(
-	`^## \\[${version.replace(/\./g, "\\.")}\\] - \\d{4}-\\d{2}-\\d{2}$`,
-	"m",
+// The heading is found by comparing text, not by building a pattern from input.
+const lines = changelog.split("\n");
+const headingPrefix = `## [${version}] - `;
+const start = lines.findIndex(
+	(line) =>
+		line.startsWith(headingPrefix) && /^\d{4}-\d{2}-\d{2}$/.test(line.slice(headingPrefix.length)),
 );
-const start = changelog.search(heading);
 let notes = "";
 if (start >= 0) {
-	const after = changelog.slice(start).split("\n").slice(1).join("\n");
-	const next = after.search(/^## \[/m);
-	notes = (next >= 0 ? after.slice(0, next) : after).trim();
+	const rest = lines.slice(start + 1);
+	const next = rest.findIndex((line) => line.startsWith("## ["));
+	notes = (next >= 0 ? rest.slice(0, next) : rest).join("\n").trim();
 }
 check(start >= 0, `CHANGELOG.md has a dated section "## [${version}] - YYYY-MM-DD"`);
 check(notes.length > 0, "that section is not empty");
