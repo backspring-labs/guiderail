@@ -133,6 +133,17 @@ Select-and-show:
 - After landing, no terrain node is selected.
 - Today only the left panel does this, by sending two events; search and the right panel only select. #35 moves the pairing into the kernel and makes every entry point consistent.
 
+### Process canvas
+
+The Process canvas shows exactly one process: the active one, or, when none is selected, the first process that has an authored diagram.
+
+- A BPMN node belongs to a process through `metadata.processId`. Nodes of other processes are never mixed in.
+- A process with no BPMN nodes of its own is shown as a flow **derived from its stages**: one task per stage in navigation order, in a single lane named after the process. Nothing is invented beyond what the stages say.
+- A process with neither shows an empty state.
+- A stage with a `subProcessId` gets a `+` marker that drills into that process. The breadcrumb then shows the parent process as a button that leads back.
+
+The logic is `resolveProcessDiagram()` in `apps/web/src/lib/process-diagram.ts`.
+
 ### Steppers
 
 Orientation, Journey, Process and Sequence each have a stepper driven by the generic `STEPPER_FORWARD`, `STEPPER_BACKWARD`, `STEPPER_RESET` and `STEPPER_END` events. The kernel picks the target from the active perspective's **type** (so it must be given the perspectives at `INITIALIZE`), never from the text of its id. Guided story routes use their own waypoint events and hide the stepper while active.
@@ -153,7 +164,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 | Limitation | Issue |
 |---|---|
 | The app imports demo data from core's source via the `@seed` alias, and components read `seed*` arrays directly instead of kernel state | #13 |
-| The Process canvas renders the same BPMN nodes whichever process is active | #21 |
 | Only the left panel navigates on selection; search and the right panel do not | #35 |
 
 Remove a row in the same PR that fixes it.

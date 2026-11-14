@@ -6,6 +6,7 @@ import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-
 import { computeLandscapeLayout } from "@/lib/landscape-layout.js";
 import { orderedStagesOf } from "@/lib/ordered-groups.js";
 import { computeOrientationLayout } from "@/lib/orientation-layout.js";
+import { type ProcessDiagram, resolveProcessDiagram } from "@/lib/process-diagram.js";
 import {
 	getHighlightedEdgeIds,
 	getHighlightedNodeIds,
@@ -29,6 +30,7 @@ import {
 	seedOrientationItems,
 	seedPerspectives,
 	seedProcessStages,
+	seedProcesses,
 	seedProviderAssociations,
 	seedProviders,
 	seedSequences,
@@ -101,11 +103,23 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 		perspectiveType,
 	]);
 
-	// BPMN layout (synchronous, computed once per perspective switch)
-	const bpmnLayout = useMemo(() => {
+	// The one process the Process canvas shows: the active process, with its own
+	// BPMN nodes or a flow derived from its stages.
+	const processDiagram = useMemo(() => {
 		if (!isProcessPerspective) return null;
-		return computeBpmnLayout(seedBpmnNodes, seedBpmnEdges);
-	}, [isProcessPerspective]);
+		return resolveProcessDiagram(nav.activeProcessId, {
+			processes: seedProcesses,
+			processStages: seedProcessStages,
+			bpmnNodes: seedBpmnNodes,
+			bpmnEdges: seedBpmnEdges,
+		});
+	}, [isProcessPerspective, nav.activeProcessId]);
+
+	// BPMN layout (synchronous, recomputed when the process changes)
+	const bpmnLayout = useMemo(
+		() => (processDiagram ? computeBpmnLayout(processDiagram.nodes, processDiagram.edges) : null),
+		[processDiagram],
+	);
 
 	// Sequence layout (synchronous, filtered by active sequence)
 	const sequenceLayout = useMemo(() => {
@@ -164,6 +178,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 				isOrientationPerspective,
 				orientationLayout,
 				isProcessPerspective,
+				processDiagram,
 				bpmnLayout,
 				isSequencePerspective,
 				sequenceLayout,
@@ -177,6 +192,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			graph,
 			elkPositions,
 			isProcessPerspective,
+			processDiagram,
 			bpmnLayout,
 			isSequencePerspective,
 			sequenceLayout,
@@ -194,6 +210,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			resolveEdges(nav, graph, {
 				isOrientationPerspective,
 				isProcessPerspective,
+				processDiagram,
 				isSequencePerspective,
 				isLandscapePerspective,
 				isJourneyPerspective,
@@ -204,6 +221,7 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			graph,
 			isOrientationPerspective,
 			isProcessPerspective,
+			processDiagram,
 			isSequencePerspective,
 			isJourneyPerspective,
 			isLandscapePerspective,
@@ -213,7 +231,14 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 
 	const swimLanes = isProcessPerspective ? (bpmnLayout?.swimLanes ?? []) : [];
 
-	return { rfNodes, rfEdges, layoutLoading, swimLanes };
+	return {
+		rfNodes,
+		rfEdges,
+		layoutLoading,
+		swimLanes,
+		// "authored", "derived" or "empty" on the Process perspective; null elsewhere.
+		processDiagramSource: processDiagram?.source ?? null,
+	};
 }
 
 function buildLandscapeNodes(
@@ -332,6 +357,7 @@ function resolveActiveStageId(nav: NavigationContext): string | null {
 
 function buildBpmnNodes(
 	nav: NavigationContext,
+	diagram: ProcessDiagram,
 	positions: Map<string, { x: number; y: number }>,
 	swimLanes: SwimLane[],
 ) {
@@ -352,7 +378,7 @@ function buildBpmnNodes(
 		style: { zIndex: -1 },
 	}));
 
-	const bpmnNodeList = seedBpmnNodes.map((node) => {
+	const bpmnNodeList = diagram.nodes.map((node) => {
 		const pos = positions.get(node.id) ?? { x: 0, y: 0 };
 		const metadata = node.metadata as Record<string, unknown>;
 
@@ -390,11 +416,11 @@ function buildBpmnNodes(
 	return [...laneNodes, ...bpmnNodeList];
 }
 
-function buildBpmnEdges(nav: NavigationContext) {
+function buildBpmnEdges(nav: NavigationContext, diagram: ProcessDiagram) {
 	const canvasMode = nav.activeCanvasMode ?? "operational";
 	const isActivity = canvasMode === "activity";
 
-	return seedBpmnEdges.map((edge) => {
+	return diagram.edges.map((edge) => {
 		const isBranch = edge.type === "yes_branch" || edge.type === "no_branch";
 
 		return {
@@ -460,6 +486,7 @@ function resolveNodes(
 		isOrientationPerspective: boolean;
 		orientationLayout: ReturnType<typeof computeOrientationLayout> | null;
 		isProcessPerspective: boolean;
+		processDiagram: ProcessDiagram | null;
 		bpmnLayout: ReturnType<typeof computeBpmnLayout> | null;
 		isSequencePerspective: boolean;
 		sequenceLayout: SequenceLayoutResult | null;
@@ -473,8 +500,13 @@ function resolveNodes(
 	if (ctx.isOrientationPerspective && ctx.orientationLayout) {
 		return buildOrientationNodes(nav, ctx.orientationLayout.nodes);
 	}
-	if (ctx.isProcessPerspective && ctx.bpmnLayout) {
-		return buildBpmnNodes(nav, ctx.bpmnLayout.positions, ctx.bpmnLayout.swimLanes);
+	if (ctx.isProcessPerspective && ctx.bpmnLayout && ctx.processDiagram) {
+		return buildBpmnNodes(
+			nav,
+			ctx.processDiagram,
+			ctx.bpmnLayout.positions,
+			ctx.bpmnLayout.swimLanes,
+		);
 	}
 	if (ctx.isSequencePerspective && ctx.sequenceLayout) {
 		return buildSequenceNodes(nav, ctx.sequenceLayout.nodes);
@@ -494,6 +526,7 @@ function resolveEdges(
 	ctx: {
 		isOrientationPerspective: boolean;
 		isProcessPerspective: boolean;
+		processDiagram: ProcessDiagram | null;
 		isSequencePerspective: boolean;
 		isLandscapePerspective: boolean;
 		isJourneyPerspective: boolean;
@@ -502,7 +535,9 @@ function resolveEdges(
 ): unknown[] {
 	if (!graph) return [];
 	if (ctx.isOrientationPerspective) return [];
-	if (ctx.isProcessPerspective) return buildBpmnEdges(nav);
+	if (ctx.isProcessPerspective) {
+		return ctx.processDiagram ? buildBpmnEdges(nav, ctx.processDiagram) : [];
+	}
 	if (ctx.isSequencePerspective) return [];
 	if (ctx.isLandscapePerspective) return [];
 	if (ctx.isJourneyPerspective && ctx.journeyLayout) return ctx.journeyLayout.edges;

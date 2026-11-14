@@ -104,18 +104,24 @@ function handleNodeClick(nodeId: string, send: SendFn) {
 export function AppShell() {
 	useInitializeContext();
 	const { nav, graph, isReady, send } = useNavigation();
-	const { rfNodes, rfEdges, layoutLoading, swimLanes } = usePerspectiveProvider(nav, graph);
+	const { rfNodes, rfEdges, layoutLoading, swimLanes, processDiagramSource } =
+		usePerspectiveProvider(nav, graph);
 	useAutoPanel(nav);
 	const { searchOpen, setSearchOpen } = useSearchShortcut();
 
 	useExpandEvents(send);
-	const { onInit } = useFitViewOnSwitch(nav.activePerspectiveId, nav.activeCanvasMode);
+	const perspectiveType =
+		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
+	// On the Process perspective a different process is a different diagram.
+	const { onInit } = useFitViewOnSwitch(
+		nav.activePerspectiveId,
+		nav.activeCanvasMode,
+		perspectiveType === "process" ? nav.activeProcessId : null,
+	);
 
 	const [nodes, setNodes, onNodesChangeBase] = useNodesState(rfNodes as RFNode[]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges as RFEdge[]);
 
-	const perspectiveType =
-		seedPerspectives.find((p) => p.id === nav.activePerspectiveId)?.type ?? "landscape";
 	const onNodesChange = CUSTOM_SELECTION_PERSPECTIVES.has(perspectiveType)
 		? (changes: Parameters<typeof onNodesChangeBase>[0]) => {
 				const filtered = changes.filter((c) => c.type !== "select");
@@ -175,6 +181,7 @@ export function AppShell() {
 				onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				onClearCapability={() => send({ type: "CLEAR_CAPABILITY" })}
 				onSwitchCanvasMode={(mode) => send({ type: "SWITCH_CANVAS_MODE", canvasMode: mode })}
+				onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
 			/>
 			<div className="app-shell__body">
 				<LeftPanel
@@ -267,6 +274,11 @@ export function AppShell() {
 								style={{ background: "#1e293b" }}
 							/>
 						</ReactFlow>
+					)}
+					{processDiagramSource === "empty" && (
+						<div className="app-shell__canvas-empty">
+							This process has no diagram and no stages to show yet.
+						</div>
 					)}
 					<StoryRouteBar
 						routeState={nav.routeState}

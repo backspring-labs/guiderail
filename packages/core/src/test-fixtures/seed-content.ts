@@ -754,6 +754,7 @@ export const bpmnNodes: Node[] = [
 		label: "User clicks perspective tab",
 		description: "Start event — user initiates a perspective switch",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "app-shell",
 			terrainNodeId: "n-app-shell",
 			eventKind: "start",
@@ -769,6 +770,7 @@ export const bpmnNodes: Node[] = [
 		label: "Dispatch SWITCH_PERSPECTIVE",
 		description: 'send({ type: "SWITCH_PERSPECTIVE", perspectiveId })',
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "app-shell",
 			terrainNodeId: "n-app-shell",
 			stageId: "ps-ps-1",
@@ -784,6 +786,7 @@ export const bpmnNodes: Node[] = [
 		label: "Validate in ready state",
 		description: "Context machine validates event — perspective ID must be valid",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "context-machine",
 			terrainNodeId: "n-context-machine",
 			stageId: "ps-ps-2",
@@ -799,6 +802,7 @@ export const bpmnNodes: Node[] = [
 		label: "reconcilePerspectiveSwitch",
 		description: "Clear selection, reset canvas mode, preserve domain/capability context",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "reconciler",
 			terrainNodeId: "n-reconciler",
 			stageId: "ps-ps-3",
@@ -814,6 +818,7 @@ export const bpmnNodes: Node[] = [
 		label: "Assign new NavigationContext",
 		description: "XState assign writes reconciled state",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "context-machine",
 			terrainNodeId: "n-context-machine",
 			stageId: "ps-ps-4",
@@ -829,6 +834,7 @@ export const bpmnNodes: Node[] = [
 		label: "Route to layout engine",
 		description: "Perspective provider selects the correct layout engine based on perspective type",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "perspective-provider",
 			terrainNodeId: "n-use-perspective-provider",
 			gatewayKind: "exclusive",
@@ -844,6 +850,7 @@ export const bpmnNodes: Node[] = [
 		label: "Compute layout",
 		description: "BPMN, Journey, Landscape, or Sequence layout engine produces nodes and edges",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "perspective-provider",
 			terrainNodeId: "n-use-perspective-provider",
 			stageId: "ps-ps-6",
@@ -859,6 +866,7 @@ export const bpmnNodes: Node[] = [
 		label: "setNodes + setEdges",
 		description: "React Flow receives new canvas data",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "react-flow",
 			terrainNodeId: "n-react-flow-instance",
 			stageId: "ps-ps-7",
@@ -874,6 +882,7 @@ export const bpmnNodes: Node[] = [
 		label: "fitViewTopLeft",
 		description: "Compute zoom and 40px top-left offset",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "app-shell",
 			terrainNodeId: "n-app-shell",
 			stageId: "ps-ps-8",
@@ -889,6 +898,7 @@ export const bpmnNodes: Node[] = [
 		label: "Perspective rendered",
 		description: "End event — new perspective is fully visible",
 		metadata: {
+			processId: "proc-perspective-switch",
 			swimLane: "app-shell",
 			terrainNodeId: "n-app-shell",
 			eventKind: "end",

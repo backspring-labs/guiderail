@@ -88,23 +88,35 @@ function fitViewTopLeft(instance: ReactFlowInstance) {
 	});
 }
 
-export function useFitViewOnSwitch(activePerspectiveId: string, activeCanvasMode: string | null) {
+/**
+ * Refits the view when the canvas shows something different: another
+ * perspective, another canvas mode, or (via `contentKey`) another diagram within
+ * the same perspective, such as a different process.
+ */
+export function useFitViewOnSwitch(
+	activePerspectiveId: string,
+	activeCanvasMode: string | null,
+	contentKey: string | null = null,
+) {
 	const reactFlowRef = useRef<ReactFlowInstance | null>(null);
 	const lastPerspectiveId = useRef(activePerspectiveId);
 	const lastCanvasMode = useRef(activeCanvasMode);
+	const lastContentKey = useRef(contentKey);
 
 	useEffect(() => {
 		const perspectiveChanged = activePerspectiveId !== lastPerspectiveId.current;
 		const canvasModeChanged = activeCanvasMode !== lastCanvasMode.current;
+		const contentChanged = contentKey !== lastContentKey.current;
 		lastPerspectiveId.current = activePerspectiveId;
 		lastCanvasMode.current = activeCanvasMode;
+		lastContentKey.current = contentKey;
 
-		if ((perspectiveChanged || canvasModeChanged) && reactFlowRef.current) {
+		if ((perspectiveChanged || canvasModeChanged || contentChanged) && reactFlowRef.current) {
 			setTimeout(() => {
 				if (reactFlowRef.current) fitViewTopLeft(reactFlowRef.current);
 			}, 50);
 		}
-	}, [activePerspectiveId, activeCanvasMode]);
+	}, [activePerspectiveId, activeCanvasMode, contentKey]);
 
 	const onInit = useCallback((instance: ReactFlowInstance) => {
 		reactFlowRef.current = instance;
