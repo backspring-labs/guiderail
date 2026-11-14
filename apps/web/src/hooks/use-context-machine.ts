@@ -1,19 +1,5 @@
-import {
-	seedCapabilities,
-	seedControlPoints,
-	seedGraph,
-	seedJourneys,
-	seedOrientationItems,
-	seedProcessStages,
-	seedProcesses,
-	seedProviderAssociations,
-	seedProviders,
-	seedSequences,
-	seedSteps,
-	seedStoryRoutes,
-	seedStoryWaypoints,
-	seedValueStreams,
-} from "@/store/seed-loader.js";
+import { createInitializeEvent } from "@/store/kernel-init.js";
+import { seedOrientationItems } from "@/store/seed-loader.js";
 import { contextMachine } from "@guiderail/core/context";
 import { createActorContext } from "@xstate/react";
 
@@ -49,23 +35,7 @@ export function useInitializeContext() {
 	const isReady = KernelContext.useSelector((s) => s.value === "ready");
 
 	if (!isReady) {
-		actorRef.send({
-			type: "INITIALIZE",
-			graph: seedGraph,
-			journeys: seedJourneys,
-			steps: seedSteps,
-			capabilities: seedCapabilities,
-			providers: seedProviders,
-			providerAssociations: seedProviderAssociations,
-			valueStreams: seedValueStreams,
-			processes: seedProcesses,
-			processStages: seedProcessStages,
-			storyRoutes: seedStoryRoutes,
-			storyWaypoints: seedStoryWaypoints,
-			sequences: seedSequences,
-			controlPoints: seedControlPoints,
-			orientationItems: seedOrientationItems,
-		});
+		actorRef.send(createInitializeEvent());
 
 		// Set the default perspective so nodes have positions on first render.
 		// Orientation is the entry perspective — first item selected on first load.

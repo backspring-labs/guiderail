@@ -163,7 +163,11 @@ function resolveStepperTarget(ctx: ContextMachineContext): StepperTarget {
 		return "orientation";
 	if (perspectiveId.includes("journey") && ctx.nav.activeJourneyId) return "journey";
 	if (perspectiveId.includes("process") && ctx.nav.activeProcessId) return "process";
-	if (perspectiveId.includes("sequence") && ctx.nav.activeSequenceId) return "sequence";
+	if (perspectiveId.includes("sequence") && ctx.nav.activeSequenceId) {
+		// A sequence with no resolvable messages has nothing to step through.
+		const msgs = resolveMessagesForSequence(ctx.nav.activeSequenceId, ctx.sequences, ctx.messages);
+		return msgs.length > 0 ? "sequence" : null;
+	}
 	return null;
 }
 
@@ -500,14 +504,19 @@ export const contextMachine = setup({
 					actions: assign(({ context, event }) => {
 						const sequence = context.sequences.find((s) => s.id === event.sequenceId);
 						if (!sequence) return {};
-						return {
-							nav: reconcileSequenceSwitch(
-								context.nav,
-								event.sequenceId,
-								sequence,
-								context.capabilities,
-							),
-						};
+						const nav = reconcileSequenceSwitch(
+							context.nav,
+							event.sequenceId,
+							sequence,
+							context.capabilities,
+						);
+						// An index is only valid when it points at a message the kernel holds.
+						const msgs = resolveMessagesForSequence(
+							event.sequenceId,
+							context.sequences,
+							context.messages,
+						);
+						return { nav: msgs.length > 0 ? nav : { ...nav, activeMessageIndex: null } };
 					}),
 				},
 				CLEAR_SEQUENCE: {

@@ -405,6 +405,74 @@ describe("Context Machine — Stepper (Sequence)", () => {
 	});
 });
 
+describe("Context Machine — Stepper (Sequence without messages)", () => {
+	function selectInSequencePerspective(
+		actor: ReturnType<typeof createFullCtx>,
+		sequenceId: string,
+	) {
+		actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-sequence" });
+		actor.send({ type: "SELECT_SEQUENCE", sequenceId });
+	}
+
+	// Sequences supplied, messages omitted: the payload the web app sent before HY-08.
+	function createCtxWithoutMessages() {
+		const actor = createActor(contextMachine).start();
+		actor.send({ type: "INITIALIZE", graph, journeys, steps, capabilities, sequences });
+		selectInSequencePerspective(actor, "seq-capability-selection");
+		return actor;
+	}
+
+	function createCtxWithEmptySequence() {
+		const [first] = sequences;
+		if (!first) throw new Error("seed has no sequences");
+		const actor = createActor(contextMachine).start();
+		actor.send({
+			type: "INITIALIZE",
+			graph,
+			journeys,
+			steps,
+			capabilities,
+			interfaces,
+			messages,
+			sequences: [...sequences, { ...first, id: "seq-empty", messageIds: [] }],
+		});
+		selectInSequencePerspective(actor, "seq-empty");
+		return actor;
+	}
+
+	const cases = [
+		["messages were never initialised", createCtxWithoutMessages],
+		["the sequence lists no messages", createCtxWithEmptySequence],
+	] as const;
+
+	it.each(cases)("selection sets no active index when %s", (_, create) => {
+		const actor = create();
+		expect(actor.getSnapshot().context.nav.activeSequenceId).not.toBeNull();
+		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBeNull();
+	});
+
+	it.each(cases)("no stepper event produces an index when %s", (_, create) => {
+		const actor = create();
+		for (const type of [
+			"STEPPER_END",
+			"STEPPER_RESET",
+			"STEPPER_FORWARD",
+			"STEPPER_BACKWARD",
+		] as const) {
+			actor.send({ type });
+			expect(actor.getSnapshot().context.nav.activeMessageIndex).toBeNull();
+		}
+	});
+
+	it("selecting a populated sequence afterwards restores a valid index", () => {
+		const actor = createCtxWithEmptySequence();
+		actor.send({ type: "SELECT_SEQUENCE", sequenceId: "seq-capability-selection" });
+		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBe(0);
+		actor.send({ type: "STEPPER_END" });
+		expect(actor.getSnapshot().context.nav.activeMessageIndex).toBeGreaterThan(0);
+	});
+});
+
 describe("Context Machine — Stepper indices do not leak between types", () => {
 	it("process stepper does not affect journey or sequence indices", () => {
 		const actor = createFullCtx();
