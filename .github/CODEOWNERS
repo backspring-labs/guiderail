@@ -1,0 +1,22 @@
+# GuideRail has one maintainer, who owns everything. The explicit entries below
+# exist so that ownership of each area stays visible when a second maintainer
+# joins. Branch protection does not require code-owner review today.
+
+*                   @jasonLadd
+
+# Headless kernel
+/packages/core/     @jasonLadd
+
+# React UI
+/apps/web/          @jasonLadd
+
+# Tooling: build, lint, runtime policy
+/package.json       @jasonLadd
+/pnpm-lock.yaml     @jasonLadd
+/biome.json         @jasonLadd
+/turbo.json         @jasonLadd
+/.node-version      @jasonLadd
+
+# Workflow policy: CI, dependency updates, ownership, security policy
+/.github/           @jasonLadd
+/SECURITY.md        @jasonLadd

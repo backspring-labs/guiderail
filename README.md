@@ -26,6 +26,10 @@ pnpm test           # run all tests
 pnpm check          # lint and format check
 ```
 
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md). Please do not open a public issue.
+
 ## License
 
 [MIT](LICENSE)
