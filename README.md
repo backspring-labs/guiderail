@@ -141,6 +141,8 @@ Only load content you trust. See [SECURITY.md](SECURITY.md).
 - [AGENTS.md](AGENTS.md): how the codebase is organised and how to work in it
 - [CONTRIBUTING.md](CONTRIBUTING.md): how to propose and land a change
 - [ROADMAP.md](ROADMAP.md): what is being worked on
+- [CHANGELOG.md](CHANGELOG.md): what changed, by version
+- [docs/releasing.md](docs/releasing.md): versioning, compatibility and how a release is cut
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - [docs/architecture/data-integrity.md](docs/architecture/data-integrity.md): what content is accepted, rejected and reported
 - [docs/performance.md](docs/performance.md): bundle size, start-up time and the size budget

@@ -31,9 +31,10 @@ Working instructions for the codebase (commands, architecture, conventions) are 
    pnpm check:package
    pnpm test:e2e
    ```
-5. **Fill in the pull request template.** It asks for the resulting behaviour, the checks you ran, what you did not verify, and the effects on compatibility, security and release.
-6. **For a bug fix, add a test that fails without the fix,** and say how you confirmed that.
-7. **CI must pass.** The `CI gate` check is required, and the branch must be up to date with `main`.
+5. **Add a line to `CHANGELOG.md`** under `## [Unreleased]` if the change is something a user or a consumer of the kernel would notice.
+6. **Fill in the pull request template.** It asks for the resulting behaviour, the checks you ran, what you did not verify, and the effects on compatibility, security and release.
+7. **For a bug fix, add a test that fails without the fix,** and say how you confirmed that.
+8. **CI must pass.** The `CI gate` check is required, and the branch must be up to date with `main`.
 
 ### Done
 
@@ -47,7 +48,7 @@ Progress lives in GitHub issues and milestones only. Plans and docs describe int
 
 - **Maintainer:** [@jasonLadd](https://github.com/jasonLadd). The maintainer triages issues, decides what is in scope, and has the final say on design.
 - **Merging:** only the maintainer merges. Pull requests are squash-merged, one commit per pull request. No approval count is required while there is a single maintainer; the required gate is CI.
-- **Releases:** only the maintainer tags and releases. See [ROADMAP.md](ROADMAP.md) for what is planned.
+- **Releases:** only the maintainer tags and releases, following [docs/releasing.md](docs/releasing.md). See [ROADMAP.md](ROADMAP.md) for what is planned and [CHANGELOG.md](CHANGELOG.md) for what changed.
 - **Branch protection applies to the maintainer too.** There is no bypass.
 
 Ownership by area is listed in [.github/CODEOWNERS](.github/CODEOWNERS).
