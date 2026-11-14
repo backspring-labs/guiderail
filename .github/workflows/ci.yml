@@ -62,6 +62,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Bundle size against its budget
+        run: pnpm check:bundle
+
       - name: Typecheck (tests, fixtures and config files, no emit)
         run: pnpm typecheck
 

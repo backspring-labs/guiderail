@@ -1,7 +1,23 @@
 import type { Node as ReactFlowNode } from "@xyflow/react";
-import ELK from "elkjs/lib/elk.bundled.js";
+type ElkInstance = InstanceType<typeof import("elkjs/lib/elk.bundled.js").default>;
 
-const elk = new ELK();
+/*
+ * ELK is about half of the app's JavaScript and is only needed to lay out the
+ * Architecture and System canvases. It is loaded the first time a layout is
+ * asked for, not at start-up. See docs/performance.md.
+ */
+let elkLoading: Promise<ElkInstance> | null = null;
+
+function loadElk(): Promise<ElkInstance> {
+	elkLoading ??= import("elkjs/lib/elk.bundled.js")
+		.then((module) => new module.default())
+		.catch((error) => {
+			// Do not cache a failed load: a retry must be able to try again.
+			elkLoading = null;
+			throw error;
+		});
+	return elkLoading;
+}
 
 export type LayoutDirection = "DOWN" | "RIGHT";
 
@@ -53,6 +69,7 @@ export async function computeElkLayout(
 		})),
 	};
 
+	const elk = await loadElk();
 	const layoutResult = await elk.layout(elkGraph);
 
 	const positions = new Map<string, { x: number; y: number }>();
