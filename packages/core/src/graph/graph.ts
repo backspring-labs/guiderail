@@ -7,6 +7,7 @@ import type { Process } from "../entities/process.js";
 import type { ProviderAssociation } from "../entities/provider-association.js";
 import type { Step } from "../entities/step.js";
 import type { ValueStream } from "../entities/value-stream.js";
+import { type Direction, neighborAcross } from "./adjacency.js";
 
 export interface TerrainGraph {
 	readonly nodes: ReadonlyMap<string, Node>;
@@ -42,23 +43,25 @@ export function getEdge(graph: TerrainGraph, id: string): Edge | undefined {
 	return graph.edges.get(id);
 }
 
+/**
+ * Nodes one edge away from `nodeId`, each once, in edge insertion order.
+ *
+ * `direction` follows directed edges as stored: "out" from source to target,
+ * "in" from target to source, "both" either way. Undirected edges
+ * (`directed: false`) count from either end whatever `direction` is. Edge
+ * endpoints that are not nodes in the graph are skipped. `bfsTraverse` follows
+ * the same rules.
+ */
 export function getNeighbors(
 	graph: TerrainGraph,
 	nodeId: string,
-	direction: "in" | "out" | "both" = "both",
+	direction: Direction = "both",
 ): Node[] {
 	const neighbors: Node[] = [];
 	const seen = new Set<string>();
 
 	for (const edge of graph.edges.values()) {
-		let neighborId: string | undefined;
-
-		if (direction !== "in" && edge.sourceNodeId === nodeId) {
-			neighborId = edge.targetNodeId;
-		}
-		if (direction !== "out" && edge.targetNodeId === nodeId) {
-			neighborId = edge.sourceNodeId;
-		}
+		const neighborId = neighborAcross(edge, nodeId, direction);
 
 		if (neighborId != null && !seen.has(neighborId)) {
 			seen.add(neighborId);

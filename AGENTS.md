@@ -151,7 +151,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 | Limitation | Issue |
 |---|---|
 | The app imports demo data from core's source via the `@seed` alias, and components read `seed*` arrays directly instead of kernel state | #13 |
-| Graph queries ignore the `directed` edge flag | #32 |
 | The Process canvas renders the same BPMN nodes whichever process is active | #21 |
 | Stepper indices mix `sequenceNumber` lookups with array positions | #22 |
 | Only the left panel navigates on selection; search and the right panel do not | #35 |

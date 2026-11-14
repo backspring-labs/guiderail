@@ -1,18 +1,6 @@
-import type { Edge } from "../entities/edge.js";
 import type { Node } from "../entities/node.js";
+import { type Direction, neighborAcross } from "./adjacency.js";
 import type { TerrainGraph } from "./graph.js";
-
-type Direction = "in" | "out" | "both";
-
-function getNeighborId(edge: Edge, nodeId: string, direction: Direction): string | undefined {
-	if (direction !== "in" && edge.sourceNodeId === nodeId) {
-		return edge.targetNodeId;
-	}
-	if (direction !== "out" && edge.targetNodeId === nodeId) {
-		return edge.sourceNodeId;
-	}
-	return undefined;
-}
 
 /**
  * Ids adjacent to `nodeId` in edge insertion order, each at most once.
@@ -26,7 +14,7 @@ function collectNeighborIds(
 ): string[] {
 	const neighbors = new Set<string>();
 	for (const edge of graph.edges.values()) {
-		const neighborId = getNeighborId(edge, nodeId, direction);
+		const neighborId = neighborAcross(edge, nodeId, direction);
 		if (neighborId != null && !visited.has(neighborId) && graph.nodes.has(neighborId)) {
 			neighbors.add(neighborId);
 		}
@@ -44,8 +32,9 @@ function collectNeighborIds(
  *   (parallel edges, cycles and self-loops included).
  * - `maxDepth` bounds the distance from the start: 0 returns only the start
  *   node. Omitted means unbounded.
- * - `direction` follows edges as stored: "out" from source to target, "in"
- *   from target to source, "both" either way.
+ * - `direction` follows directed edges as stored: "out" from source to target,
+ *   "in" from target to source, "both" either way. Undirected edges
+ *   (`directed: false`) are walked from either end whatever `direction` is.
  * - Dangling references are ignored: an edge endpoint that is not a node in
  *   the graph is neither returned nor traversed through, and an unknown start
  *   id returns an empty array.
