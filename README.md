@@ -9,6 +9,13 @@ Guided architecture navigation from business understanding to code reality.
 | `@guiderail/core` | Headless kernel — canonical domain model, state machines, context synchronization |
 | `@guiderail/web` | React UI — terrain canvas, detail panels, guided route bar |
 
+## Requirements
+
+- Node.js 26 (primary) or 24 (kept compatible). `.node-version` pins the development runtime; other lines are not supported.
+- pnpm, at the exact version in the root `package.json` `packageManager` field.
+
+CI runs lint, build and tests on both Node lines for every pull request and every push to `main`.
+
 ## Develop
 
 ```bash
