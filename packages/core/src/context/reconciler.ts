@@ -1,3 +1,4 @@
+import { orderBySequence } from "../content/ordering.js";
 import type { Capability } from "../entities/capability.js";
 import type { FocusTarget } from "../entities/focus-target.js";
 import type { Journey } from "../entities/journey.js";
@@ -28,8 +29,13 @@ function viewportForNode(
 	return { x: 0, y: 0, zoom: currentZoom };
 }
 
-function primaryNodeFromFocusTargets(targets: FocusTarget[]): string | null {
-	const nodeTarget = targets.find((t) => t.type === "node");
+/**
+ * The first focus target that is a node present in the graph. A focus target
+ * naming a node that does not exist is skipped, so selection never points at
+ * nothing.
+ */
+function primaryNodeFromFocusTargets(targets: FocusTarget[], graph: TerrainGraph): string | null {
+	const nodeTarget = targets.find((t) => t.type === "node" && graph.nodes.has(t.targetId));
 	return nodeTarget?.targetId ?? null;
 }
 
@@ -80,7 +86,8 @@ export function reconcilePerspectiveSwitch(
 	perspectiveId: string,
 	graph: TerrainGraph,
 ): NavigationContext {
-	const primaryNode = primaryNodeFromFocusTargets(ctx.activeFocusTargets) ?? ctx.selectedNodeId;
+	const primaryNode =
+		primaryNodeFromFocusTargets(ctx.activeFocusTargets, graph) ?? ctx.selectedNodeId;
 
 	let viewportAnchor = ctx.viewportAnchor;
 	if (primaryNode) {
@@ -122,7 +129,7 @@ export function reconcileJourneySelection(
 	capabilities: Capability[],
 	graph: TerrainGraph,
 ): NavigationContext {
-	const firstStep = steps.find((s) => s.sequenceNumber === 0) ?? steps[0];
+	const firstStep = orderBySequence(steps)[0];
 
 	// Infer domain/capability from entry capability if not already set
 	let activeDomainId = ctx.activeDomainId;
@@ -139,7 +146,7 @@ export function reconcileJourneySelection(
 	}
 
 	const focusTargets = firstStep?.focusTargets ?? [];
-	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets, graph);
 	const viewportAnchor = primaryNode
 		? viewportForNode(primaryNode, ctx.activePerspectiveId, graph, ctx.viewportAnchor.zoom)
 		: ctx.viewportAnchor;
@@ -174,6 +181,7 @@ export function reconcileJourneyDeselection(ctx: NavigationContext): NavigationC
 
 /**
  * 6. Step change: update focus targets, scene, capability if crossing boundary, viewport.
+ *    `stepIndex` is a position in the journey's steps ordered by sequenceNumber.
  */
 export function reconcileStepChange(
 	ctx: NavigationContext,
@@ -181,11 +189,11 @@ export function reconcileStepChange(
 	steps: Step[],
 	graph: TerrainGraph,
 ): NavigationContext {
-	const step = steps.find((s) => s.sequenceNumber === stepIndex);
+	const step = orderBySequence(steps)[stepIndex];
 	if (!step) return ctx;
 
 	const focusTargets = step.focusTargets;
-	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets, graph);
 	const viewportAnchor = primaryNode
 		? viewportForNode(primaryNode, ctx.activePerspectiveId, graph, ctx.viewportAnchor.zoom)
 		: ctx.viewportAnchor;
@@ -218,12 +226,12 @@ export function reconcileNodeSelection(
 ): NavigationContext {
 	// If a journey is active, check if this node is on the path
 	if (ctx.activeJourneyId != null && steps.length > 0) {
-		const matchingStep = steps.find((s) =>
+		const position = orderBySequence(steps).findIndex((s) =>
 			s.focusTargets.some((ft) => ft.type === "node" && ft.targetId === nodeId),
 		);
-		if (matchingStep) {
-			// Snap to that step
-			return reconcileStepChange(ctx, matchingStep.sequenceNumber, steps, graph);
+		if (position >= 0) {
+			// Snap to the first step, in navigation order, that focuses this node
+			return reconcileStepChange(ctx, position, steps, graph);
 		}
 	}
 
@@ -279,13 +287,13 @@ export function reconcileProcessSwitch(
 	processStages: ProcessStage[],
 	graph: TerrainGraph,
 ): NavigationContext {
-	const orderedStages = [...processStages].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	const orderedStages = orderBySequence(processStages);
 	const firstStage = orderedStages[0];
 
 	const focusTargets: FocusTarget[] =
 		firstStage?.nodeIds.map((nodeId) => ({ type: "node" as const, targetId: nodeId })) ?? [];
 
-	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets, graph);
 	const viewportAnchor = primaryNode
 		? viewportForNode(primaryNode, ctx.activePerspectiveId, graph, ctx.viewportAnchor.zoom)
 		: ctx.viewportAnchor;
@@ -309,11 +317,11 @@ export function reconcileStoryRouteStart(
 	waypoints: StoryWaypoint[],
 	graph: TerrainGraph,
 ): NavigationContext {
-	const orderedWaypoints = [...waypoints].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	const orderedWaypoints = orderBySequence(waypoints);
 	const firstWaypoint = orderedWaypoints[0];
 
 	const focusTargets = firstWaypoint?.focusTargets ?? [];
-	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets, graph);
 
 	const perspectiveId = firstWaypoint?.perspectiveId ?? ctx.activePerspectiveId;
 	const viewportAnchor = primaryNode
@@ -340,12 +348,12 @@ export function reconcileWaypointChange(
 	waypoints: StoryWaypoint[],
 	graph: TerrainGraph,
 ): NavigationContext {
-	const waypoint = waypoints.find((w) => w.sequenceNumber === waypointIndex);
+	const waypoint = orderBySequence(waypoints)[waypointIndex];
 	if (!waypoint) return ctx;
 
 	const focusTargets = waypoint.focusTargets;
 	const perspectiveId = waypoint.perspectiveId ?? ctx.activePerspectiveId;
-	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets, graph);
 	const viewportAnchor = primaryNode
 		? viewportForNode(primaryNode, perspectiveId, graph, ctx.viewportAnchor.zoom)
 		: ctx.viewportAnchor;
@@ -462,14 +470,14 @@ export function reconcileStageChange(
 	stages: ProcessStage[],
 	graph: TerrainGraph,
 ): NavigationContext {
-	const stage = stages.find((s) => s.sequenceNumber === stageIndex);
+	const stage = orderBySequence(stages)[stageIndex];
 	if (!stage) return ctx;
 
 	const focusTargets: FocusTarget[] = stage.nodeIds.map((nodeId) => ({
 		type: "node" as const,
 		targetId: nodeId,
 	}));
-	const primaryNode = primaryNodeFromFocusTargets(focusTargets);
+	const primaryNode = primaryNodeFromFocusTargets(focusTargets, graph);
 	const viewportAnchor = primaryNode
 		? viewportForNode(primaryNode, ctx.activePerspectiveId, graph, ctx.viewportAnchor.zoom)
 		: ctx.viewportAnchor;

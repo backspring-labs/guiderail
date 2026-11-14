@@ -5,7 +5,8 @@ interface JourneyStepNodeData {
 	expectedAction?: string;
 	narrative?: string;
 	capabilityId?: string;
-	sequenceNumber: number;
+	/** Position in navigation order, starting at 0. */
+	position: number;
 	stepType: string;
 	journeyLabel: string;
 	valueStreamLabel: string | null;
@@ -36,7 +37,7 @@ export function JourneyStepNode({ data, selected }: JourneyStepNodeProps) {
 	return (
 		<div className={`journey-step ${actorClass} ${typeClass} ${selectedClass} ${activeClass}`}>
 			<div className={`journey-step__seq journey-step__seq--${data.stepType}`}>
-				{STEP_TYPE_ICONS[data.stepType] ?? data.sequenceNumber + 1}
+				{STEP_TYPE_ICONS[data.stepType] ?? data.position + 1}
 			</div>
 			<div className="journey-step__title">{data.title}</div>
 			{data.actor && <div className="journey-step__actor">{data.actor}</div>}

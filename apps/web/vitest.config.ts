@@ -19,14 +19,14 @@ export default defineConfig({
 				"src/vite-env.d.ts",
 			],
 			reporter: ["text", "json-summary"],
-			// Floors measured on 2026-11-14 (8.89 / 6.80 / 8.08 / 8.89), rounded down.
-			// The app is barely tested today; these exist to stop it getting worse and
-			// only move up. Issues #12 and #24 are where they rise.
+			// Floors are the last measured coverage (14.55 / 8.26 / 12.01 / 14.61), rounded
+			// down. Most of the app is still untested; these exist to stop it getting
+			// worse and only move up. Issues #12 and #24 are where they rise.
 			thresholds: {
-				statements: 8,
-				branches: 6,
-				functions: 8,
-				lines: 8,
+				statements: 14,
+				branches: 8,
+				functions: 12,
+				lines: 14,
 			},
 		},
 	},
