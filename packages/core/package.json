@@ -62,6 +62,8 @@
 		"build": "tsc -p tsconfig.build.json",
 		"test": "vitest run",
 		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"typecheck": "tsc -p tsconfig.test.json",
 		"check": "biome check .",
 		"check:fix": "biome check --fix ."
 	},
@@ -70,6 +72,7 @@
 		"zod": "^3.24.0"
 	},
 	"devDependencies": {
+		"@vitest/coverage-v8": "^4.1.12",
 		"vitest": "^4.1.12"
 	},
 	"engines": {

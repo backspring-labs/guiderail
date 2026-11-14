@@ -521,8 +521,8 @@ describe("0.4.0 referential integrity", () => {
 			const seqMsgs = messages
 				.filter((m) => seq.messageIds.includes(m.id))
 				.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
-			for (let i = 0; i < seqMsgs.length; i++) {
-				expect(seqMsgs[i].sequenceNumber).toBe(i);
+			for (const [i, message] of seqMsgs.entries()) {
+				expect(message.sequenceNumber).toBe(i);
 			}
 		}
 	});
@@ -659,8 +659,8 @@ describe("0.7.0 OrientationItem entity", () => {
 
 	it("orientation items have sequential sequence numbers", () => {
 		const sorted = [...orientationItems].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
-		for (let i = 0; i < sorted.length; i++) {
-			expect(sorted[i].sequenceNumber).toBe(i);
+		for (const [i, item] of sorted.entries()) {
+			expect(item.sequenceNumber).toBe(i);
 		}
 	});
 });

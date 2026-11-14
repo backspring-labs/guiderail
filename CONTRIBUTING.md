@@ -24,7 +24,8 @@ Working instructions for the codebase (commands, architecture, conventions) are 
    ```bash
    pnpm exec biome ci .
    pnpm build
-   pnpm test
+   pnpm typecheck
+   pnpm test:coverage
    ```
 5. **Fill in the pull request template.** It asks for the resulting behaviour, the checks you ran, what you did not verify, and the effects on compatibility, security and release.
 6. **For a bug fix, add a test that fails without the fix,** and say how you confirmed that.

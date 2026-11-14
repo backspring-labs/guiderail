@@ -95,6 +95,7 @@ export function makeStep(overrides: Partial<Step> = {}): Step {
 		id: nextId("step"),
 		journeyId: "journey-test",
 		sequenceNumber: 0,
+		stepType: "screen",
 		focusTargets: [],
 		capabilityId: "cap-test",
 		title: "Test Step",

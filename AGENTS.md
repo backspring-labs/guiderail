@@ -15,14 +15,28 @@ pnpm dev            # start the web dev server
 pnpm test           # run all tests (builds core first)
 pnpm check          # Biome lint + format check in each workspace
 pnpm check:fix      # Biome auto-fix
+pnpm typecheck      # tsc over tests, fixtures and config files, no emit
+pnpm test:coverage  # tests with coverage and the per-package thresholds (what CI runs)
 pnpm check:package  # pack core, install it outside the workspace, import and typecheck every export
 ```
+
+What each command proves:
+
+| Command | Proves | Does not prove |
+|---|---|---|
+| `check` | Formatting and lint rules (Biome) | Anything about types or behaviour |
+| `build` | Shipped source compiles; the web bundle builds | That tests compile |
+| `typecheck` | Tests, fixtures and config files compile | Behaviour |
+| `test` | Behaviour covered by tests | That the tests compile: Vitest strips types without checking them |
+| `test:coverage` | The same, plus coverage has not dropped below the recorded floor | That covered code is correct |
+| `check:package` | The packed core resolves for a consumer | Anything about the web app |
+
+Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core sits in the mid-80s. The web app is at about 9%, so a green run says little about the UI.
 
 Things the command names do not tell you:
 
 - **Build before `pnpm dev` on a fresh checkout.** The web app resolves `@guiderail/core` from `packages/core/dist`.
-- **`check` is Biome only.** Type errors surface in `pnpm build` (`tsc`), not in `check`.
-- **Core tests are not typechecked yet** (#11). A passing test run does not prove the tests compile under `tsc`.
+- **`check` is Biome only.** Type errors surface in `pnpm build` and `pnpm typecheck`, not in `check`.
 - **`src/test-fixtures/` in core is internal.** It holds the demo corpus, mocks and factories. It is excluded from the build and not exported; only core's own tests (and, for now, the web app's `@seed` alias) read it.
 - **Git hooks may not be installed on a fresh clone.** pnpm does not run lefthook's install script. Run `pnpm exec lefthook install` once; the pre-commit hook then runs `pnpm check`.
 
@@ -35,7 +49,8 @@ Run all three and record the results in the PR description:
 ```bash
 pnpm exec biome ci .
 pnpm build
-pnpm test
+pnpm typecheck
+pnpm test:coverage
 ```
 
 ## Packages

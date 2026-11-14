@@ -10,7 +10,8 @@ Closes #
 |---|---|
 | `pnpm exec biome ci .` | |
 | `pnpm build` | |
-| `pnpm test` | |
+| `pnpm typecheck` | |
+| `pnpm test:coverage` | |
 
 ## Visible changes
 <!-- Screenshots or a short recording for UI changes. "None" if there are none. -->

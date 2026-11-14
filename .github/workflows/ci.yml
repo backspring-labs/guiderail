@@ -57,8 +57,11 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Test
-        run: pnpm test
+      - name: Typecheck (tests, fixtures and config files, no emit)
+        run: pnpm typecheck
+
+      - name: Test with coverage thresholds
+        run: pnpm test:coverage
 
       - name: Package check (packed core installs and resolves outside the workspace)
         run: pnpm check:package
