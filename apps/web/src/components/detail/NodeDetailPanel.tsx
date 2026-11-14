@@ -1,10 +1,4 @@
-import {
-	seedAnnotations,
-	seedCapabilities,
-	seedEvidenceRefs,
-	seedProviderAssociations,
-	seedProviders,
-} from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 import type { NavigationContext } from "@guiderail/core/context";
 import type { Node } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
@@ -18,15 +12,16 @@ interface NodeDetailPanelProps {
 }
 
 export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: NodeDetailPanelProps) {
+	const dataset = useDataset();
 	const edges = getEdgesForNode(graph, node.id);
 	const neighbors = getNeighbors(graph, node.id);
-	const annotations = seedAnnotations.filter((a) => a.targetId === node.id);
-	const evidenceRefs = seedEvidenceRefs.filter((e) => e.relatedEntityIds.includes(node.id));
-	const capabilities = seedCapabilities.filter((c) => c.nodeIds.includes(node.id));
-	const nodeProviderAssocs = seedProviderAssociations.filter(
+	const annotations = dataset.annotations.filter((a) => a.targetId === node.id);
+	const evidenceRefs = dataset.evidenceRefs.filter((e) => e.relatedEntityIds.includes(node.id));
+	const capabilities = dataset.capabilities.filter((c) => c.nodeIds.includes(node.id));
+	const nodeProviderAssocs = dataset.providerAssociations.filter(
 		(a) => a.targetType === "node" && a.targetId === node.id,
 	);
-	const nodeProviders = seedProviders.filter((p) =>
+	const nodeProviders = dataset.providers.filter((p) =>
 		nodeProviderAssocs.some((a) => a.providerId === p.id),
 	);
 

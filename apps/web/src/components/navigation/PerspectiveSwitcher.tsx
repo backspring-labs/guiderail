@@ -1,4 +1,4 @@
-import { seedPerspectives } from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 import type { Perspective } from "@guiderail/core/entities";
 
 interface PerspectiveSwitcherProps {
@@ -7,9 +7,10 @@ interface PerspectiveSwitcherProps {
 }
 
 export function PerspectiveSwitcher({ activePerspectiveId, onSwitch }: PerspectiveSwitcherProps) {
+	const dataset = useDataset();
 	return (
 		<div className="perspective-switcher">
-			{seedPerspectives.map((p) => (
+			{dataset.perspectives.map((p) => (
 				<button
 					key={p.id}
 					type="button"

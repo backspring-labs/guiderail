@@ -1,15 +1,5 @@
+import { useDataset } from "@/data/dataset-context.js";
 import { parentProcessOf } from "@/lib/process-diagram.js";
-import {
-	seedCapabilities,
-	seedDomains,
-	seedJourneys,
-	seedPerspectives,
-	seedProcessStages,
-	seedProcesses,
-	seedSequences,
-	seedStoryRoutes,
-	seedValueStreams,
-} from "@/store/seed-loader.js";
 
 const CANVAS_MODES: Record<string, Array<{ id: string; label: string; defaultMode: string }>> = {
 	process: [
@@ -47,8 +37,9 @@ interface ContextBarProps {
 }
 
 export function ContextBar(props: ContextBarProps) {
+	const dataset = useDataset();
 	const perspectiveType =
-		seedPerspectives.find((p) => p.id === props.activePerspectiveId)?.type ?? "landscape";
+		dataset.perspectives.find((p) => p.id === props.activePerspectiveId)?.type ?? "landscape";
 
 	return (
 		<div className="context-bar">
@@ -100,17 +91,16 @@ function findById<T extends { id: string }>(items: T[], id: string | null): T | 
 }
 
 function BreadcrumbTrail(props: BreadcrumbTrailProps) {
-	const domain = findById(seedDomains, props.activeDomainId);
-	const capability = findById(seedCapabilities, props.activeCapabilityId);
-	const journey = findById(seedJourneys, props.activeJourneyId);
-	const valueStream = findById(seedValueStreams, props.activeValueStreamId);
-	const process = findById(seedProcesses, props.activeProcessId);
+	const dataset = useDataset();
+	const domain = findById(dataset.domains, props.activeDomainId);
+	const capability = findById(dataset.capabilities, props.activeCapabilityId);
+	const journey = findById(dataset.journeys, props.activeJourneyId);
+	const valueStream = findById(dataset.valueStreams, props.activeValueStreamId);
+	const process = findById(dataset.processes, props.activeProcessId);
 	// When the active process is a sub-process, its parent is the way back.
-	const parentProcess = process
-		? parentProcessOf(process.id, { processes: seedProcesses, processStages: seedProcessStages })
-		: null;
-	const sequence = findById(seedSequences, props.activeSequenceId);
-	const storyRoute = findById(seedStoryRoutes, props.activeStoryRouteId);
+	const parentProcess = process ? parentProcessOf(process.id, dataset) : null;
+	const sequence = findById(dataset.sequences, props.activeSequenceId);
+	const storyRoute = findById(dataset.storyRoutes, props.activeStoryRouteId);
 
 	return (
 		<div className="context-bar__breadcrumb">

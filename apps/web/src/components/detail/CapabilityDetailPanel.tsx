@@ -1,11 +1,4 @@
-import {
-	seedJourneys,
-	seedProcesses,
-	seedProviderAssociations,
-	seedProviders,
-	seedStoryRoutes,
-	seedValueStreams,
-} from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 import type { Capability } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
 import { getNode, getProvidersForCapability } from "@guiderail/core/graph";
@@ -29,20 +22,23 @@ export function CapabilityDetailPanel({
 	onSelectProcess,
 	onStartRoute,
 }: CapabilityDetailPanelProps) {
+	const dataset = useDataset();
 	const referencedNodes = capability.nodeIds
 		.map((id) => getNode(graph, id))
 		.filter((n) => n != null);
 
-	const availableJourneys = seedJourneys.filter((j) => capability.journeyIds.includes(j.id));
+	const availableJourneys = dataset.journeys.filter((j) => capability.journeyIds.includes(j.id));
 
-	const providerIds = getProvidersForCapability(capability.id, seedProviderAssociations);
-	const capProviders = seedProviders.filter((p) => providerIds.includes(p.id));
+	const providerIds = getProvidersForCapability(capability.id, dataset.providerAssociations);
+	const capProviders = dataset.providers.filter((p) => providerIds.includes(p.id));
 
-	const capValueStreams = seedValueStreams.filter((vs) => vs.capabilityIds.includes(capability.id));
+	const capValueStreams = dataset.valueStreams.filter((vs) =>
+		vs.capabilityIds.includes(capability.id),
+	);
 
-	const capProcesses = seedProcesses.filter((p) => p.capabilityIds.includes(capability.id));
+	const capProcesses = dataset.processes.filter((p) => p.capabilityIds.includes(capability.id));
 
-	const capStoryRoutes = seedStoryRoutes.filter((sr) =>
+	const capStoryRoutes = dataset.storyRoutes.filter((sr) =>
 		sr.tags.some((t) => capability.tags.includes(t)),
 	);
 

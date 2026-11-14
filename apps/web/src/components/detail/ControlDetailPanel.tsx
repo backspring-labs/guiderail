@@ -1,4 +1,4 @@
-import { seedControlPoints } from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 
 interface ControlDetailPanelProps {
 	nodeId: string;
@@ -11,7 +11,8 @@ export function ControlDetailPanel({
 	nodeLabel,
 	processStageIds,
 }: ControlDetailPanelProps) {
-	const relevantControls = seedControlPoints.filter((cp) =>
+	const dataset = useDataset();
+	const relevantControls = dataset.controlPoints.filter((cp) =>
 		processStageIds.includes(cp.processStageId),
 	);
 

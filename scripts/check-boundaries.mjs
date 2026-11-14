@@ -70,6 +70,13 @@ const rules = [
 			/^@guiderail\/core\/(src|dist)(\/|$)/.test(spec) ||
 			spec.includes("test-fixtures"),
 	},
+	{
+		name: "Only data/demo-dataset.ts imports content; everything else reads the Dataset",
+		files: sourceFiles(webSrc).filter(
+			(f) => relative(webSrc, f) !== join("data", "demo-dataset.ts"),
+		),
+		forbidden: (spec) => /^@guiderail\/core\/demo(\/|$)/.test(spec),
+	},
 ];
 
 let violations = 0;

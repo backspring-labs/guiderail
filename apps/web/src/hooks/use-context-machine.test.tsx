@@ -1,5 +1,6 @@
+import { DatasetProvider } from "@/data/dataset-context.js";
+import { demoDataset as dataset } from "@/data/demo-dataset.js";
 import { deriveStepperState } from "@/lib/stepper-state.js";
-import { seedInterfaces, seedMessages, seedSequences } from "@/store/seed-loader.js";
 import { act, renderHook } from "@testing-library/react";
 import { type ReactNode, StrictMode } from "react";
 import { describe, expect, it } from "vitest";
@@ -19,7 +20,9 @@ import {
 function wrapper({ children }: { children: ReactNode }) {
 	return (
 		<StrictMode>
-			<KernelContext.Provider>{children}</KernelContext.Provider>
+			<DatasetProvider dataset={dataset}>
+				<KernelContext.Provider>{children}</KernelContext.Provider>
+			</DatasetProvider>
 		</StrictMode>
 	);
 }
@@ -42,12 +45,12 @@ function renderApp() {
 describe("app initialization — sequence state", () => {
 	it("hands the kernel the same messages and interfaces the views read", () => {
 		const app = renderApp();
-		expect(seedMessages.length).toBeGreaterThan(0);
-		expect(app.current.kernelMessages).toEqual(seedMessages);
-		expect(app.current.kernelInterfaces).toEqual(seedInterfaces);
+		expect(dataset.messages.length).toBeGreaterThan(0);
+		expect(app.current.kernelMessages).toEqual(dataset.messages);
+		expect(app.current.kernelInterfaces).toEqual(dataset.interfaces);
 	});
 
-	it.each(seedSequences.map((s) => [s.id, s] as const))(
+	it.each(dataset.sequences.map((s) => [s.id, s] as const))(
 		"steps %s from the first message to a valid end",
 		(sequenceId, sequence) => {
 			const app = renderApp();
@@ -57,7 +60,7 @@ describe("app initialization — sequence state", () => {
 			});
 
 			// The count the stepper control shows and the kernel's own collection agree.
-			const stepper = deriveStepperState(app.current.nav, "sequence");
+			const stepper = deriveStepperState(app.current.nav, "sequence", dataset);
 			const kernelCount = app.current.kernelMessages.filter((m) =>
 				sequence.messageIds.includes(m.id),
 			).length;
@@ -81,7 +84,9 @@ describe("app initialization — sequence state", () => {
 
 			act(() => app.current.send({ type: "STEPPER_END" }));
 			expect(app.current.nav.activeMessageIndex).toBe(lastIndex);
-			expect(deriveStepperState(app.current.nav, "sequence")?.currentIndex).toBe(lastIndex);
+			expect(deriveStepperState(app.current.nav, "sequence", dataset)?.currentIndex).toBe(
+				lastIndex,
+			);
 		},
 	);
 });
@@ -114,7 +119,7 @@ describe("app initialization — lifecycle", () => {
 		});
 		const before = app.current.actor.getSnapshot().context;
 
-		act(() => initializeKernel(app.current.actor));
+		act(() => initializeKernel(app.current.actor, dataset));
 
 		expect(app.current.actor.getSnapshot().context).toBe(before);
 		expect(app.current.nav.activePerspectiveId).toBe("persp-journey");

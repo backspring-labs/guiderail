@@ -1,22 +1,4 @@
-import {
-	seedCapabilities,
-	seedControlPoints,
-	seedGraph,
-	seedInterfaces,
-	seedJourneys,
-	seedMessages,
-	seedOrientationItems,
-	seedPerspectives,
-	seedProcessStages,
-	seedProcesses,
-	seedProviderAssociations,
-	seedProviders,
-	seedSequences,
-	seedSteps,
-	seedStoryRoutes,
-	seedStoryWaypoints,
-	seedValueStreams,
-} from "@/store/seed-loader.js";
+import type { Dataset } from "@/data/dataset.js";
 import type { ContextMachineEvent } from "@guiderail/core/context";
 
 type InitializeEvent = Extract<ContextMachineEvent, { type: "INITIALIZE" }>;
@@ -31,26 +13,29 @@ type InitializeEvent = Extract<ContextMachineEvent, { type: "INITIALIZE" }>;
  */
 export type CompleteInitializeEvent = Required<InitializeEvent>;
 
-/** Builds the single INITIALIZE event the app sends to the Context Machine. */
-export function createInitializeEvent(): CompleteInitializeEvent {
+/**
+ * Builds the single INITIALIZE event the app sends to the Context Machine, from
+ * the same Dataset the views read.
+ */
+export function createInitializeEvent(dataset: Dataset): CompleteInitializeEvent {
 	return {
 		type: "INITIALIZE",
-		graph: seedGraph,
-		journeys: seedJourneys,
-		steps: seedSteps,
-		capabilities: seedCapabilities,
-		providers: seedProviders,
-		providerAssociations: seedProviderAssociations,
-		valueStreams: seedValueStreams,
-		processes: seedProcesses,
-		processStages: seedProcessStages,
-		storyRoutes: seedStoryRoutes,
-		storyWaypoints: seedStoryWaypoints,
-		controlPoints: seedControlPoints,
-		interfaces: seedInterfaces,
-		messages: seedMessages,
-		sequences: seedSequences,
-		orientationItems: seedOrientationItems,
-		perspectives: seedPerspectives,
+		graph: dataset.graph,
+		journeys: dataset.journeys,
+		steps: dataset.steps,
+		capabilities: dataset.capabilities,
+		providers: dataset.providers,
+		providerAssociations: dataset.providerAssociations,
+		valueStreams: dataset.valueStreams,
+		processes: dataset.processes,
+		processStages: dataset.processStages,
+		storyRoutes: dataset.storyRoutes,
+		storyWaypoints: dataset.storyWaypoints,
+		controlPoints: dataset.controlPoints,
+		interfaces: dataset.interfaces,
+		messages: dataset.messages,
+		sequences: dataset.sequences,
+		orientationItems: dataset.orientationItems,
+		perspectives: dataset.perspectives,
 	};
 }

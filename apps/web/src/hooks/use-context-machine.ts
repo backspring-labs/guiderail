@@ -1,5 +1,6 @@
+import { useDataset } from "@/data/dataset-context.js";
+import type { Dataset } from "@/data/dataset.js";
 import { createInitializeEvent } from "@/store/kernel-init.js";
-import { seedOrientationItems, seedPerspectives } from "@/store/seed-loader.js";
 import { contextMachine } from "@guiderail/core/context";
 import { createActorContext } from "@xstate/react";
 import { useLayoutEffect } from "react";
@@ -30,23 +31,24 @@ export function useNavigation() {
 type KernelActor = ReturnType<typeof KernelContext.useActorRef>;
 
 /**
- * Brings the kernel to its first usable state: data loaded, the Orientation
+ * Brings the kernel to its first usable state: the dataset loaded, the Orientation
  * perspective active, and its first item selected.
  *
  * Idempotent: once the kernel is ready this does nothing, so it is safe to call
  * again (React StrictMode runs effects twice) and can never reset navigation
  * the user has done since.
  */
-export function initializeKernel(actor: KernelActor) {
+export function initializeKernel(actor: KernelActor, dataset: Dataset) {
 	if (actor.getSnapshot().value === "ready") return;
 
-	actor.send(createInitializeEvent());
+	actor.send(createInitializeEvent(dataset));
 
 	// Orientation is the entry perspective, with its first item selected so the
 	// content panel renders immediately. It is found by type, not by id.
-	const entry = seedPerspectives.find((p) => p.type === "orientation") ?? seedPerspectives[0];
+	const entry =
+		dataset.perspectives.find((p) => p.type === "orientation") ?? dataset.perspectives[0];
 	if (entry) actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: entry.id });
-	if (seedOrientationItems.length > 0) {
+	if (dataset.orientationItems.length > 0) {
 		actor.send({ type: "JUMP_TO_ORIENTATION", index: 0 });
 	}
 }
@@ -59,7 +61,8 @@ export function initializeKernel(actor: KernelActor) {
  */
 export function useInitializeContext() {
 	const actorRef = KernelContext.useActorRef();
+	const dataset = useDataset();
 	useLayoutEffect(() => {
-		initializeKernel(actorRef);
-	}, [actorRef]);
+		initializeKernel(actorRef, dataset);
+	}, [actorRef, dataset]);
 }

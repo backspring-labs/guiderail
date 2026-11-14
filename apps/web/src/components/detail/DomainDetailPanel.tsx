@@ -1,4 +1,4 @@
-import { seedCapabilities } from "@/store/seed-loader.js";
+import { useDataset } from "@/data/dataset-context.js";
 import type { Domain } from "@guiderail/core/entities";
 import { getCapabilitiesForDomain } from "@guiderail/core/graph";
 
@@ -8,7 +8,8 @@ interface DomainDetailPanelProps {
 }
 
 export function DomainDetailPanel({ domain, onSelectCapability }: DomainDetailPanelProps) {
-	const capabilities = getCapabilitiesForDomain(domain.id, seedCapabilities);
+	const dataset = useDataset();
+	const capabilities = getCapabilitiesForDomain(domain.id, dataset.capabilities);
 
 	return (
 		<div className="detail-panel">

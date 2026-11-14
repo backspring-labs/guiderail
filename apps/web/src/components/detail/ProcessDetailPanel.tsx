@@ -1,3 +1,4 @@
+import { useDataset } from "@/data/dataset-context.js";
 import { orderedStagesOf } from "@/lib/ordered-groups.js";
 import type { Process } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
@@ -10,7 +11,8 @@ interface ProcessDetailPanelProps {
 }
 
 export function ProcessDetailPanel({ process, graph, onSelectNode }: ProcessDetailPanelProps) {
-	const stages = orderedStagesOf(process.id);
+	const dataset = useDataset();
+	const stages = orderedStagesOf(dataset, process.id);
 
 	return (
 		<div className="detail-panel">

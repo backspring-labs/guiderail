@@ -15,18 +15,18 @@ export default defineConfig({
 			exclude: [
 				"src/**/*.stories.tsx",
 				"src/**/*.test.{ts,tsx}",
+				"src/**/*.fixture.ts",
 				"src/test-setup.ts",
 				"src/vite-env.d.ts",
 			],
 			reporter: ["text", "json-summary"],
-			// Floors are the last measured coverage (25.13 / 15.89 / 21.35 / 24.04), rounded
-			// down. Most of the app is still untested; these exist to stop it getting
-			// worse and only move up. Issues #12 and #24 are where they rise.
+			// Floors are the last measured coverage (56.88 / 46.57 / 49.10 / 57.16), rounded
+			// down. They only move up: raise them in the pull request that raises coverage.
 			thresholds: {
-				statements: 25,
-				branches: 15,
-				functions: 21,
-				lines: 24,
+				statements: 56,
+				branches: 46,
+				functions: 49,
+				lines: 57,
 			},
 		},
 	},

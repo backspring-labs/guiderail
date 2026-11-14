@@ -1,5 +1,5 @@
+import { useDataset } from "@/data/dataset-context.js";
 import { orderedMessagesOf, positionOf } from "@/lib/ordered-groups.js";
-import { seedInterfaces, seedMessages } from "@/store/seed-loader.js";
 import { orderBySequence } from "@guiderail/core/content";
 import type { Message } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
@@ -18,11 +18,12 @@ export function SequenceDetailPanel({
 	graph,
 	onSelectNode,
 }: SequenceDetailPanelProps) {
+	const dataset = useDataset();
 	// Numbers shown here are positions in the active sequence, so they match the
 	// numbers on the canvas and the stepper counter.
 	const sequenceMessages = activeSequenceId
-		? orderedMessagesOf(activeSequenceId)
-		: orderBySequence(seedMessages);
+		? orderedMessagesOf(dataset, activeSequenceId)
+		: orderBySequence(dataset.messages);
 
 	if (selectedNodeId.startsWith("lifeline-")) {
 		return (
@@ -55,7 +56,8 @@ interface LifelineDetailProps {
 }
 
 function LifelineDetail({ ifaceId, sequenceMessages, graph, onSelectNode }: LifelineDetailProps) {
-	const iface = seedInterfaces.find((i) => i.id === ifaceId);
+	const dataset = useDataset();
+	const iface = dataset.interfaces.find((i) => i.id === ifaceId);
 	if (!iface) return null;
 
 	const terrainNode = getNode(graph, iface.nodeId);
@@ -97,7 +99,7 @@ function LifelineDetail({ ifaceId, sequenceMessages, graph, onSelectNode }: Life
 				<div className="detail-panel__section">
 					<h4 className="detail-panel__section-title">Sends ({originatingMessages.length})</h4>
 					{originatingMessages.map(({ msg, position }) => {
-						const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
+						const targetIface = dataset.interfaces.find((i) => i.id === msg.targetInterfaceId);
 						return (
 							<div key={msg.id} className="detail-panel__message-item">
 								<span className="detail-panel__message-seq">#{position + 1}</span>
@@ -119,12 +121,13 @@ function MessageDetail({
 	msgId,
 	sequenceMessages,
 }: { msgId: string; sequenceMessages: Message[] }) {
-	const msg = seedMessages.find((m) => m.id === msgId);
+	const dataset = useDataset();
+	const msg = dataset.messages.find((m) => m.id === msgId);
 	if (!msg) return null;
 	const position = positionOf(sequenceMessages, msg.id);
 
-	const sourceIface = seedInterfaces.find((i) => i.id === msg.sourceInterfaceId);
-	const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
+	const sourceIface = dataset.interfaces.find((i) => i.id === msg.sourceInterfaceId);
+	const targetIface = dataset.interfaces.find((i) => i.id === msg.targetInterfaceId);
 
 	return (
 		<div className="detail-panel">
