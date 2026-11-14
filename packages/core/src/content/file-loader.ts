@@ -1,89 +1,31 @@
-import type { ZodSchema } from "zod";
+import type { ZodTypeAny } from "zod";
 import {
-	AnnotationSchema,
-	CapabilitySchema,
-	ControlPointSchema,
-	DomainSchema,
-	EdgeSchema,
-	EvidenceRefSchema,
-	InterfaceSchema,
-	JourneySchema,
-	LayerSchema,
-	MessageSchema,
-	NodeSchema,
-	PerspectiveSchema,
-	ProcessSchema,
-	ProcessStageSchema,
-	ProviderAssociationSchema,
-	ProviderSchema,
-	SequenceSchema,
-	StepSchema,
-	StoryRouteSchema,
-	StoryWaypointSchema,
-	ValueStreamSchema,
-} from "../entities/index.js";
-import type {
-	Annotation,
-	Capability,
-	ControlPoint,
-	Domain,
-	Edge,
-	EvidenceRef,
-	Interface,
-	Journey,
-	Layer,
-	Message,
-	Node,
-	Perspective,
-	Process,
-	ProcessStage,
-	Provider,
-	ProviderAssociation,
-	Sequence,
-	Step,
-	StoryRoute,
-	StoryWaypoint,
-	ValueStream,
-} from "../entities/index.js";
+	CONTENT_COLLECTIONS,
+	CONTENT_COLLECTION_NAMES,
+	type ContentBundle,
+	type ContentCollectionName,
+	emptyContentBundle,
+	isContentCollectionName,
+} from "./collections.js";
+import { type ContentError, issue, splitBySeverity } from "./diagnostics.js";
+import { checkOrdering } from "./ordering.js";
+import { checkDuplicateIds, checkReferences } from "./references.js";
+
+export type { ContentBundle } from "./collections.js";
+export { emptyContentBundle } from "./collections.js";
+export type { ContentError } from "./diagnostics.js";
 
 /**
- * Result of loading content from a JSON file.
- * Matches the same entity shapes as seed data.
+ * Result of loading content. Follows docs/architecture/data-integrity.md:
+ * loading never throws on bad content, and nothing is dropped silently.
  */
-export interface ContentBundle {
-	domains: Domain[];
-	capabilities: Capability[];
-	nodes: Node[];
-	edges: Edge[];
-	journeys: Journey[];
-	steps: Step[];
-	perspectives: Perspective[];
-	layers: Layer[];
-	annotations: Annotation[];
-	evidenceRefs: EvidenceRef[];
-	providers: Provider[];
-	providerAssociations: ProviderAssociation[];
-	valueStreams: ValueStream[];
-	processes: Process[];
-	processStages: ProcessStage[];
-	storyRoutes: StoryRoute[];
-	storyWaypoints: StoryWaypoint[];
-	controlPoints: ControlPoint[];
-	interfaces: Interface[];
-	messages: Message[];
-	sequences: Sequence[];
-}
-
 export interface LoadResult {
 	bundle: ContentBundle;
+	/** Input that was unusable, dropped, or does not resolve. */
 	errors: ContentError[];
+	/** Input that was ignored or is ambiguous, but nothing was lost. */
+	warnings: ContentError[];
 	provenance: ContentProvenance;
-}
-
-export interface ContentError {
-	entityType: string;
-	index: number;
-	message: string;
 }
 
 export interface ContentProvenance {
@@ -93,91 +35,122 @@ export interface ContentProvenance {
 	entityCounts: Record<string, number>;
 }
 
-const ENTITY_SCHEMAS: Record<string, ZodSchema> = {
-	domains: DomainSchema,
-	capabilities: CapabilitySchema,
-	nodes: NodeSchema,
-	edges: EdgeSchema,
-	journeys: JourneySchema,
-	steps: StepSchema,
-	perspectives: PerspectiveSchema,
-	layers: LayerSchema,
-	annotations: AnnotationSchema,
-	evidenceRefs: EvidenceRefSchema,
-	providers: ProviderSchema,
-	providerAssociations: ProviderAssociationSchema,
-	valueStreams: ValueStreamSchema,
-	processes: ProcessSchema,
-	processStages: ProcessStageSchema,
-	storyRoutes: StoryRouteSchema,
-	storyWaypoints: StoryWaypointSchema,
-	controlPoints: ControlPointSchema,
-	interfaces: InterfaceSchema,
-	messages: MessageSchema,
-	sequences: SequenceSchema,
-};
+export interface ValidationResult {
+	errors: ContentError[];
+	warnings: ContentError[];
+}
+
+export interface MergeResult {
+	bundle: ContentBundle;
+	/** Ids in the second bundle that collided with the first and were dropped. */
+	errors: ContentError[];
+}
+
+type Identified = { id: string };
+
+function readableId(value: unknown): string | undefined {
+	if (typeof value !== "object" || value === null) return undefined;
+	const id = (value as { id?: unknown }).id;
+	return typeof id === "string" ? id : undefined;
+}
+
+/** Parses one collection: validates each entity and keeps the first of any duplicated id. */
+function parseCollection(
+	name: ContentCollectionName,
+	rawArray: unknown[],
+	issues: ContentError[],
+): Identified[] {
+	const schema: ZodTypeAny = CONTENT_COLLECTIONS[name];
+	const kept: Identified[] = [];
+	const seen = new Set<string>();
+
+	rawArray.forEach((rawEntity, index) => {
+		const result = schema.safeParse(rawEntity);
+		if (!result.success) {
+			const id = readableId(rawEntity);
+			issues.push(
+				issue("invalid_entity", name, result.error.message, id == null ? { index } : { index, id }),
+			);
+			return;
+		}
+		const entity = result.data as Identified;
+		if (seen.has(entity.id)) {
+			issues.push(
+				issue(
+					"duplicate_id",
+					name,
+					`id "${entity.id}" is already used in ${name}; this later entity was dropped`,
+					{ index, id: entity.id },
+				),
+			);
+			return;
+		}
+		seen.add(entity.id);
+		kept.push(entity);
+	});
+
+	return kept;
+}
 
 /**
  * Parse a raw JSON object into a validated ContentBundle.
- * Each entity array is validated through its Zod schema.
- * Invalid entities are collected as errors, not thrown.
+ *
+ * - An omitted collection loads as empty, with no diagnostic.
+ * - A collection that is present but not an array is an error.
+ * - An entity that fails its schema, or reuses an id, is dropped and reported.
+ * - A reference that does not resolve is reported; the entity is kept.
+ * - An unknown top-level key is ignored with a warning.
  */
-export function parseContentBundle(raw: Record<string, unknown>, sourcePath: string): LoadResult {
-	const errors: ContentError[] = [];
+export function parseContentBundle(raw: unknown, sourcePath: string): LoadResult {
+	const issues: ContentError[] = [];
 	const entityCounts: Record<string, number> = {};
+	const bundle = emptyContentBundle();
+	const writable = bundle as Record<ContentCollectionName, Identified[]>;
+	const present = new Set<ContentCollectionName>();
 
-	const bundle: ContentBundle = {
-		domains: [],
-		capabilities: [],
-		nodes: [],
-		edges: [],
-		journeys: [],
-		steps: [],
-		perspectives: [],
-		layers: [],
-		annotations: [],
-		evidenceRefs: [],
-		providers: [],
-		providerAssociations: [],
-		valueStreams: [],
-		processes: [],
-		processStages: [],
-		storyRoutes: [],
-		storyWaypoints: [],
-		controlPoints: [],
-		interfaces: [],
-		messages: [],
-		sequences: [],
-	};
+	const isObject = typeof raw === "object" && raw !== null && !Array.isArray(raw);
+	if (!isObject) {
+		issues.push(
+			issue("not_an_array", "(root)", "content must be an object whose keys are collections"),
+		);
+	}
+	const source: Record<string, unknown> = isObject ? (raw as Record<string, unknown>) : {};
 
-	for (const [key, schema] of Object.entries(ENTITY_SCHEMAS)) {
-		const rawArray = raw[key];
-		if (!Array.isArray(rawArray)) {
-			entityCounts[key] = 0;
+	for (const key of Object.keys(source)) {
+		if (!isContentCollectionName(key)) {
+			issues.push(
+				issue("unknown_section", key, `"${key}" is not a known collection and was ignored`),
+			);
+		}
+	}
+
+	for (const name of CONTENT_COLLECTION_NAMES) {
+		const rawArray = source[name];
+		if (rawArray === undefined) {
+			entityCounts[name] = 0;
 			continue;
 		}
-
-		const parsed: unknown[] = [];
-		for (let i = 0; i < rawArray.length; i++) {
-			const result = schema.safeParse(rawArray[i]);
-			if (result.success) {
-				parsed.push(result.data);
-			} else {
-				errors.push({
-					entityType: key,
-					index: i,
-					message: result.error.message,
-				});
-			}
+		if (!Array.isArray(rawArray)) {
+			issues.push(
+				issue(
+					"not_an_array",
+					name,
+					`"${name}" must be an array but is ${rawArray === null ? "null" : typeof rawArray}; it was loaded as empty`,
+				),
+			);
+			entityCounts[name] = 0;
+			continue;
 		}
-
-		(bundle as unknown as Record<string, unknown>)[key] = parsed;
-		entityCounts[key] = parsed.length;
+		present.add(name);
+		writable[name] = parseCollection(name, rawArray, issues);
+		entityCounts[name] = writable[name].length;
 	}
+
+	issues.push(...checkReferences(bundle, present), ...checkOrdering(bundle));
 
 	return {
 		bundle,
-		errors,
+		...splitBySeverity(issues),
 		provenance: {
 			sourceType: "content_file",
 			sourcePath,
@@ -188,59 +161,51 @@ export function parseContentBundle(raw: Record<string, unknown>, sourcePath: str
 }
 
 /**
- * Create an empty ContentBundle (all arrays empty).
+ * Checks a complete bundle for duplicate ids, dangling references and ambiguous
+ * ordering. Use it on a bundle assembled in code or produced by a merge, where
+ * every collection is expected to be present.
  */
-export function emptyContentBundle(): ContentBundle {
-	return {
-		domains: [],
-		capabilities: [],
-		nodes: [],
-		edges: [],
-		journeys: [],
-		steps: [],
-		perspectives: [],
-		layers: [],
-		annotations: [],
-		evidenceRefs: [],
-		providers: [],
-		providerAssociations: [],
-		valueStreams: [],
-		processes: [],
-		processStages: [],
-		storyRoutes: [],
-		storyWaypoints: [],
-		controlPoints: [],
-		interfaces: [],
-		messages: [],
-		sequences: [],
-	};
+export function validateContentBundle(bundle: ContentBundle): ValidationResult {
+	return splitBySeverity([
+		...checkDuplicateIds(bundle),
+		...checkReferences(bundle),
+		...checkOrdering(bundle),
+	]);
 }
 
 /**
- * Merge two ContentBundles. Second bundle's entities are appended.
+ * Merge two ContentBundles. Entities from the second are appended.
+ *
+ * An id that already exists in the first bundle's collection is not overwritten
+ * and not duplicated: the first bundle's entity wins and the collision is
+ * reported. Call validateContentBundle() on the result to check references
+ * across the merged whole.
  */
-export function mergeContentBundles(a: ContentBundle, b: ContentBundle): ContentBundle {
-	return {
-		domains: [...a.domains, ...b.domains],
-		capabilities: [...a.capabilities, ...b.capabilities],
-		nodes: [...a.nodes, ...b.nodes],
-		edges: [...a.edges, ...b.edges],
-		journeys: [...a.journeys, ...b.journeys],
-		steps: [...a.steps, ...b.steps],
-		perspectives: [...a.perspectives, ...b.perspectives],
-		layers: [...a.layers, ...b.layers],
-		annotations: [...a.annotations, ...b.annotations],
-		evidenceRefs: [...a.evidenceRefs, ...b.evidenceRefs],
-		providers: [...a.providers, ...b.providers],
-		providerAssociations: [...a.providerAssociations, ...b.providerAssociations],
-		valueStreams: [...a.valueStreams, ...b.valueStreams],
-		processes: [...a.processes, ...b.processes],
-		processStages: [...a.processStages, ...b.processStages],
-		storyRoutes: [...a.storyRoutes, ...b.storyRoutes],
-		storyWaypoints: [...a.storyWaypoints, ...b.storyWaypoints],
-		controlPoints: [...a.controlPoints, ...b.controlPoints],
-		interfaces: [...a.interfaces, ...b.interfaces],
-		messages: [...a.messages, ...b.messages],
-		sequences: [...a.sequences, ...b.sequences],
-	};
+export function mergeContentBundles(a: ContentBundle, b: ContentBundle): MergeResult {
+	const bundle = emptyContentBundle();
+	const writable = bundle as Record<ContentCollectionName, Identified[]>;
+	const errors: ContentError[] = [];
+
+	for (const name of CONTENT_COLLECTION_NAMES) {
+		const merged = [...(a[name] as Identified[])];
+		const seen = new Set(merged.map((e) => e.id));
+		(b[name] as Identified[]).forEach((entity, index) => {
+			if (seen.has(entity.id)) {
+				errors.push(
+					issue(
+						"duplicate_id",
+						name,
+						`id "${entity.id}" exists in both bundles; the first bundle's entity was kept`,
+						{ index, id: entity.id },
+					),
+				);
+				return;
+			}
+			seen.add(entity.id);
+			merged.push(entity);
+		});
+		writable[name] = merged;
+	}
+
+	return { bundle, errors };
 }

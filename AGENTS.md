@@ -90,7 +90,7 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 7. **Seven-perspective progression.** Each perspective answers a different question about the same terrain.
 8. **Canvas modes are perspective-internal.** Same topology, different emphasis.
 9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". See "Navigation contract" below for exactly what persists and what resets.
-10. **Content loading.** `@guiderail/core/content` exports `parseContentBundle()` (Zod validation, non-fatal error collection) and `mergeContentBundles()`. The web app does not use them yet.
+10. **Content loading.** `@guiderail/core/content` exports `parseContentBundle()`, `validateContentBundle()` and `mergeContentBundles()`. They follow the [data-integrity contract](docs/architecture/data-integrity.md): nothing is dropped, overwritten or reinterpreted without a diagnostic. `orderBySequence()` is the one definition of navigation order. The web app does not load content through them yet.
 
 ## Perspectives
 
@@ -154,7 +154,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 | The Process canvas renders the same BPMN nodes whichever process is active | #21 |
 | Stepper indices mix `sequenceNumber` lookups with array positions | #22 |
 | Only the left panel navigates on selection; search and the right panel do not | #35 |
-| `parseContentBundle()` silently ignores unknown or malformed sections | #9 |
 
 Remove a row in the same PR that fixes it.
 
