@@ -50,7 +50,7 @@ Supported runtimes are Node 26 (primary) and Node 24. The pnpm version is pinned
 Run all three and record the results in the PR description:
 
 ```bash
-pnpm exec biome ci .
+pnpm exec biome ci --error-on-warnings .
 pnpm build
 pnpm typecheck
 pnpm test:coverage

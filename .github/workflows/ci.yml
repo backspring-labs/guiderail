@@ -51,8 +51,10 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
-      - name: Lint (root and workspaces)
-        run: pnpm exec biome ci .
+      # Warnings fail too. The repository keeps complexity and style warnings at zero,
+      # and a warning that does not fail the gate is one nobody sees.
+      - name: Lint (root and workspaces, warnings are errors)
+        run: pnpm exec biome ci --error-on-warnings .
 
       - name: Build
         run: pnpm build

@@ -22,7 +22,7 @@ Working instructions for the codebase (commands, architecture, conventions) are 
 3. **Keep one concern per pull request.** An issue may take several pull requests.
 4. **Run the checks** and record the results in the pull request:
    ```bash
-   pnpm exec biome ci .
+   pnpm exec biome ci --error-on-warnings .
    pnpm build
    pnpm typecheck
    pnpm test:coverage
