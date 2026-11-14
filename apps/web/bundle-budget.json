@@ -1,0 +1,5 @@
+{
+	"initialJsGzip": 225000,
+	"lazyJsGzip": 470000,
+	"cssGzip": 11000
+}

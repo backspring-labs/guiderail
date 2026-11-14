@@ -19,6 +19,7 @@ pnpm typecheck      # tsc over tests, fixtures and config files, no emit
 pnpm test:coverage  # tests with coverage and the per-package thresholds (what CI runs)
 pnpm check:package  # pack core, install it outside the workspace, import and typecheck every export
 pnpm check:boundaries  # web imports core only via built entry points; the kernel imports no UI or demo data
+pnpm check:bundle   # after a build: web bundle sizes against apps/web/bundle-budget.json
 pnpm test:e2e       # build the app and Storybook, then run the browser suite against both
 ```
 
@@ -56,6 +57,7 @@ Run what CI runs, and record the results in the PR description:
 pnpm exec biome ci --error-on-warnings .
 pnpm check:boundaries
 pnpm build
+pnpm check:bundle
 pnpm typecheck
 pnpm test:coverage
 pnpm check:package
@@ -113,6 +115,11 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 The Process mode ids differ from their UI labels: `activity` is shown as "Decision" and `risk_controls` as "Controls".
 
 Orientation is the entry perspective on first load.
+
+### Bundle size
+
+- ELK, the layout library, is loaded on demand by `lib/elk-layout.ts`. Do not import `elkjs` anywhere else: a static import puts 446 kB (gzip) back into start-up.
+- `pnpm check:bundle` enforces a budget on initial JavaScript, on-demand JavaScript and CSS. Numbers, method and policy are in [docs/performance.md](docs/performance.md).
 
 ### Accessibility
 

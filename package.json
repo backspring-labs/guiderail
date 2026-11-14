@@ -19,7 +19,8 @@
 		"dev": "turbo dev",
 		"check:fix": "turbo check:fix",
 		"check:package": "node scripts/check-packed-core.mjs",
-		"check:boundaries": "node scripts/check-boundaries.mjs"
+		"check:boundaries": "node scripts/check-boundaries.mjs",
+		"check:bundle": "node scripts/check-bundle-size.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.0",

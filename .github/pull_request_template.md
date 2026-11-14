@@ -11,6 +11,7 @@ Closes #
 | `pnpm exec biome ci --error-on-warnings .` | |
 | `pnpm check:boundaries` | |
 | `pnpm build` | |
+| `pnpm check:bundle` | |
 | `pnpm typecheck` | |
 | `pnpm test:coverage` | |
 | `pnpm check:package` | |

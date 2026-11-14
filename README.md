@@ -66,6 +66,7 @@ Run from the repository root.
 | `pnpm test:e2e` | Build the app and Storybook and run the browser suite against both |
 | `pnpm check:package` | Pack the kernel and verify it as an outside consumer would |
 | `pnpm check:boundaries` | Verify the import rules between packages |
+| `pnpm check:bundle` | After a build, compare the web bundle's size with its budget |
 
 The browser suite needs a browser installed once:
 
@@ -79,6 +80,7 @@ Before opening a pull request, run what CI runs:
 pnpm exec biome ci --error-on-warnings .
 pnpm check:boundaries
 pnpm build
+pnpm check:bundle
 pnpm typecheck
 pnpm test:coverage
 pnpm check:package
@@ -141,6 +143,7 @@ Only load content you trust. See [SECURITY.md](SECURITY.md).
 - [ROADMAP.md](ROADMAP.md): what is being worked on
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - [docs/architecture/data-integrity.md](docs/architecture/data-integrity.md): what content is accepted, rejected and reported
+- [docs/performance.md](docs/performance.md): bundle size, start-up time and the size budget
 - [docs/plans/](docs/plans/): implementation plans by version
 
 ## Security

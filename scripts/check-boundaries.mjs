@@ -77,6 +77,13 @@ const rules = [
 		),
 		forbidden: (spec) => /^@guiderail\/core\/demo(\/|$)/.test(spec),
 	},
+	{
+		name: "Only lib/elk-layout.ts imports elkjs, so it stays out of the start-up bundle",
+		files: sourceFiles(webSrc).filter(
+			(f) => !relative(webSrc, f).startsWith(join("lib", "elk-layout")),
+		),
+		forbidden: (spec) => spec === "elkjs" || spec.startsWith("elkjs/"),
+	},
 ];
 
 let violations = 0;
