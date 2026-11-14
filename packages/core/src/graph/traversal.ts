@@ -14,25 +14,41 @@ function getNeighborId(edge: Edge, nodeId: string, direction: Direction): string
 	return undefined;
 }
 
+/**
+ * Ids adjacent to `nodeId` in edge insertion order, each at most once.
+ * Skips ids already visited and endpoints that are not nodes in the graph.
+ */
 function collectNeighborIds(
 	graph: TerrainGraph,
 	nodeId: string,
 	direction: Direction,
 	visited: ReadonlySet<string>,
 ): string[] {
-	const neighbors: string[] = [];
+	const neighbors = new Set<string>();
 	for (const edge of graph.edges.values()) {
 		const neighborId = getNeighborId(edge, nodeId, direction);
-		if (neighborId != null && !visited.has(neighborId)) {
-			neighbors.push(neighborId);
+		if (neighborId != null && !visited.has(neighborId) && graph.nodes.has(neighborId)) {
+			neighbors.add(neighborId);
 		}
 	}
-	return neighbors;
+	return [...neighbors];
 }
 
 /**
- * Breadth-first traversal from a starting node, returning all reachable nodes
- * up to an optional depth limit.
+ * Breadth-first traversal from a starting node.
+ *
+ * Contract:
+ * - Returns the start node first, then every reachable node in breadth-first
+ *   order. Within one depth level, nodes appear in edge insertion order.
+ * - Each node appears exactly once, however many edges or paths lead to it
+ *   (parallel edges, cycles and self-loops included).
+ * - `maxDepth` bounds the distance from the start: 0 returns only the start
+ *   node. Omitted means unbounded.
+ * - `direction` follows edges as stored: "out" from source to target, "in"
+ *   from target to source, "both" either way.
+ * - Dangling references are ignored: an edge endpoint that is not a node in
+ *   the graph is neither returned nor traversed through, and an unknown start
+ *   id returns an empty array.
  */
 export function bfsTraverse(
 	graph: TerrainGraph,
@@ -40,26 +56,27 @@ export function bfsTraverse(
 	options: { maxDepth?: number; direction?: Direction } = {},
 ): Node[] {
 	const { maxDepth, direction = "both" } = options;
+	const start = graph.nodes.get(startNodeId);
+	if (!start) return [];
+
 	const visited = new Set<string>([startNodeId]);
 	const result: Node[] = [];
-	const queue: Array<{ nodeId: string; depth: number }> = [{ nodeId: startNodeId, depth: 0 }];
+	const queue: Array<{ node: Node; depth: number }> = [{ node: start, depth: 0 }];
 
 	while (queue.length > 0) {
 		const current = queue.shift();
 		if (!current) break;
-
-		const node = graph.nodes.get(current.nodeId);
-		if (node) {
-			result.push(node);
-		}
+		result.push(current.node);
 
 		if (maxDepth != null && current.depth >= maxDepth) {
 			continue;
 		}
 
-		for (const neighborId of collectNeighborIds(graph, current.nodeId, direction, visited)) {
+		for (const neighborId of collectNeighborIds(graph, current.node.id, direction, visited)) {
+			const neighbor = graph.nodes.get(neighborId);
+			if (!neighbor) continue;
 			visited.add(neighborId);
-			queue.push({ nodeId: neighborId, depth: current.depth + 1 });
+			queue.push({ node: neighbor, depth: current.depth + 1 });
 		}
 	}
 

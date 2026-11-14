@@ -13,6 +13,13 @@ export interface TerrainGraph {
 	readonly edges: ReadonlyMap<string, Edge>;
 }
 
+/**
+ * Index nodes and edges by id.
+ *
+ * Duplicate ids: the last entry with a given id wins and earlier ones are
+ * dropped, so `nodes.size` can be smaller than the input length. Edges are not
+ * checked against the node set; queries ignore endpoints that do not resolve.
+ */
 export function createGraph(nodes: Node[], edges: Edge[]): TerrainGraph {
 	const nodeMap = new Map<string, Node>();
 	for (const node of nodes) {
@@ -119,8 +126,22 @@ export function getNodesForLayer(graph: TerrainGraph, layer: Layer): Node[] {
 	return filterNodes(graph, (n) => eligible.has(n.type));
 }
 
+/**
+ * Nodes a journey visits, in step order.
+ *
+ * Contract:
+ * - Only steps whose `journeyId` matches `journey.id` are considered, so the
+ *   full step collection can be passed in.
+ * - Steps are ordered by `sequenceNumber`; within a step, focus targets keep
+ *   their declared order.
+ * - Each node appears once, at its first visit.
+ * - Focus targets that are not nodes, or whose id is not in the graph, are
+ *   skipped.
+ */
 export function getPathNodes(graph: TerrainGraph, journey: Journey, steps: Step[]): Node[] {
-	const orderedSteps = [...steps].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	const orderedSteps = steps
+		.filter((s) => s.journeyId === journey.id)
+		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
 	const result: Node[] = [];
 	const seen = new Set<string>();
 
