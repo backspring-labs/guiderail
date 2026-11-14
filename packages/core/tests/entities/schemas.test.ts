@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { orientationItems } from "../../src/demo/seed-orientation.js";
 import {
 	AnnotationSchema,
 	CanvasModeSchema,
@@ -58,7 +59,6 @@ import {
 	storyWaypoints,
 	valueStreams,
 } from "../../src/test-fixtures/index.js";
-import { orientationItems } from "../../src/test-fixtures/seed-orientation.js";
 
 describe("Entity schemas validate seed data", () => {
 	it("validates all domains", () => {

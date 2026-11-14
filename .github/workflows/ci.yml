@@ -56,6 +56,9 @@ jobs:
       - name: Lint (root and workspaces, warnings are errors)
         run: pnpm exec biome ci --error-on-warnings .
 
+      - name: Dependency boundaries (web -> core only, kernel free of UI and demo data)
+        run: pnpm check:boundaries
+
       - name: Build
         run: pnpm build
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createActor } from "xstate";
 import { contextMachine } from "../../src/context/context.machine.js";
+import { orientationItems } from "../../src/demo/seed-orientation.js";
 import { createGraph } from "../../src/graph/graph.js";
 import {
 	capabilities,
@@ -20,7 +21,6 @@ import {
 	storyWaypoints,
 	valueStreams,
 } from "../../src/test-fixtures/index.js";
-import { orientationItems } from "../../src/test-fixtures/seed-orientation.js";
 
 const graph = createGraph(nodes, edges);
 
@@ -618,8 +618,8 @@ describe("Context Machine — Stepper (Orientation)", () => {
 // --- Seed split barrel re-export verification ---
 
 describe("Seed split barrel re-export", () => {
-	it("seed-banking.ts re-exports all expected entities", async () => {
-		const barrel = await import("../../src/test-fixtures/seed-banking.js");
+	it("the demo entry re-exports all expected entities", async () => {
+		const barrel = await import("../../src/demo/index.js");
 		expect(barrel.domains).toBeDefined();
 		expect(barrel.capabilities).toBeDefined();
 		expect(barrel.nodes).toBeDefined();
@@ -648,7 +648,7 @@ describe("Seed split barrel re-export", () => {
 	});
 
 	it("barrel re-export provides same data as direct import", () => {
-		// The test-fixtures/index.ts imports from seed-banking.ts —
+		// The test-fixtures/index.ts imports from the demo entry —
 		// if we got here with valid data, the barrel chain works
 		expect(capabilities.length).toBeGreaterThan(0);
 		expect(journeys.length).toBeGreaterThan(0);

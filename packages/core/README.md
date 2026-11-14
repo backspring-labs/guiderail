@@ -22,6 +22,7 @@ Requires Node.js 24 or 26. ESM only.
 | `@guiderail/core/adapters` | Source adapter contracts |
 | `@guiderail/core/indexing` | Index generation helpers |
 | `@guiderail/core/provenance` | Provenance reference schema |
+| `@guiderail/core/demo` | The demo corpus (GuideRail described in its own model) as collections and as one `demoContent` bundle. Sample data, not kernel API |
 
 ## Example
 
@@ -45,7 +46,7 @@ All navigation state is read from `snapshot.context.nav` and changed only by sen
 
 ## What is not in the package
 
-Test fixtures, the demo corpus and mock adapters live under `src/test-fixtures/`. They are internal: excluded from the build and not exported. Do not import them from outside this package's tests.
+Mock adapters and entity factories live under `src/test-fixtures/`. They are internal: excluded from the build and not exported. Do not import them from outside this package's tests.
 
 ## Verifying the package
 

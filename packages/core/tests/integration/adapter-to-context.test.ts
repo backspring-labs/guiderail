@@ -1,17 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createActor } from "xstate";
 import { contextMachine } from "../../src/context/context.machine.js";
+import { capabilities, domains, edges, journeys, nodes, steps } from "../../src/demo/index.js";
 import { createGraph } from "../../src/graph/graph.js";
 import { MockContentRepoAdapter } from "../../src/test-fixtures/mock-content-adapter.js";
 import { MockNormalizer } from "../../src/test-fixtures/mock-normalizer.js";
-import {
-	capabilities,
-	domains,
-	edges,
-	journeys,
-	nodes,
-	steps,
-} from "../../src/test-fixtures/seed-banking.js";
 
 function nav(actor: ReturnType<typeof createActor<typeof contextMachine>>) {
 	return actor.getSnapshot().context.nav;

@@ -17,7 +17,8 @@
 		"check": "turbo check",
 		"dev": "turbo dev",
 		"check:fix": "turbo check:fix",
-		"check:package": "node scripts/check-packed-core.mjs"
+		"check:package": "node scripts/check-packed-core.mjs",
+		"check:boundaries": "node scripts/check-boundaries.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.0",
