@@ -10,12 +10,12 @@ export default defineConfig({
 			// Fixtures and demo data are test support, not kernel code.
 			exclude: ["src/test-fixtures/**"],
 			reporter: ["text", "json-summary"],
-			// Floors are the last measured coverage (88.08 / 77.37 / 88.73 / 92.54), rounded
+			// Floors are the last measured coverage (88.86 / 78.01 / 89.23 / 92.92), rounded
 			// down. They only move up: raise them in the pull request that raises coverage.
 			thresholds: {
 				statements: 88,
-				branches: 77,
-				functions: 88,
+				branches: 78,
+				functions: 89,
 				lines: 92,
 			},
 		},

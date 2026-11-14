@@ -129,7 +129,24 @@ export type ContextMachineEvent =
 	| { type: "STEPPER_RESET" }
 	| { type: "STEPPER_END" }
 	// 0.7.0 additions — orientation jump
-	| { type: "JUMP_TO_ORIENTATION"; index: number };
+	| { type: "JUMP_TO_ORIENTATION"; index: number }
+	// Select an entity and show it in the perspective that displays it.
+	| { type: "NAVIGATE_TO"; target: NavigationTarget };
+
+/** An entity that has a perspective of its own to be shown in. */
+export interface NavigationTarget {
+	kind: "domain" | "capability" | "journey" | "process" | "sequence";
+	id: string;
+}
+
+/** The perspective type each kind of target is shown in. */
+const TARGET_PERSPECTIVE_TYPE: Record<NavigationTarget["kind"], PerspectiveType> = {
+	domain: "landscape",
+	capability: "landscape",
+	journey: "journey",
+	process: "process",
+	sequence: "sequence",
+};
 
 /*
  * Ordered groups. Every index in NavigationContext (step, stage, message,
@@ -237,6 +254,72 @@ function stepTo(
 			return { nav: reconcileStageChange(nav, position, stages, graph) };
 		}
 	}
+}
+
+/**
+ * Navigation state after selecting `target`, or null when it cannot be selected
+ * (an unknown journey or sequence, or no graph yet). Shared by the SELECT_*
+ * events and NAVIGATE_TO so the two cannot drift apart.
+ */
+function selectTarget(
+	ctx: ContextMachineContext,
+	target: NavigationTarget,
+): NavigationContext | null {
+	const { nav, graph } = ctx;
+	switch (target.kind) {
+		case "domain":
+			return reconcileDomainSwitch(nav, target.id);
+		case "capability":
+			return reconcileCapabilitySwitch(nav, target.id);
+		case "journey": {
+			const journey = ctx.journeys.find((j) => j.id === target.id);
+			if (!journey || !graph) return null;
+			const steps = resolveStepsForJourney(journey.id, ctx.steps);
+			return reconcileJourneySelection(nav, journey, steps, ctx.capabilities, graph);
+		}
+		case "process": {
+			if (!graph) return null;
+			const stages = resolveStagesForProcess(target.id, ctx.processStages);
+			return reconcileProcessSwitch(nav, target.id, stages, graph);
+		}
+		case "sequence": {
+			const sequence = ctx.sequences.find((q) => q.id === target.id);
+			if (!sequence) return null;
+			const selected = reconcileSequenceSwitch(nav, target.id, sequence, ctx.capabilities);
+			// An index is only valid when it points at a message the kernel holds.
+			const messages = resolveMessagesForSequence(target.id, ctx.sequences, ctx.messages);
+			return messages.length > 0 ? selected : { ...selected, activeMessageIndex: null };
+		}
+	}
+}
+
+/**
+ * Selects `target`, then shows it: switches to a perspective of the type that
+ * displays it, resolved from the perspectives' types, never from an id.
+ *
+ * - Already on a perspective of that type: stay there and keep its canvas mode.
+ * - Otherwise: switch to the first perspective of that type, which resets the
+ *   canvas mode as any perspective switch does.
+ * - No perspective of that type: select only.
+ *
+ * Either way no node or edge is left selected, because the selection belongs to
+ * the canvas the user came from.
+ */
+function navigateTo(
+	ctx: ContextMachineContext,
+	target: NavigationTarget,
+): NavigationContext | null {
+	const selected = selectTarget(ctx, target);
+	if (!selected) return null;
+
+	const type = TARGET_PERSPECTIVE_TYPE[target.kind];
+	if (activePerspectiveType(ctx) === type) {
+		return { ...selected, selectedNodeId: null, selectedEdgeId: null };
+	}
+
+	const perspective = ctx.perspectives.find((p) => p.type === type);
+	if (!perspective || !ctx.graph) return selected;
+	return reconcilePerspectiveSwitch(selected, perspective.id, ctx.graph);
 }
 
 export const contextMachine = setup({
@@ -383,14 +466,16 @@ export const contextMachine = setup({
 		ready: {
 			on: {
 				SELECT_DOMAIN: {
-					actions: assign(({ context, event }) => ({
-						nav: reconcileDomainSwitch(context.nav, event.domainId),
-					})),
+					actions: assign(({ context, event }) => {
+						const nav = selectTarget(context, { kind: "domain", id: event.domainId });
+						return nav ? { nav } : {};
+					}),
 				},
 				SELECT_CAPABILITY: {
-					actions: assign(({ context, event }) => ({
-						nav: reconcileCapabilitySwitch(context.nav, event.capabilityId),
-					})),
+					actions: assign(({ context, event }) => {
+						const nav = selectTarget(context, { kind: "capability", id: event.capabilityId });
+						return nav ? { nav } : {};
+					}),
 				},
 				CLEAR_CAPABILITY: {
 					actions: assign(({ context }) => ({
@@ -424,18 +509,8 @@ export const contextMachine = setup({
 				SELECT_JOURNEY: {
 					guard: "isValidJourney",
 					actions: assign(({ context, event }) => {
-						const journey = context.journeys.find((j) => j.id === event.journeyId);
-						if (!journey || !context.graph) return {};
-						const journeySteps = resolveStepsForJourney(journey.id, context.steps);
-						return {
-							nav: reconcileJourneySelection(
-								context.nav,
-								journey,
-								journeySteps,
-								context.capabilities,
-								context.graph,
-							),
-						};
+						const nav = selectTarget(context, { kind: "journey", id: event.journeyId });
+						return nav ? { nav } : {};
 					}),
 				},
 				DESELECT_JOURNEY: {
@@ -540,21 +615,8 @@ export const contextMachine = setup({
 				},
 				SELECT_SEQUENCE: {
 					actions: assign(({ context, event }) => {
-						const sequence = context.sequences.find((s) => s.id === event.sequenceId);
-						if (!sequence) return {};
-						const nav = reconcileSequenceSwitch(
-							context.nav,
-							event.sequenceId,
-							sequence,
-							context.capabilities,
-						);
-						// An index is only valid when it points at a message the kernel holds.
-						const msgs = resolveMessagesForSequence(
-							event.sequenceId,
-							context.sequences,
-							context.messages,
-						);
-						return { nav: msgs.length > 0 ? nav : { ...nav, activeMessageIndex: null } };
+						const nav = selectTarget(context, { kind: "sequence", id: event.sequenceId });
+						return nav ? { nav } : {};
 					}),
 				},
 				CLEAR_SEQUENCE: {
@@ -583,11 +645,8 @@ export const contextMachine = setup({
 				},
 				SELECT_PROCESS: {
 					actions: assign(({ context, event }) => {
-						if (!context.graph) return {};
-						const stages = resolveStagesForProcess(event.processId, context.processStages);
-						return {
-							nav: reconcileProcessSwitch(context.nav, event.processId, stages, context.graph),
-						};
+						const nav = selectTarget(context, { kind: "process", id: event.processId });
+						return nav ? { nav } : {};
 					}),
 				},
 				CLEAR_PROCESS: {
@@ -723,6 +782,12 @@ export const contextMachine = setup({
 					actions: assign(({ context }) => {
 						const stepper = resolveStepper(context);
 						return stepper ? stepTo(context, stepper, stepper.count - 1) : {};
+					}),
+				},
+				NAVIGATE_TO: {
+					actions: assign(({ context, event }) => {
+						const nav = navigateTo(context, event.target);
+						return nav ? { nav } : {};
 					}),
 				},
 				// 0.7.0 — Orientation jump

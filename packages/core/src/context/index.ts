@@ -24,4 +24,8 @@ export {
 } from "./reconciler.js";
 
 export { contextMachine } from "./context.machine.js";
-export type { ContextMachineContext, ContextMachineEvent } from "./context.machine.js";
+export type {
+	ContextMachineContext,
+	ContextMachineEvent,
+	NavigationTarget,
+} from "./context.machine.js";

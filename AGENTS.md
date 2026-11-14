@@ -129,9 +129,11 @@ On `SWITCH_PERSPECTIVE`:
 
 Select-and-show:
 
-- Selecting a journey, process or sequence from any entry point navigates to its perspective. Selecting a domain or capability navigates to Landscape.
-- After landing, no terrain node is selected.
-- Today only the left panel does this, by sending two events; search and the right panel only select. #35 moves the pairing into the kernel and makes every entry point consistent.
+- Selecting a domain, capability, journey, process or sequence from the left panel, search or the right panel sends one kernel event, `NAVIGATE_TO`. The kernel selects the entity and switches to a perspective of the type that shows it (Landscape for domains and capabilities).
+- The perspective is resolved from its **type**. No perspective id is hardcoded in the UI.
+- Already on a perspective of the right type: the kernel stays there and keeps the canvas mode.
+- After landing, no terrain node or edge is selected.
+- Clicks on a canvas that is already showing the entity (a landscape tile, a picker card, a `+` marker) use the plain `SELECT_*` events, which do not switch.
 
 ### Process canvas
 
@@ -164,7 +166,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 | Limitation | Issue |
 |---|---|
 | The app imports demo data from core's source via the `@seed` alias, and components read `seed*` arrays directly instead of kernel state | #13 |
-| Only the left panel navigates on selection; search and the right panel do not | #35 |
 
 Remove a row in the same PR that fixes it.
 
