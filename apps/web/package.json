@@ -37,9 +37,9 @@
 		"@types/react-dom": "^19.0.0",
 		"@vitejs/plugin-react": "^4.3.0",
 		"jsdom": "^26.0.0",
-		"storybook": "^8.6.18",
-		"vite": "^6.0.0",
-		"vitest": "^3.1.0"
+		"storybook": "^8.6.19",
+		"vite": "^6.4.5",
+		"vitest": "^4.1.11"
 	},
 	"engines": {
 		"node": "^24.0.0 || ^26.0.0"
