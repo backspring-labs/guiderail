@@ -136,13 +136,22 @@ export function SearchPalette({
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	// Focus input when palette opens
+	const previouslyFocused = useRef<HTMLElement | null>(null);
+
+	// Opening moves focus into the palette; closing gives it back to whatever had
+	// it before, so keyboard users are not left with focus on nothing.
 	useEffect(() => {
-		if (open) {
-			setQuery("");
-			setSelectedIndex(0);
-			setTimeout(() => inputRef.current?.focus(), 0);
+		if (!open) {
+			previouslyFocused.current?.focus();
+			previouslyFocused.current = null;
+			return;
 		}
+		previouslyFocused.current =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		setQuery("");
+		setSelectedIndex(0);
+		const timer = setTimeout(() => inputRef.current?.focus(), 0);
+		return () => clearTimeout(timer);
 	}, [open]);
 
 	const allItems = useMemo(

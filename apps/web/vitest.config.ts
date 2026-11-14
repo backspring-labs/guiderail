@@ -20,13 +20,13 @@ export default defineConfig({
 				"src/vite-env.d.ts",
 			],
 			reporter: ["text", "json-summary"],
-			// Floors are the last measured coverage (56.88 / 46.57 / 49.10 / 57.16), rounded
+			// Floors are the last measured coverage (66.86 / 57.28 / 58.69 / 67.51), rounded
 			// down. They only move up: raise them in the pull request that raises coverage.
 			thresholds: {
-				statements: 56,
-				branches: 46,
-				functions: 49,
-				lines: 57,
+				statements: 66,
+				branches: 57,
+				functions: 58,
+				lines: 67,
 			},
 		},
 	},
