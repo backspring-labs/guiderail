@@ -15,6 +15,7 @@ pnpm dev            # start the web dev server
 pnpm test           # run all tests (builds core first)
 pnpm check          # Biome lint + format check in each workspace
 pnpm check:fix      # Biome auto-fix
+pnpm check:package  # pack core, install it outside the workspace, import and typecheck every export
 ```
 
 Things the command names do not tell you:
@@ -22,6 +23,7 @@ Things the command names do not tell you:
 - **Build before `pnpm dev` on a fresh checkout.** The web app resolves `@guiderail/core` from `packages/core/dist`.
 - **`check` is Biome only.** Type errors surface in `pnpm build` (`tsc`), not in `check`.
 - **Core tests are not typechecked yet** (#11). A passing test run does not prove the tests compile under `tsc`.
+- **`src/test-fixtures/` in core is internal.** It holds the demo corpus, mocks and factories. It is excluded from the build and not exported; only core's own tests (and, for now, the web app's `@seed` alias) read it.
 - **Git hooks may not be installed on a fresh clone.** pnpm does not run lefthook's install script. Run `pnpm exec lefthook install` once; the pre-commit hook then runs `pnpm check`.
 
 Supported runtimes are Node 26 (primary) and Node 24. The pnpm version is pinned in the root `package.json`.
@@ -135,7 +137,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 | The Process canvas renders the same BPMN nodes whichever process is active | #21 |
 | Stepper indices mix `sequenceNumber` lookups with array positions | #22 |
 | Only the left panel navigates on selection; search and the right panel do not | #35 |
-| `@guiderail/core` advertises a `./test-fixtures` export that is not built | #7 |
 | `parseContentBundle()` silently ignores unknown or malformed sections | #9 |
 
 Remove a row in the same PR that fixes it.
