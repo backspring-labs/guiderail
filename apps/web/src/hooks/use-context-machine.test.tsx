@@ -3,7 +3,12 @@ import { seedInterfaces, seedMessages, seedSequences } from "@/store/seed-loader
 import { act, renderHook } from "@testing-library/react";
 import { type ReactNode, StrictMode } from "react";
 import { describe, expect, it } from "vitest";
-import { KernelContext, useInitializeContext, useNavigation } from "./use-context-machine.js";
+import {
+	KernelContext,
+	initializeKernel,
+	useInitializeContext,
+	useNavigation,
+} from "./use-context-machine.js";
 
 /**
  * These tests go through the app's own initialization (useInitializeContext
@@ -22,9 +27,10 @@ function wrapper({ children }: { children: ReactNode }) {
 function useApp() {
 	useInitializeContext();
 	const navigation = useNavigation();
+	const actor = KernelContext.useActorRef();
 	const kernelMessages = KernelContext.useSelector((s) => s.context.messages);
 	const kernelInterfaces = KernelContext.useSelector((s) => s.context.interfaces);
-	return { ...navigation, kernelMessages, kernelInterfaces };
+	return { ...navigation, actor, kernelMessages, kernelInterfaces };
 }
 
 function renderApp() {
@@ -78,4 +84,39 @@ describe("app initialization — sequence state", () => {
 			expect(deriveStepperState(app.current.nav, "sequence")?.currentIndex).toBe(lastIndex);
 		},
 	);
+});
+
+describe("app initialization — lifecycle", () => {
+	it("is ready on the first committed render, on Orientation with its first item", () => {
+		const app = renderApp();
+		expect(app.current.nav.activePerspectiveId).toBe("persp-orientation");
+		expect(app.current.nav.activeOrientationIndex).toBe(0);
+	});
+
+	it("does not reset navigation when React replays the mount or the app re-renders", () => {
+		const { result, rerender } = renderHook(() => useApp(), { wrapper });
+		act(() => {
+			result.current.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-sequence" });
+			result.current.send({ type: "JUMP_TO_ORIENTATION", index: 2 });
+		});
+
+		rerender();
+		rerender();
+
+		expect(result.current.nav.activePerspectiveId).toBe("persp-sequence");
+		expect(result.current.nav.activeOrientationIndex).toBe(2);
+	});
+
+	it("initializeKernel is idempotent: a second call changes nothing", () => {
+		const app = renderApp();
+		act(() => {
+			app.current.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-journey" });
+		});
+		const before = app.current.actor.getSnapshot().context;
+
+		act(() => initializeKernel(app.current.actor));
+
+		expect(app.current.actor.getSnapshot().context).toBe(before);
+		expect(app.current.nav.activePerspectiveId).toBe("persp-journey");
+	});
 });

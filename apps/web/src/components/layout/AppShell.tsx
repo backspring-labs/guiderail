@@ -104,7 +104,7 @@ function handleNodeClick(nodeId: string, send: SendFn) {
 export function AppShell() {
 	useInitializeContext();
 	const { nav, graph, isReady, send } = useNavigation();
-	const { rfNodes, rfEdges, layoutLoading, swimLanes, processDiagramSource } =
+	const { rfNodes, rfEdges, layoutError, retryLayout, processDiagramSource } =
 		usePerspectiveProvider(nav, graph);
 	useAutoPanel(nav);
 	const { searchOpen, setSearchOpen } = useSearchShortcut();
@@ -274,6 +274,18 @@ export function AppShell() {
 								style={{ background: "#1e293b" }}
 							/>
 						</ReactFlow>
+					)}
+					{layoutError && (
+						<div className="app-shell__canvas-notice" role="alert">
+							Automatic layout failed, so nodes are shown in a simple grid.
+							<button
+								type="button"
+								className="app-shell__canvas-notice-action"
+								onClick={retryLayout}
+							>
+								Retry layout
+							</button>
+						</div>
 					)}
 					{processDiagramSource === "empty" && (
 						<div className="app-shell__canvas-empty">

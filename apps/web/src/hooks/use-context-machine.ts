@@ -2,6 +2,7 @@ import { createInitializeEvent } from "@/store/kernel-init.js";
 import { seedOrientationItems } from "@/store/seed-loader.js";
 import { contextMachine } from "@guiderail/core/context";
 import { createActorContext } from "@xstate/react";
+import { useLayoutEffect } from "react";
 
 /**
  * React context for the Context Machine.
@@ -26,27 +27,38 @@ export function useNavigation() {
 	};
 }
 
+type KernelActor = ReturnType<typeof KernelContext.useActorRef>;
+
 /**
- * Initialize the context machine with seed data.
- * Call this once from the component that provides KernelContext.
+ * Brings the kernel to its first usable state: data loaded, the Orientation
+ * perspective active, and its first item selected.
+ *
+ * Idempotent: once the kernel is ready this does nothing, so it is safe to call
+ * again (React StrictMode runs effects twice) and can never reset navigation
+ * the user has done since.
+ */
+export function initializeKernel(actor: KernelActor) {
+	if (actor.getSnapshot().value === "ready") return;
+
+	actor.send(createInitializeEvent());
+
+	// Orientation is the entry perspective, with its first item selected so the
+	// content panel renders immediately.
+	actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-orientation" });
+	if (seedOrientationItems.length > 0) {
+		actor.send({ type: "JUMP_TO_ORIENTATION", index: 0 });
+	}
+}
+
+/**
+ * Initializes the kernel once, when the app mounts.
+ *
+ * This runs in a layout effect, not during render: rendering stays free of side
+ * effects, and the kernel is ready before the first paint.
  */
 export function useInitializeContext() {
 	const actorRef = KernelContext.useActorRef();
-	const isReady = KernelContext.useSelector((s) => s.value === "ready");
-
-	if (!isReady) {
-		actorRef.send(createInitializeEvent());
-
-		// Set the default perspective so nodes have positions on first render.
-		// Orientation is the entry perspective — first item selected on first load.
-		actorRef.send({
-			type: "SWITCH_PERSPECTIVE",
-			perspectiveId: "persp-orientation",
-		});
-
-		// Select the first orientation item so the content panel renders immediately
-		if (seedOrientationItems.length > 0) {
-			actorRef.send({ type: "JUMP_TO_ORIENTATION", index: 0 });
-		}
-	}
+	useLayoutEffect(() => {
+		initializeKernel(actorRef);
+	}, [actorRef]);
 }

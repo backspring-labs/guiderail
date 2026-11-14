@@ -88,6 +88,8 @@ function fitViewTopLeft(instance: ReactFlowInstance) {
 	});
 }
 
+export const FIT_VIEW_DELAY_MS = 50;
+
 /**
  * Refits the view when the canvas shows something different: another
  * perspective, another canvas mode, or (via `contentKey`) another diagram within
@@ -112,9 +114,12 @@ export function useFitViewOnSwitch(
 		lastContentKey.current = contentKey;
 
 		if ((perspectiveChanged || canvasModeChanged || contentChanged) && reactFlowRef.current) {
-			setTimeout(() => {
+			// Wait for the new nodes to mount, then fit. The timer is cancelled if the
+			// view changes again first or the component unmounts.
+			const timer = setTimeout(() => {
 				if (reactFlowRef.current) fitViewTopLeft(reactFlowRef.current);
-			}, 50);
+			}, FIT_VIEW_DELAY_MS);
+			return () => clearTimeout(timer);
 		}
 	}, [activePerspectiveId, activeCanvasMode, contentKey]);
 
