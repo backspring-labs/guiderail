@@ -1,3 +1,4 @@
+import { orderedStepsOf, positionOf } from "@/lib/ordered-groups.js";
 import {
 	seedCapabilities,
 	seedDomains,
@@ -60,6 +61,7 @@ function resolveSelectedNode(
 		return (
 			<SequenceDetailPanel
 				selectedNodeId={nav.selectedNodeId}
+				activeSequenceId={nav.activeSequenceId}
 				graph={graph}
 				onSelectNode={onSelectNode}
 			/>
@@ -220,12 +222,14 @@ function resolveJourneyPickerDetail(
 function resolveJourneyStepDetail(stepId: string): ReactNode | null {
 	const step = seedSteps.find((s) => s.id === stepId);
 	if (!step) return null;
+	// The badge shows the step's place in the journey, matching the stepper.
+	const position = positionOf(orderedStepsOf(step.journeyId), step.id);
 
 	return (
 		<div className="detail-panel">
 			<div className="detail-panel__header">
 				<span className="detail-panel__type-badge" data-type="step">
-					step {step.sequenceNumber + 1}
+					step {position + 1}
 				</span>
 				<h3 className="detail-panel__title">{step.title}</h3>
 			</div>

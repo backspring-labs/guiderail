@@ -1,18 +1,28 @@
+import { orderedMessagesOf, positionOf } from "@/lib/ordered-groups.js";
 import { seedInterfaces, seedMessages } from "@/store/seed-loader.js";
+import { orderBySequence } from "@guiderail/core/content";
 import type { TerrainGraph } from "@guiderail/core/graph";
 import { getNode } from "@guiderail/core/graph";
 
 interface SequenceDetailPanelProps {
 	selectedNodeId: string;
+	activeSequenceId: string | null;
 	graph: TerrainGraph;
 	onSelectNode: (nodeId: string) => void;
 }
 
 export function SequenceDetailPanel({
 	selectedNodeId,
+	activeSequenceId,
 	graph,
 	onSelectNode,
 }: SequenceDetailPanelProps) {
+	// Numbers shown here are positions in the active sequence, so they match the
+	// numbers on the canvas and the stepper counter.
+	const sequenceMessages = activeSequenceId
+		? orderedMessagesOf(activeSequenceId)
+		: orderBySequence(seedMessages);
+
 	// Lifeline selected
 	if (selectedNodeId.startsWith("lifeline-")) {
 		const ifaceId = selectedNodeId.replace("lifeline-", "");
@@ -20,7 +30,9 @@ export function SequenceDetailPanel({
 		if (!iface) return null;
 
 		const terrainNode = getNode(graph, iface.nodeId);
-		const originatingMessages = seedMessages.filter((m) => m.sourceInterfaceId === ifaceId);
+		const originatingMessages = sequenceMessages
+			.map((msg, position) => ({ msg, position }))
+			.filter(({ msg }) => msg.sourceInterfaceId === ifaceId);
 
 		return (
 			<div className="detail-panel">
@@ -55,21 +67,19 @@ export function SequenceDetailPanel({
 				{originatingMessages.length > 0 && (
 					<div className="detail-panel__section">
 						<h4 className="detail-panel__section-title">Sends ({originatingMessages.length})</h4>
-						{originatingMessages
-							.sort((a, b) => a.sequenceNumber - b.sequenceNumber)
-							.map((msg) => {
-								const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
-								return (
-									<div key={msg.id} className="detail-panel__message-item">
-										<span className="detail-panel__message-seq">#{msg.sequenceNumber + 1}</span>
-										<span className="detail-panel__message-dir">→</span>
-										<span className="detail-panel__message-label">{msg.label}</span>
-										{targetIface && (
-											<span className="detail-panel__message-target">to {targetIface.label}</span>
-										)}
-									</div>
-								);
-							})}
+						{originatingMessages.map(({ msg, position }) => {
+							const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
+							return (
+								<div key={msg.id} className="detail-panel__message-item">
+									<span className="detail-panel__message-seq">#{position + 1}</span>
+									<span className="detail-panel__message-dir">→</span>
+									<span className="detail-panel__message-label">{msg.label}</span>
+									{targetIface && (
+										<span className="detail-panel__message-target">to {targetIface.label}</span>
+									)}
+								</div>
+							);
+						})}
 					</div>
 				)}
 			</div>
@@ -81,6 +91,7 @@ export function SequenceDetailPanel({
 		const msgId = selectedNodeId.replace("msg-node-", "");
 		const msg = seedMessages.find((m) => m.id === msgId);
 		if (!msg) return null;
+		const position = positionOf(sequenceMessages, msg.id);
 
 		const sourceIface = seedInterfaces.find((i) => i.id === msg.sourceInterfaceId);
 		const targetIface = seedInterfaces.find((i) => i.id === msg.targetInterfaceId);
@@ -89,7 +100,7 @@ export function SequenceDetailPanel({
 			<div className="detail-panel">
 				<div className="detail-panel__header">
 					<span className="detail-panel__type-badge" data-type="message">
-						message #{msg.sequenceNumber + 1}
+						{position >= 0 ? `message #${position + 1}` : "message"}
 					</span>
 					<h3 className="detail-panel__title">{msg.label}</h3>
 				</div>

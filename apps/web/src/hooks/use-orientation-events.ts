@@ -1,4 +1,4 @@
-import { seedOrientationItems } from "@/store/seed-loader.js";
+import { orderedOrientationItems } from "@/lib/ordered-groups.js";
 import type { ContextMachineEvent } from "@guiderail/core/context";
 import type { OrientationItem } from "@guiderail/core/entities";
 import { useCallback, useEffect } from "react";
@@ -15,8 +15,8 @@ export function useOrientationEvents(
 ) {
 	const handleOrientationSelect = useCallback(
 		(e: Event) => {
-			const detail = (e as CustomEvent).detail as { sequenceNumber: number };
-			send({ type: "JUMP_TO_ORIENTATION", index: detail.sequenceNumber });
+			const detail = (e as CustomEvent).detail as { position: number };
+			send({ type: "JUMP_TO_ORIENTATION", index: detail.position });
 		},
 		[send],
 	);
@@ -43,7 +43,7 @@ export function useOrientationEvents(
 
 	const currentOrientationItem: OrientationItem | null =
 		isOrientationPerspective && activeOrientationIndex != null
-			? (seedOrientationItems[activeOrientationIndex] ?? null)
+			? (orderedOrientationItems[activeOrientationIndex] ?? null)
 			: null;
 
 	return { currentOrientationItem };

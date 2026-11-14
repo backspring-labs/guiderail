@@ -1,7 +1,8 @@
 interface SequenceMessageNodeData {
 	label: string;
 	messageType: string;
-	sequenceNumber: number;
+	/** Position in navigation order, starting at 0. */
+	position: number;
 	description?: string;
 	payloadSummary?: string;
 	width: number;
@@ -51,7 +52,7 @@ export function SequenceMessageNode({ data, selected }: SequenceMessageNodeProps
 		>
 			<div className="sequence-message__line" style={{ borderColor: activeColor }} />
 			<div className="sequence-message__arrow" style={arrowStyle} />
-			<div className={`sequence-message__seq ${seqClass}`}>{data.sequenceNumber + 1}</div>
+			<div className={`sequence-message__seq ${seqClass}`}>{data.position + 1}</div>
 			<div
 				className={`sequence-message__label ${selected ? "sequence-message__label--selected" : ""}`}
 			>

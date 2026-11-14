@@ -135,7 +135,9 @@ Select-and-show:
 
 ### Steppers
 
-Orientation, Journey, Process and Sequence each have a stepper driven by the generic `STEPPER_FORWARD`, `STEPPER_BACKWARD`, `STEPPER_RESET` and `STEPPER_END` events. The kernel picks the target from the active perspective. Guided story routes use their own waypoint events and hide the stepper while active.
+Orientation, Journey, Process and Sequence each have a stepper driven by the generic `STEPPER_FORWARD`, `STEPPER_BACKWARD`, `STEPPER_RESET` and `STEPPER_END` events. The kernel picks the target from the active perspective's **type** (so it must be given the perspectives at `INITIALIZE`), never from the text of its id. Guided story routes use their own waypoint events and hide the stepper while active.
+
+**An index is a position, never a sequence number.** `activeStepIndex`, `activeStageIndex`, `activeMessageIndex`, `activeWaypointIndex` and `activeOrientationIndex` are positions in a group ordered by `sequenceNumber`. Sequence numbers only decide order; they need not start at 0 or be contiguous. Use `orderBySequence()` from `@guiderail/core/content` (the web app wraps it in `lib/ordered-groups.ts`) and compare with `position`, as the canvases do. Full rules: [data-integrity contract](docs/architecture/data-integrity.md), section 5.
 
 ### Interaction patterns
 
@@ -152,7 +154,6 @@ These are tracked defects and bridges, not design intent. Check the issue before
 |---|---|
 | The app imports demo data from core's source via the `@seed` alias, and components read `seed*` arrays directly instead of kernel state | #13 |
 | The Process canvas renders the same BPMN nodes whichever process is active | #21 |
-| Stepper indices mix `sequenceNumber` lookups with array positions | #22 |
 | Only the left panel navigates on selection; search and the right panel do not | #35 |
 
 Remove a row in the same PR that fixes it.

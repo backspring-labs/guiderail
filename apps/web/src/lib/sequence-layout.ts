@@ -1,3 +1,4 @@
+import { orderBySequence } from "@guiderail/core/content";
 import type { Interface, Message, Sequence } from "@guiderail/core/entities";
 
 const LIFELINE_SPACING_X = 250;
@@ -27,13 +28,15 @@ export interface SequenceLayoutResult {
 /**
  * Compute sequence diagram layout.
  * Lifelines are positioned horizontally. Messages are rendered as
- * positioned nodes (horizontal arrows) at vertical offsets by sequence number.
+ * positioned nodes (horizontal arrows), one row per message in navigation order.
+ * Each message node carries its `position`, which is what the kernel's
+ * activeMessageIndex refers to.
  */
 export function computeSequenceLayout(
 	interfaces: Interface[],
 	messages: Message[],
 ): SequenceLayoutResult {
-	const sortedMessages = [...messages].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	const sortedMessages = orderBySequence(messages);
 	const lifelineHeight = LIFELINE_HEADER_HEIGHT + sortedMessages.length * MESSAGE_SPACING_Y + 60;
 
 	const interfaceXPositions = buildInterfacePositions(interfaces);
@@ -77,10 +80,10 @@ function buildMessageNodes(
 	messages: Message[],
 	interfacePositions: Map<string, number>,
 ): SequenceNode[] {
-	return messages.map((msg) => {
+	return messages.map((msg, position) => {
 		const sourceX = interfacePositions.get(msg.sourceInterfaceId) ?? 0;
 		const targetX = interfacePositions.get(msg.targetInterfaceId) ?? 0;
-		const y = LIFELINE_HEADER_HEIGHT + msg.sequenceNumber * MESSAGE_SPACING_Y;
+		const y = LIFELINE_HEADER_HEIGHT + position * MESSAGE_SPACING_Y;
 
 		const leftX = Math.min(sourceX, targetX);
 		const isReverse = targetX < sourceX;
@@ -93,7 +96,7 @@ function buildMessageNodes(
 			data: {
 				label: msg.label,
 				messageType: msg.type,
-				sequenceNumber: msg.sequenceNumber,
+				position,
 				description: msg.description,
 				payloadSummary: msg.payloadSummary,
 				width: Math.abs(targetX - sourceX),

@@ -1,10 +1,12 @@
 import { assign, setup } from "xstate";
+import { orderBySequence } from "../content/ordering.js";
 import type { Capability } from "../entities/capability.js";
 import type { ControlPoint } from "../entities/control-point.js";
 import type { Interface } from "../entities/interface.js";
 import type { Journey } from "../entities/journey.js";
 import type { Message } from "../entities/message.js";
 import type { OrientationItem } from "../entities/orientation-item.js";
+import type { Perspective, PerspectiveType } from "../entities/perspective.js";
 import type { ProcessStage } from "../entities/process-stage.js";
 import type { Process } from "../entities/process.js";
 import type { ProviderAssociation } from "../entities/provider-association.js";
@@ -62,6 +64,9 @@ export interface ContextMachineContext {
 	// 0.7.0 additions
 	orientationItems: OrientationItem[];
 	pausedRouteSnapshot: NavigationContext | null;
+	// The stepper is resolved from the active perspective's type, so the kernel
+	// needs the perspectives. Without them no perspective has a stepper.
+	perspectives: Perspective[];
 }
 
 export type ContextMachineEvent =
@@ -86,6 +91,7 @@ export type ContextMachineEvent =
 			sequences?: Sequence[];
 			// 0.7.0 optional additions
 			orientationItems?: OrientationItem[];
+			perspectives?: Perspective[];
 	  }
 	| { type: "SELECT_DOMAIN"; domainId: string }
 	| { type: "SELECT_CAPABILITY"; capabilityId: string }
@@ -125,24 +131,24 @@ export type ContextMachineEvent =
 	// 0.7.0 additions — orientation jump
 	| { type: "JUMP_TO_ORIENTATION"; index: number };
 
+/*
+ * Ordered groups. Every index in NavigationContext (step, stage, message,
+ * waypoint, orientation) is a POSITION in one of these arrays, never a
+ * sequenceNumber. See docs/architecture/data-integrity.md, section 5.
+ */
 function resolveStepsForJourney(journeyId: string, allSteps: Step[]): Step[] {
-	return allSteps
-		.filter((s) => s.journeyId === journeyId)
-		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	return orderBySequence(allSteps.filter((s) => s.journeyId === journeyId));
 }
 
 function resolveWaypointsForRoute(routeId: string, allWaypoints: StoryWaypoint[]): StoryWaypoint[] {
-	return allWaypoints
-		.filter((w) => w.storyRouteId === routeId)
-		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	return orderBySequence(allWaypoints.filter((w) => w.storyRouteId === routeId));
 }
 
 function resolveStagesForProcess(processId: string, allStages: ProcessStage[]): ProcessStage[] {
-	return allStages
-		.filter((s) => s.processId === processId)
-		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	return orderBySequence(allStages.filter((s) => s.processId === processId));
 }
 
+/** The messages a sequence lists that actually exist. A missing id is not a position. */
 function resolveMessagesForSequence(
 	sequenceId: string,
 	allSequences: Sequence[],
@@ -150,25 +156,87 @@ function resolveMessagesForSequence(
 ): Message[] {
 	const seq = allSequences.find((s) => s.id === sequenceId);
 	if (!seq) return [];
-	return allMessages
-		.filter((m) => seq.messageIds.includes(m.id))
-		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	return orderBySequence(allMessages.filter((m) => seq.messageIds.includes(m.id)));
 }
 
-type StepperTarget = "journey" | "process" | "sequence" | "orientation" | null;
+type StepperTarget = "journey" | "process" | "sequence" | "orientation";
 
-function resolveStepperTarget(ctx: ContextMachineContext): StepperTarget {
-	const perspectiveId = ctx.nav.activePerspectiveId;
-	if (perspectiveId.includes("orientation") && ctx.orientationItems.length > 0)
-		return "orientation";
-	if (perspectiveId.includes("journey") && ctx.nav.activeJourneyId) return "journey";
-	if (perspectiveId.includes("process") && ctx.nav.activeProcessId) return "process";
-	if (perspectiveId.includes("sequence") && ctx.nav.activeSequenceId) {
-		// A sequence with no resolvable messages has nothing to step through.
-		const msgs = resolveMessagesForSequence(ctx.nav.activeSequenceId, ctx.sequences, ctx.messages);
-		return msgs.length > 0 ? "sequence" : null;
+interface Stepper {
+	target: StepperTarget;
+	/** How many items there are to step through. Always at least 1. */
+	count: number;
+	/** The active position, or null when none is active yet. */
+	index: number | null;
+}
+
+function activePerspectiveType(ctx: ContextMachineContext): PerspectiveType | null {
+	return ctx.perspectives.find((p) => p.id === ctx.nav.activePerspectiveId)?.type ?? null;
+}
+
+/**
+ * What the generic stepper events act on. Decided by the active perspective's
+ * type, never by the text of its id. Null when the perspective has no stepper,
+ * nothing is selected, or the selection has nothing to step through.
+ */
+function resolveStepper(ctx: ContextMachineContext): Stepper | null {
+	const { nav } = ctx;
+	const stepper = (target: StepperTarget, count: number, index: number | null): Stepper | null =>
+		count > 0 ? { target, count, index } : null;
+
+	switch (activePerspectiveType(ctx)) {
+		case "orientation":
+			return stepper("orientation", ctx.orientationItems.length, nav.activeOrientationIndex);
+		case "journey":
+			if (!nav.activeJourneyId) return null;
+			return stepper(
+				"journey",
+				resolveStepsForJourney(nav.activeJourneyId, ctx.steps).length,
+				nav.activeStepIndex,
+			);
+		case "process":
+			if (!nav.activeProcessId) return null;
+			return stepper(
+				"process",
+				resolveStagesForProcess(nav.activeProcessId, ctx.processStages).length,
+				nav.activeStageIndex,
+			);
+		case "sequence":
+			if (!nav.activeSequenceId) return null;
+			return stepper(
+				"sequence",
+				resolveMessagesForSequence(nav.activeSequenceId, ctx.sequences, ctx.messages).length,
+				nav.activeMessageIndex,
+			);
+		default:
+			return null;
 	}
-	return null;
+}
+
+/** Moves the active stepper to `position`. Out-of-range positions leave nav unchanged. */
+function stepTo(
+	ctx: ContextMachineContext,
+	stepper: Stepper,
+	position: number,
+): Partial<ContextMachineContext> {
+	const { nav, graph } = ctx;
+	if (position < 0 || position >= stepper.count) return {};
+
+	switch (stepper.target) {
+		case "orientation":
+			return { nav: reconcileOrientationChange(nav, position) };
+		case "sequence":
+			return { nav: reconcileMessageChange(nav, position) };
+		case "journey": {
+			if (!nav.activeJourneyId || !graph) return {};
+			const steps = resolveStepsForJourney(nav.activeJourneyId, ctx.steps);
+			return { nav: reconcileStepChange(nav, position, steps, graph) };
+		}
+		case "process": {
+			if (!nav.activeProcessId || !graph) return {};
+			const stages = resolveStagesForProcess(nav.activeProcessId, ctx.processStages);
+			return { nav: reconcileStageChange(nav, position, stages, graph) };
+		}
+	}
 }
 
 export const contextMachine = setup({
@@ -230,46 +298,14 @@ export const contextMachine = setup({
 			return event.index >= 0 && event.index < waypoints.length;
 		},
 		canStepperForward: ({ context }) => {
-			const { nav } = context;
-			if (nav.activePerspectiveId.includes("orientation") && context.orientationItems.length > 0) {
-				return (nav.activeOrientationIndex ?? -1) < context.orientationItems.length - 1;
-			}
-			if (nav.activeJourneyId && nav.activePerspectiveId.includes("journey")) {
-				if (nav.activeStepIndex == null) return false;
-				const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
-				return nav.activeStepIndex < steps.length - 1;
-			}
-			if (nav.activeProcessId && nav.activePerspectiveId.includes("process")) {
-				const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
-				return (nav.activeStageIndex ?? -1) < stages.length - 1;
-			}
-			if (nav.activeSequenceId && nav.activePerspectiveId.includes("sequence")) {
-				const msgs = resolveMessagesForSequence(
-					nav.activeSequenceId,
-					context.sequences,
-					context.messages,
-				);
-				return (nav.activeMessageIndex ?? -1) < msgs.length - 1;
-			}
-			return false;
+			const stepper = resolveStepper(context);
+			return stepper != null && (stepper.index ?? -1) < stepper.count - 1;
 		},
 		canStepperBackward: ({ context }) => {
-			const { nav } = context;
-			if (nav.activePerspectiveId.includes("orientation") && context.orientationItems.length > 0) {
-				return (nav.activeOrientationIndex ?? 0) > 0;
-			}
-			if (nav.activeJourneyId && nav.activePerspectiveId.includes("journey")) {
-				return (nav.activeStepIndex ?? 0) > 0;
-			}
-			if (nav.activeProcessId && nav.activePerspectiveId.includes("process")) {
-				return (nav.activeStageIndex ?? 0) > 0;
-			}
-			if (nav.activeSequenceId && nav.activePerspectiveId.includes("sequence")) {
-				return (nav.activeMessageIndex ?? 0) > 0;
-			}
-			return false;
+			const stepper = resolveStepper(context);
+			return stepper != null && (stepper.index ?? 0) > 0;
 		},
-		hasStepperTarget: ({ context }) => resolveStepperTarget(context) != null,
+		hasStepperTarget: ({ context }) => resolveStepper(context) != null,
 	},
 }).createMachine({
 	id: "context",
@@ -315,6 +351,7 @@ export const contextMachine = setup({
 		sequences: [],
 		orientationItems: [],
 		pausedRouteSnapshot: null,
+		perspectives: [],
 	},
 	states: {
 		uninitialized: {
@@ -338,6 +375,7 @@ export const contextMachine = setup({
 						messages: event.messages ?? [],
 						sequences: event.sequences ?? [],
 						orientationItems: event.orientationItems ?? [],
+						perspectives: event.perspectives ?? [],
 					})),
 				},
 			},
@@ -546,7 +584,7 @@ export const contextMachine = setup({
 				SELECT_PROCESS: {
 					actions: assign(({ context, event }) => {
 						if (!context.graph) return {};
-						const stages = context.processStages.filter((ps) => ps.processId === event.processId);
+						const stages = resolveStagesForProcess(event.processId, context.processStages);
 						return {
 							nav: reconcileProcessSwitch(context.nav, event.processId, stages, context.graph),
 						};
@@ -657,122 +695,34 @@ export const contextMachine = setup({
 						pausedRouteSnapshot: null,
 					})),
 				},
-				// 0.6.0 — Generic stepper events
+				// 0.6.0 — Generic stepper events. Each resolves the stepper for the
+				// active perspective and moves it by position.
 				STEPPER_FORWARD: {
 					guard: "canStepperForward",
 					actions: assign(({ context }) => {
-						const target = resolveStepperTarget(context);
-						const { nav } = context;
-						if (target === "orientation") {
-							return {
-								nav: reconcileOrientationChange(nav, (nav.activeOrientationIndex ?? -1) + 1),
-							};
-						}
-						if (target === "journey" && nav.activeJourneyId && context.graph) {
-							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
-							return {
-								nav: reconcileStepChange(nav, (nav.activeStepIndex ?? 0) + 1, steps, context.graph),
-							};
-						}
-						if (target === "process" && nav.activeProcessId && context.graph) {
-							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
-							return {
-								nav: reconcileStageChange(
-									nav,
-									(nav.activeStageIndex ?? -1) + 1,
-									stages,
-									context.graph,
-								),
-							};
-						}
-						if (target === "sequence" && nav.activeSequenceId) {
-							return { nav: reconcileMessageChange(nav, (nav.activeMessageIndex ?? -1) + 1) };
-						}
-						return {};
+						const stepper = resolveStepper(context);
+						return stepper ? stepTo(context, stepper, (stepper.index ?? -1) + 1) : {};
 					}),
 				},
 				STEPPER_BACKWARD: {
 					guard: "canStepperBackward",
 					actions: assign(({ context }) => {
-						const target = resolveStepperTarget(context);
-						const { nav } = context;
-						if (target === "orientation") {
-							return {
-								nav: reconcileOrientationChange(nav, (nav.activeOrientationIndex ?? 0) - 1),
-							};
-						}
-						if (target === "journey" && nav.activeJourneyId && context.graph) {
-							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
-							return {
-								nav: reconcileStepChange(nav, (nav.activeStepIndex ?? 0) - 1, steps, context.graph),
-							};
-						}
-						if (target === "process" && nav.activeProcessId && context.graph) {
-							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
-							return {
-								nav: reconcileStageChange(
-									nav,
-									(nav.activeStageIndex ?? 0) - 1,
-									stages,
-									context.graph,
-								),
-							};
-						}
-						if (target === "sequence" && nav.activeSequenceId) {
-							return { nav: reconcileMessageChange(nav, (nav.activeMessageIndex ?? 0) - 1) };
-						}
-						return {};
+						const stepper = resolveStepper(context);
+						return stepper ? stepTo(context, stepper, (stepper.index ?? 0) - 1) : {};
 					}),
 				},
 				STEPPER_RESET: {
 					guard: "hasStepperTarget",
 					actions: assign(({ context }) => {
-						const target = resolveStepperTarget(context);
-						const { nav } = context;
-						if (target === "orientation") {
-							return { nav: reconcileOrientationChange(nav, 0) };
-						}
-						if (target === "journey" && nav.activeJourneyId && context.graph) {
-							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
-							return { nav: reconcileStepChange(nav, 0, steps, context.graph) };
-						}
-						if (target === "process" && nav.activeProcessId && context.graph) {
-							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
-							return { nav: reconcileStageChange(nav, 0, stages, context.graph) };
-						}
-						if (target === "sequence" && nav.activeSequenceId) {
-							return { nav: reconcileMessageChange(nav, 0) };
-						}
-						return {};
+						const stepper = resolveStepper(context);
+						return stepper ? stepTo(context, stepper, 0) : {};
 					}),
 				},
 				STEPPER_END: {
 					guard: "hasStepperTarget",
 					actions: assign(({ context }) => {
-						const target = resolveStepperTarget(context);
-						const { nav } = context;
-						if (target === "orientation") {
-							return {
-								nav: reconcileOrientationChange(nav, context.orientationItems.length - 1),
-							};
-						}
-						if (target === "journey" && nav.activeJourneyId && context.graph) {
-							const steps = resolveStepsForJourney(nav.activeJourneyId, context.steps);
-							return { nav: reconcileStepChange(nav, steps.length - 1, steps, context.graph) };
-						}
-						if (target === "process" && nav.activeProcessId && context.graph) {
-							const stages = resolveStagesForProcess(nav.activeProcessId, context.processStages);
-							return { nav: reconcileStageChange(nav, stages.length - 1, stages, context.graph) };
-						}
-						if (target === "sequence" && nav.activeSequenceId) {
-							const msgs = resolveMessagesForSequence(
-								nav.activeSequenceId,
-								context.sequences,
-								context.messages,
-							);
-							return { nav: reconcileMessageChange(nav, msgs.length - 1) };
-						}
-						return {};
+						const stepper = resolveStepper(context);
+						return stepper ? stepTo(context, stepper, stepper.count - 1) : {};
 					}),
 				},
 				// 0.7.0 — Orientation jump

@@ -9,6 +9,7 @@ import {
 	journeys,
 	messages,
 	nodes,
+	perspectives,
 	processStages,
 	processes,
 	providerAssociations,
@@ -151,6 +152,7 @@ function createFullCtx() {
 		messages,
 		sequences,
 		orientationItems,
+		perspectives,
 	});
 	return actor;
 }
@@ -417,7 +419,15 @@ describe("Context Machine — Stepper (Sequence without messages)", () => {
 	// Sequences supplied, messages omitted: the payload the web app sent before HY-08.
 	function createCtxWithoutMessages() {
 		const actor = createActor(contextMachine).start();
-		actor.send({ type: "INITIALIZE", graph, journeys, steps, capabilities, sequences });
+		actor.send({
+			type: "INITIALIZE",
+			graph,
+			journeys,
+			steps,
+			capabilities,
+			sequences,
+			perspectives,
+		});
 		selectInSequencePerspective(actor, "seq-capability-selection");
 		return actor;
 	}
@@ -435,6 +445,7 @@ describe("Context Machine — Stepper (Sequence without messages)", () => {
 			interfaces,
 			messages,
 			sequences: [...sequences, { ...first, id: "seq-empty", messageIds: [] }],
+			perspectives,
 		});
 		selectInSequencePerspective(actor, "seq-empty");
 		return actor;

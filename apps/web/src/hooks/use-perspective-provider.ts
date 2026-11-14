@@ -4,6 +4,7 @@ import { computeElkLayout, getLayoutDirection } from "@/lib/elk-layout.js";
 import type { JourneyLayoutResult, JourneyNode } from "@/lib/journey-layout.js";
 import { computeJourneyLayout, computeJourneyPickerLayout } from "@/lib/journey-layout.js";
 import { computeLandscapeLayout } from "@/lib/landscape-layout.js";
+import { orderedStagesOf } from "@/lib/ordered-groups.js";
 import { computeOrientationLayout } from "@/lib/orientation-layout.js";
 import {
 	getHighlightedEdgeIds,
@@ -326,10 +327,7 @@ function resolveSubProcess(stageId: string | undefined): string | null {
 
 function resolveActiveStageId(nav: NavigationContext): string | null {
 	if (nav.activeStageIndex == null || !nav.activeProcessId) return null;
-	const stages = seedProcessStages
-		.filter((s) => s.processId === nav.activeProcessId)
-		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
-	return stages[nav.activeStageIndex]?.id ?? null;
+	return orderedStagesOf(nav.activeProcessId)[nav.activeStageIndex]?.id ?? null;
 }
 
 function buildBpmnNodes(
@@ -444,12 +442,12 @@ function buildOrientationNodes(
 		type: string;
 		position: { x: number; y: number };
 		draggable: boolean;
-		data: { sequenceNumber: number; [key: string]: unknown };
+		data: { position: number; [key: string]: unknown };
 	}>,
 ) {
 	const activeIdx = nav.activeOrientationIndex;
 	return nodes.map((node) => {
-		const isActive = activeIdx != null && node.data.sequenceNumber === activeIdx;
+		const isActive = activeIdx != null && node.data.position === activeIdx;
 		return { ...node, data: { ...node.data, isActive } };
 	});
 }
@@ -518,9 +516,7 @@ function buildSequenceNodes(nav: NavigationContext, nodes: SequenceNode[]) {
 	return nodes.map((node) => {
 		const isSelected = node.id === selectedId;
 		const isActive =
-			node.type === "sequence_message" &&
-			activeIdx != null &&
-			node.data.sequenceNumber === activeIdx;
+			node.type === "sequence_message" && activeIdx != null && node.data.position === activeIdx;
 		if (node.type === "sequence_message" && isLifelineSelected) {
 			return {
 				...node,
@@ -536,7 +532,7 @@ function buildJourneyNodes(nav: NavigationContext, nodes: JourneyNode[]) {
 	const activeIdx = nav.activeStepIndex;
 	return nodes.map((node) => {
 		const isActive =
-			node.type === "journey_step" && activeIdx != null && node.data.sequenceNumber === activeIdx;
+			node.type === "journey_step" && activeIdx != null && node.data.position === activeIdx;
 		return { ...node, data: { ...node.data, isActive } };
 	});
 }

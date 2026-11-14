@@ -6,6 +6,7 @@ import {
 	seedJourneys,
 	seedMessages,
 	seedOrientationItems,
+	seedPerspectives,
 	seedProcessStages,
 	seedProcesses,
 	seedProviderAssociations,
@@ -50,5 +51,6 @@ export function createInitializeEvent(): CompleteInitializeEvent {
 		messages: seedMessages,
 		sequences: seedSequences,
 		orientationItems: seedOrientationItems,
+		perspectives: seedPerspectives,
 	};
 }

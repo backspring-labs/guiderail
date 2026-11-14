@@ -15,14 +15,14 @@ import { useInitializeContext, useNavigation } from "@/hooks/use-context-machine
 import { useOrientationEvents } from "@/hooks/use-orientation-events.js";
 import { usePerspectiveProvider } from "@/hooks/use-perspective-provider.js";
 import { useStepperKeyboard } from "@/hooks/use-stepper-keyboard.js";
-import { deriveStepperState } from "@/lib/stepper-state.js";
 import {
-	seedOrientationItems,
-	seedPerspectives,
-	seedSteps,
-	seedStoryRoutes,
-	seedStoryWaypoints,
-} from "@/store/seed-loader.js";
+	orderedOrientationItems,
+	orderedStepsOf,
+	orderedWaypointsOf,
+	positionOf,
+} from "@/lib/ordered-groups.js";
+import { deriveStepperState } from "@/lib/stepper-state.js";
+import { seedPerspectives, seedSteps, seedStoryRoutes } from "@/store/seed-loader.js";
 import type { Edge as RFEdge, Node as RFNode } from "@xyflow/react";
 import {
 	Background,
@@ -54,15 +54,17 @@ const NODE_CLICK_HANDLERS: Array<{ prefix: string; action: (id: string, send: Se
 	{
 		prefix: "orient-item-",
 		action: (id, send) => {
-			const item = seedOrientationItems.find((o) => o.id === id);
-			if (item) send({ type: "JUMP_TO_ORIENTATION", index: item.sequenceNumber });
+			const position = positionOf(orderedOrientationItems, id);
+			if (position >= 0) send({ type: "JUMP_TO_ORIENTATION", index: position });
 		},
 	},
 	{
 		prefix: "journey-step-",
 		action: (id, send) => {
 			const step = seedSteps.find((s) => s.id === id);
-			if (step) send({ type: "JUMP_TO_STEP", index: step.sequenceNumber });
+			if (!step) return;
+			const position = positionOf(orderedStepsOf(step.journeyId), id);
+			if (position >= 0) send({ type: "JUMP_TO_STEP", index: position });
 		},
 	},
 	{ prefix: "landscape-actor-", action: (id, send) => send({ type: "SELECT_NODE", nodeId: id }) },
@@ -83,11 +85,7 @@ function deriveRouteState(nav: {
 	const activeRoute = nav.activeStoryRouteId
 		? (seedStoryRoutes.find((sr) => sr.id === nav.activeStoryRouteId) ?? null)
 		: null;
-	const routeWaypoints = activeRoute
-		? seedStoryWaypoints
-				.filter((sw) => sw.storyRouteId === activeRoute.id)
-				.sort((a, b) => a.sequenceNumber - b.sequenceNumber)
-		: [];
+	const routeWaypoints = activeRoute ? orderedWaypointsOf(activeRoute.id) : [];
 	const currentWaypoint =
 		nav.activeWaypointIndex != null ? (routeWaypoints[nav.activeWaypointIndex] ?? null) : null;
 	return { activeRoute, routeWaypoints, currentWaypoint };
@@ -216,7 +214,7 @@ export function AppShell() {
 				>
 					{isOrientationPerspective ? (
 						<OrientationDeck
-							items={seedOrientationItems}
+							items={orderedOrientationItems}
 							activeIndex={nav.activeOrientationIndex ?? 0}
 							onSelect={(i) => send({ type: "JUMP_TO_ORIENTATION", index: i })}
 						/>

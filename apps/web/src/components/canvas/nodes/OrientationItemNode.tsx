@@ -1,6 +1,7 @@
 interface OrientationItemNodeData {
 	title: string;
-	sequenceNumber: number;
+	/** Position in navigation order, starting at 0. */
+	position: number;
 	itemId: string;
 	isActive?: boolean;
 	[key: string]: unknown;
@@ -17,14 +18,14 @@ export function OrientationItemNode({ data }: OrientationItemNodeProps) {
 	const handleClick = () => {
 		window.dispatchEvent(
 			new CustomEvent("guiderail:orientation-select", {
-				detail: { itemId: data.itemId, sequenceNumber: data.sequenceNumber },
+				detail: { itemId: data.itemId, position: data.position },
 			}),
 		);
 	};
 
 	return (
 		<button type="button" className={`orientation-item ${activeClass}`} onClick={handleClick}>
-			<div className="orientation-item__seq">{data.sequenceNumber + 1}</div>
+			<div className="orientation-item__seq">{data.position + 1}</div>
 			<div className="orientation-item__title">{data.title}</div>
 		</button>
 	);

@@ -1,4 +1,4 @@
-import { seedProcessStages } from "@/store/seed-loader.js";
+import { orderedStagesOf } from "@/lib/ordered-groups.js";
 import type { Process } from "@guiderail/core/entities";
 import type { TerrainGraph } from "@guiderail/core/graph";
 import { getNode } from "@guiderail/core/graph";
@@ -10,9 +10,7 @@ interface ProcessDetailPanelProps {
 }
 
 export function ProcessDetailPanel({ process, graph, onSelectNode }: ProcessDetailPanelProps) {
-	const stages = seedProcessStages
-		.filter((ps) => ps.processId === process.id)
-		.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	const stages = orderedStagesOf(process.id);
 
 	return (
 		<div className="detail-panel">

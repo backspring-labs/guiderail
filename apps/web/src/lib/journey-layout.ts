@@ -1,3 +1,4 @@
+import { orderBySequence } from "@guiderail/core/content";
 import type { Journey, Step } from "@guiderail/core/entities";
 
 const STEP_SPACING_X = 280;
@@ -36,8 +37,10 @@ export function computeJourneyLayout(
 	steps: Step[],
 	valueStreamLabel: string | null,
 ): JourneyLayoutResult {
-	const journeySteps = steps.filter((s) => s.journeyId === journey.id);
+	const journeySteps = orderBySequence(steps.filter((s) => s.journeyId === journey.id));
 	const stepMap = new Map(journeySteps.map((s) => [s.id, s]));
+	// A step's position in navigation order: what the kernel's activeStepIndex refers to.
+	const positions = new Map(journeySteps.map((s, position) => [s.id, position]));
 
 	// Determine happy path: follow first transition from each step
 	const happyPathIds = resolveHappyPath(journeySteps);
@@ -54,6 +57,7 @@ export function computeJourneyLayout(
 		nodes.push(
 			buildStepNode(
 				step,
+				positions.get(step.id) ?? 0,
 				STEP_START_X + xIndex * STEP_SPACING_X,
 				STEP_START_Y,
 				journey,
@@ -69,7 +73,14 @@ export function computeJourneyLayout(
 		if (!step) continue;
 		const parentX = findParentX(step.id, journeySteps, happyPathIds, nodes);
 		nodes.push(
-			buildStepNode(step, parentX, STEP_START_Y + BRANCH_OFFSET_Y, journey, valueStreamLabel),
+			buildStepNode(
+				step,
+				positions.get(step.id) ?? 0,
+				parentX,
+				STEP_START_Y + BRANCH_OFFSET_Y,
+				journey,
+				valueStreamLabel,
+			),
 		);
 	}
 
@@ -95,13 +106,13 @@ export function computeJourneyLayout(
  * Resolve the happy path by following the first transition from each step.
  */
 function resolveHappyPath(steps: Step[]): Set<string> {
-	const sorted = [...steps].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+	const sorted = orderBySequence(steps);
 	if (sorted.length === 0) return new Set();
 
 	const happyPath = new Set<string>();
 	const visited = new Set<string>();
 
-	// Start from the step with the lowest sequence number
+	// Start from the first step in navigation order
 	let current = sorted[0];
 	while (current && !visited.has(current.id)) {
 		happyPath.add(current.id);
@@ -136,6 +147,7 @@ function findParentX(
 
 function buildStepNode(
 	step: Step,
+	position: number,
 	x: number,
 	y: number,
 	journey: Journey,
@@ -153,7 +165,7 @@ function buildStepNode(
 			expectedAction: step.expectedAction,
 			narrative: step.narrative,
 			capabilityId: step.capabilityId,
-			sequenceNumber: step.sequenceNumber,
+			position,
 			stepType: step.stepType,
 			journeyLabel: journey.label,
 			valueStreamLabel,
