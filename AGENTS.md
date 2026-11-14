@@ -18,6 +18,7 @@ pnpm check:fix      # Biome auto-fix
 pnpm typecheck      # tsc over tests, fixtures and config files, no emit
 pnpm test:coverage  # tests with coverage and the per-package thresholds (what CI runs)
 pnpm check:package  # pack core, install it outside the workspace, import and typecheck every export
+pnpm test:e2e       # build, then run the browser smoke test against the production build
 ```
 
 What each command proves:
@@ -30,6 +31,7 @@ What each command proves:
 | `test` | Behaviour covered by tests | That the tests compile: Vitest strips types without checking them |
 | `test:coverage` | The same, plus coverage has not dropped below the recorded floor | That covered code is correct |
 | `check:package` | The packed core resolves for a consumer | Anything about the web app |
+| `test:e2e` | The built app opens in a real browser and the Sequence stepper works end to end | Any other perspective or flow (#24) |
 
 Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core sits in the mid-80s. The web app is at about 9%, so a green run says little about the UI.
 
@@ -38,6 +40,7 @@ Things the command names do not tell you:
 - **Build before `pnpm dev` on a fresh checkout.** The web app resolves `@guiderail/core` from `packages/core/dist`.
 - **`check` is Biome only.** Type errors surface in `pnpm build` and `pnpm typecheck`, not in `check`.
 - **`src/test-fixtures/` in core is internal.** It holds the demo corpus, mocks and factories. It is excluded from the build and not exported; only core's own tests (and, for now, the web app's `@seed` alias) read it.
+- **`test:e2e` needs a browser installed once:** `pnpm --filter @guiderail/web exec playwright install chromium`.
 - **Git hooks may not be installed on a fresh clone.** pnpm does not run lefthook's install script. Run `pnpm exec lefthook install` once; the pre-commit hook then runs `pnpm check`.
 
 Supported runtimes are Node 26 (primary) and Node 24. The pnpm version is pinned in the root `package.json`.

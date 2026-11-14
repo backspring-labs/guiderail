@@ -12,6 +12,7 @@
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"typecheck": "tsc -b",
+		"test:e2e": "playwright test",
 		"check": "biome check .",
 		"check:fix": "biome check --fix .",
 		"storybook": "storybook dev -p 6006",
@@ -28,6 +29,7 @@
 		"zustand": "^5.0.0"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.65.1",
 		"@storybook/addon-essentials": "^8.6.19",
 		"@storybook/react": "^8.6.19",
 		"@storybook/react-vite": "^8.6.19",
