@@ -20,3 +20,5 @@
 # Workflow policy: CI, dependency updates, ownership, security policy
 /.github/           @jasonLadd
 /SECURITY.md        @jasonLadd
+/CONTRIBUTING.md    @jasonLadd
+/CODE_OF_CONDUCT.md @jasonLadd

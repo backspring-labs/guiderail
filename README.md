@@ -26,6 +26,13 @@ pnpm test           # run all tests
 pnpm check          # lint and format check
 ```
 
+## Project
+
+- [AGENTS.md](AGENTS.md): how the codebase is organised and how to work in it
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to propose and land a change
+- [ROADMAP.md](ROADMAP.md): what is being worked on
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
 ## Security
 
 To report a vulnerability, see [SECURITY.md](SECURITY.md). Please do not open a public issue.
