@@ -13,8 +13,8 @@ export const NodeSchema = z.object({
 	description: z.string().optional(),
 	parentNodeId: z.string().nullable().optional(),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
-	layoutByPerspective: z.record(PositionSchema).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
+	layoutByPerspective: z.record(z.string(), PositionSchema).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

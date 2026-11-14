@@ -19,7 +19,7 @@ export const SessionSchema = z.object({
 	selectedNodeId: z.string().nullable().default(null),
 	selectedEdgeId: z.string().nullable().default(null),
 	viewportAnchor: ViewportAnchorSchema.default({ x: 0, y: 0, zoom: 1 }),
-	filters: z.record(z.unknown()).default({}),
+	filters: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type ViewportAnchor = z.infer<typeof ViewportAnchorSchema>;

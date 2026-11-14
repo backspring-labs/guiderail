@@ -7,7 +7,7 @@ export const EntityManifestSchema = z.object({
 	type: z.string(),
 	path: z.string(),
 	label: z.string(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const ResearchManifestSchema = z.object({

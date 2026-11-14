@@ -13,7 +13,7 @@ export const ArtifactContentSchema = z.object({
 	path: z.string(),
 	content: z.string(),
 	encoding: z.literal("utf-8"),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const SourceConnectionSchema = z.object({

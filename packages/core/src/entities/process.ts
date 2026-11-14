@@ -10,7 +10,7 @@ export const ProcessSchema = z.object({
 	sourceDocRef: ProvenanceRefSchema.optional(),
 	stageIds: z.array(z.string()).default([]),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

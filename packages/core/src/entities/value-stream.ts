@@ -9,7 +9,7 @@ export const ValueStreamSchema = z.object({
 	capabilityIds: z.array(z.string()).default([]),
 	journeyIds: z.array(z.string()).default([]),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

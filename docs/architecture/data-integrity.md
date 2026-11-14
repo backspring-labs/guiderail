@@ -91,4 +91,6 @@ Loading never throws on bad content. The caller decides what to do with errors; 
 
 ## Trust boundary
 
-This contract is about correctness, not about hostile input. Until the Zod advisory tracked in #23 is remediated, content must come from a trusted source. See `docs/security/controls.md`.
+This contract is about correctness, not about hostile input. The app loads only demo data bundled at build time.
+
+The Zod advisory that made validating untrusted input unsafe was remediated by the Zod 4 migration (#23). Loading content from an untrusted source is still not wired in, and enabling it is its own decision: it needs limits on input size and a view on which sources are trusted. See `docs/security/controls.md`.

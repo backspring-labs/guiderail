@@ -8,8 +8,8 @@ export const LayerSchema = z.object({
 	eligibleNodeTypes: z.array(z.string()).default([]),
 	eligibleEdgeTypes: z.array(z.string()).default([]),
 	layoutStrategy: LayoutStrategySchema.default("auto"),
-	renderingHints: z.record(z.unknown()).default({}),
-	metadata: z.record(z.unknown()).default({}),
+	renderingHints: z.record(z.string(), z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type LayoutStrategy = z.infer<typeof LayoutStrategySchema>;

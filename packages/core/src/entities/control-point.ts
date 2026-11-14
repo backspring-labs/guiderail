@@ -16,7 +16,7 @@ export const ControlPointSchema = z.object({
 	status: ControlStatusSchema,
 	description: z.string().optional(),
 	regulatoryRef: z.string().optional(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

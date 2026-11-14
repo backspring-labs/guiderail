@@ -7,7 +7,7 @@ export const ProviderSchema = z.object({
 	description: z.string().optional(),
 	category: z.string(),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

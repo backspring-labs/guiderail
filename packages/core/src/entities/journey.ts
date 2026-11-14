@@ -11,7 +11,7 @@ export const JourneySchema = z.object({
 	tags: z.array(z.string()).default([]),
 	entryConditions: z.array(z.string()).default([]),
 	exitConditions: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

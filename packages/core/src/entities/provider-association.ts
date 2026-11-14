@@ -15,7 +15,7 @@ export const ProviderAssociationSchema = z.object({
 	targetType: ProviderAssociationTargetTypeSchema,
 	targetId: z.string(),
 	role: z.string(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type ProviderAssociationTargetType = z.infer<typeof ProviderAssociationTargetTypeSchema>;

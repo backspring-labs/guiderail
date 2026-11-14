@@ -9,7 +9,7 @@ export const InterfaceSchema = z.object({
 	label: z.string(),
 	protocol: InterfaceProtocolSchema.optional(),
 	description: z.string().optional(),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 

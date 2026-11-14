@@ -8,7 +8,7 @@ export const StoryRouteSchema = z.object({
 	overview: z.string(),
 	waypointIds: z.array(z.string()).default([]),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type StoryRoute = z.infer<typeof StoryRouteSchema>;

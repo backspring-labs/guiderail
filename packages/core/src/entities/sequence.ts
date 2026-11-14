@@ -11,7 +11,7 @@ export const SequenceSchema = z.object({
 	interfaceIds: z.array(z.string()),
 	messageIds: z.array(z.string()),
 	tags: z.array(z.string()).default([]),
-	metadata: z.record(z.unknown()).default({}),
+	metadata: z.record(z.string(), z.unknown()).default({}),
 	provenance: ProvenanceRefSchema.optional(),
 });
 
