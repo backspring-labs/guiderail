@@ -38,7 +38,7 @@ import { LeftPanel } from "./LeftPanel.js";
 import { RightPanel } from "./RightPanel.js";
 import { TopBar } from "./TopBar.js";
 
-import type { ContextMachineEvent } from "@guiderail/core/context";
+import type { ContextMachineEvent, NavigationTarget } from "@guiderail/core/context";
 
 type SendFn = (event: ContextMachineEvent) => void;
 
@@ -108,6 +108,12 @@ export function AppShell() {
 		usePerspectiveProvider(nav, graph);
 	useAutoPanel(nav);
 	const { searchOpen, setSearchOpen } = useSearchShortcut();
+
+	// Selecting a domain, capability, journey, process or sequence from a panel or
+	// search also shows it: the kernel picks the perspective. Every entry point
+	// goes through this one event, so they all land in the same place.
+	const navigateTo = (kind: NavigationTarget["kind"], id: string) =>
+		send({ type: "NAVIGATE_TO", target: { kind, id } });
 
 	useExpandEvents(send);
 	const perspectiveType =
@@ -181,7 +187,7 @@ export function AppShell() {
 				onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				onClearCapability={() => send({ type: "CLEAR_CAPABILITY" })}
 				onSwitchCanvasMode={(mode) => send({ type: "SWITCH_CANVAS_MODE", canvasMode: mode })}
-				onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
+				onSelectProcess={(id) => navigateTo("process", id)}
 			/>
 			<div className="app-shell__body">
 				<LeftPanel
@@ -192,26 +198,11 @@ export function AppShell() {
 					activeSequenceId={nav.activeSequenceId}
 					activeStoryRouteId={nav.activeStoryRouteId}
 					routeState={nav.routeState}
-					onSelectDomain={(id) => {
-						send({ type: "SELECT_DOMAIN", domainId: id });
-						send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-landscape" });
-					}}
-					onSelectCapability={(id) => {
-						send({ type: "SELECT_CAPABILITY", capabilityId: id });
-						send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-landscape" });
-					}}
-					onSelectJourney={(id) => {
-						send({ type: "SELECT_JOURNEY", journeyId: id });
-						send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-journey" });
-					}}
-					onSelectProcess={(id) => {
-						send({ type: "SELECT_PROCESS", processId: id });
-						send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-process" });
-					}}
-					onSelectSequence={(id) => {
-						send({ type: "SELECT_SEQUENCE", sequenceId: id });
-						send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-sequence" });
-					}}
+					onSelectDomain={(id) => navigateTo("domain", id)}
+					onSelectCapability={(id) => navigateTo("capability", id)}
+					onSelectJourney={(id) => navigateTo("journey", id)}
+					onSelectProcess={(id) => navigateTo("process", id)}
+					onSelectSequence={(id) => navigateTo("sequence", id)}
 					onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 					onSelectNode={(id) => send({ type: "SELECT_NODE", nodeId: id })}
 					onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
@@ -322,11 +313,11 @@ export function AppShell() {
 						graph={graph}
 						onSelectNode={(id) => send({ type: "SELECT_NODE", nodeId: id })}
 						onSelectEdge={(id) => send({ type: "SELECT_EDGE", edgeId: id })}
-						onSelectCapability={(id) => send({ type: "SELECT_CAPABILITY", capabilityId: id })}
-						onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
+						onSelectCapability={(id) => navigateTo("capability", id)}
+						onSelectJourney={(id) => navigateTo("journey", id)}
 						onSelectValueStream={(id) => send({ type: "SELECT_VALUE_STREAM", valueStreamId: id })}
-						onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
-						onSelectSequence={(id) => send({ type: "SELECT_SEQUENCE", sequenceId: id })}
+						onSelectProcess={(id) => navigateTo("process", id)}
+						onSelectSequence={(id) => navigateTo("sequence", id)}
 						onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 					/>
 				)}
@@ -334,12 +325,12 @@ export function AppShell() {
 			<SearchPalette
 				open={searchOpen}
 				onClose={() => setSearchOpen(false)}
-				onSelectDomain={(id) => send({ type: "SELECT_DOMAIN", domainId: id })}
-				onSelectCapability={(id) => send({ type: "SELECT_CAPABILITY", capabilityId: id })}
+				onSelectDomain={(id) => navigateTo("domain", id)}
+				onSelectCapability={(id) => navigateTo("capability", id)}
 				onSelectNode={(id) => send({ type: "SELECT_NODE", nodeId: id })}
-				onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
-				onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
-				onSelectSequence={(id) => send({ type: "SELECT_SEQUENCE", sequenceId: id })}
+				onSelectProcess={(id) => navigateTo("process", id)}
+				onSelectJourney={(id) => navigateTo("journey", id)}
+				onSelectSequence={(id) => navigateTo("sequence", id)}
 				onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 			/>
 		</div>

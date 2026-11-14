@@ -1,5 +1,5 @@
 import { createInitializeEvent } from "@/store/kernel-init.js";
-import { seedOrientationItems } from "@/store/seed-loader.js";
+import { seedOrientationItems, seedPerspectives } from "@/store/seed-loader.js";
 import { contextMachine } from "@guiderail/core/context";
 import { createActorContext } from "@xstate/react";
 import { useLayoutEffect } from "react";
@@ -43,8 +43,9 @@ export function initializeKernel(actor: KernelActor) {
 	actor.send(createInitializeEvent());
 
 	// Orientation is the entry perspective, with its first item selected so the
-	// content panel renders immediately.
-	actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: "persp-orientation" });
+	// content panel renders immediately. It is found by type, not by id.
+	const entry = seedPerspectives.find((p) => p.type === "orientation") ?? seedPerspectives[0];
+	if (entry) actor.send({ type: "SWITCH_PERSPECTIVE", perspectiveId: entry.id });
 	if (seedOrientationItems.length > 0) {
 		actor.send({ type: "JUMP_TO_ORIENTATION", index: 0 });
 	}
