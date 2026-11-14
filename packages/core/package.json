@@ -61,7 +61,7 @@
 		"check:fix": "biome check --fix ."
 	},
 	"dependencies": {
-		"xstate": "^5.19.0",
+		"xstate": "^5.33.4",
 		"zod": "^3.24.0"
 	},
 	"devDependencies": {
