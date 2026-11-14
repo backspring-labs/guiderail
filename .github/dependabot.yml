@@ -6,6 +6,18 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # Type declarations track the lowest supported Node line (24), so code
+      # cannot rely on APIs missing there. Raise this with the support policy.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # Major upgrades deferred to issue #46. Remove each entry when it is done.
+      - dependency-name: "storybook"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@storybook/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       # All security fixes arrive as one pull request.
       security:
