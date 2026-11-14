@@ -69,7 +69,7 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 6. **`@seed` is a temporary bridge.** See "Known limitations".
 7. **Seven-perspective progression.** Each perspective answers a different question about the same terrain.
 8. **Canvas modes are perspective-internal.** Same topology, different emphasis.
-9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". Domain, capability, journey, process and route context survive it; selection and canvas mode reset. Other fields (value stream, sequence, stepper indices, focus targets) also persist today, but that is not yet a decided contract. #12 pins the full list; do not write tests that assume it before then.
+9. **Shared context contract.** A perspective switch means "show me this same moment through another lens". See "Navigation contract" below for exactly what persists and what resets.
 10. **Content loading.** `@guiderail/core/content` exports `parseContentBundle()` (Zod validation, non-fatal error collection) and `mergeContentBundles()`. The web app does not use them yet.
 
 ## Perspectives
@@ -87,6 +87,31 @@ TypeScript is a root-level shared devDependency. Each package owns its own `tsco
 The Process mode ids differ from their UI labels: `activity` is shown as "Decision" and `risk_controls` as "Controls".
 
 Orientation is the entry perspective on first load.
+
+### Navigation contract
+
+Confirmed by the maintainer on 2026-11-14. Tests assert this table; behaviour that contradicts it is a defect.
+
+On `SWITCH_PERSPECTIVE`:
+
+| State | Behaviour |
+|---|---|
+| Domain, capability | Persists |
+| Journey and step index | Persists |
+| Process and stage index | Persists |
+| Sequence and message index | Persists |
+| Value stream, orientation index | Persists |
+| Story route, waypoint index, route state | Persists |
+| Focus targets, scene, `mode` | Persists |
+| Selected node, selected edge | Cleared. Each canvas has its own node ids, so a selection does not carry over |
+| Canvas mode | Reset to the new perspective's default. A mode id means nothing in another perspective |
+| Viewport anchor | Not part of the contract. The kernel computes it; the web app does not read it |
+
+Select-and-show:
+
+- Selecting a journey, process or sequence from any entry point navigates to its perspective. Selecting a domain or capability navigates to Landscape.
+- After landing, no terrain node is selected.
+- Today only the left panel does this, by sending two events; search and the right panel only select. #35 moves the pairing into the kernel and makes every entry point consistent.
 
 ### Steppers
 
@@ -110,6 +135,7 @@ These are tracked defects and bridges, not design intent. Check the issue before
 | Graph queries ignore the `directed` edge flag | #32 |
 | The Process canvas renders the same BPMN nodes whichever process is active | #21 |
 | Stepper indices mix `sequenceNumber` lookups with array positions | #22 |
+| Only the left panel navigates on selection; search and the right panel do not | #35 |
 | `@guiderail/core` advertises a `./test-fixtures` export that is not built | #7 |
 | `parseContentBundle()` silently ignores unknown or malformed sections | #9 |
 
@@ -117,7 +143,7 @@ Remove a row in the same PR that fixes it.
 
 ## How work is authorised
 
-- Work starts from a GitHub issue. The hygiene campaign is tracked in #25; issue numbers #1–#24 match backlog ids HY-01–HY-24, and HY-25–HY-27 are #31–#33.
+- Work starts from a GitHub issue. The hygiene campaign is tracked in #25; issue numbers #1–#24 match backlog ids HY-01–HY-24, and HY-25–HY-27 are #31–#33, and HY-28 is #35.
 - CI is enforced first: nothing else in the campaign merges until the CI gate is proven and `main` is protected (#1, #2).
 - An issue is Ready when it states problem, scope, non-goals, acceptance and dependencies.
 - Branch from `main`. Do not push to `main` directly.
