@@ -8,7 +8,7 @@ Closes #
 <!-- Exact commands and results. For a fix, say how you confirmed the new test fails without it. -->
 | Command | Result |
 |---|---|
-| `pnpm exec biome ci .` | |
+| `pnpm exec biome ci --error-on-warnings .` | |
 | `pnpm build` | |
 | `pnpm typecheck` | |
 | `pnpm test:coverage` | |
