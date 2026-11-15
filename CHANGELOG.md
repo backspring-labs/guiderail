@@ -6,12 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Gui
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-15
+
+Closes out the repository foundation work: one accessibility fix and the documents an independent assessment will start from. No change to the kernel's public surface or to the content format.
+
 ### Added
 - **Docs:** the GuideRail 1.0 specification (proposed) in `docs/specs/`, and the backlog the foundation campaign was built from in `docs/plans/`. The roadmap lists the specification's milestones: 0.9, 0.10, 0.11 and 1.0.
 - **Docs:** four idea documents on AI-generated and AI-maintained architecture models, in `docs/ideas/`.
+- **Docs:** the foundation campaign's closure report, `docs/plans/repository-foundation-closure.md`: each backlog item with its result, evidence and gaps.
 
-### Changed
-- **Web:** grey text and coloured text are lighter in the dark theme, so that text meets the WCAG AA contrast ratio of 4.5:1. The accessibility scan now enforces colour contrast on every view and every Storybook story, and a unit test checks the colour tokens by calculation.
+### Fixed
+- **Web:** text in the dark theme was below the WCAG AA contrast ratio of 4.5:1 on every view. Grey text and coloured text are now lighter and meet it. The accessibility scan now enforces colour contrast on every view and every Storybook story, and a unit test checks the colour tokens by calculation.
 
 ## [0.8.0] - 2026-11-15
 
