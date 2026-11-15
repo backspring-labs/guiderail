@@ -146,7 +146,9 @@ Only load content you trust. See [SECURITY.md](SECURITY.md).
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - [docs/architecture/data-integrity.md](docs/architecture/data-integrity.md): what content is accepted, rejected and reported
 - [docs/performance.md](docs/performance.md): bundle size, start-up time and the size budget
-- [docs/plans/](docs/plans/): implementation plans by version
+- [docs/README.md](docs/README.md): every document under `docs/`, and whether it is current, shipped, superseded or only an idea
+- [docs/architecture/README.md](docs/architecture/README.md): how the system is put together, in one page
+- [docs/adr/](docs/adr/README.md): decisions and the reasons for them
 
 ## Security
 
