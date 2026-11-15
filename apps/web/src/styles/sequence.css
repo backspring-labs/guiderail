@@ -103,7 +103,7 @@
 
 .sequence-picker__meta {
 	font-size: 11px;
-	color: var(--color-text-muted);
+	color: var(--color-text-secondary);
 }
 
 /* Hide React Flow chrome for sequence picker */
@@ -210,7 +210,7 @@
 }
 
 .sequence-message__label--selected {
-	color: var(--color-selected, #3b82f6);
+	color: var(--color-ink-blue);
 	font-weight: 600;
 }
 

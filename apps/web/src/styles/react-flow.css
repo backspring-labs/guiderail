@@ -65,7 +65,7 @@
 	padding: 1px 6px;
 	border-radius: 8px;
 	background: var(--color-provider-default);
-	color: var(--color-bg);
+	color: var(--color-text-on-fill);
 	font-weight: 600;
 	white-space: nowrap;
 }
@@ -129,7 +129,7 @@
 	padding: 1px 5px;
 	border-radius: 6px;
 	background: rgba(99, 102, 241, 0.15);
-	color: #6366f1;
+	color: var(--color-ink-indigo);
 	font-weight: 600;
 }
 
@@ -138,7 +138,7 @@
 	padding: 1px 5px;
 	border-radius: 6px;
 	background: rgba(100, 116, 139, 0.15);
-	color: #94a3b8;
+	color: var(--color-text-secondary);
 }
 
 /* React Flow handle overrides */
@@ -180,7 +180,7 @@
 }
 
 .react-flow__node-sequence_message.selected .sequence-message__label {
-	color: var(--color-selected);
+	color: var(--color-ink-blue);
 	font-weight: 600;
 }
 

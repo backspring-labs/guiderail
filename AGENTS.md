@@ -34,7 +34,7 @@ What each command proves:
 | `test:coverage` | The same, plus coverage has not dropped below the recorded floor | That covered code is correct |
 | `check:package` | The packed core resolves for a consumer | Anything about the web app |
 | `check:boundaries` | Import rules between web, kernel, demo corpus and fixtures hold | That the code behind an allowed import is correct |
-| `test:e2e` | In a real browser, against built output: every perspective renders, steppers and search work from the keyboard, navigation is consistent, every Storybook story renders, and the automated accessibility scan passes | Colour contrast (a tracked exception, #66); anything a screen reader or a human eye would catch that axe does not |
+| `test:e2e` | In a real browser, against built output: every perspective renders, steppers and search work from the keyboard, navigation is consistent, every Storybook story renders, and the automated accessibility scan passes, colour contrast included | Anything a screen reader or a human eye would catch that axe does not. Axe cannot judge contrast for text drawn over another canvas element, and nodes dimmed to show focus are faded on purpose |
 
 Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core sits in the mid-80s. The web app is at about 9%, so a green run says little about the UI.
 
@@ -129,7 +129,8 @@ Orientation is the entry perspective on first load.
 
 - The page has landmarks: a banner, one `main` (the canvas), a navigation landmark for the context bar, and two labelled complementary regions (the Browse and Details panels). The title is the page's only `h1`; a detail panel's title is an `h2` and its sections are `h3`.
 - The search palette is a labelled dialog. Closing it returns focus to where it was.
-- `apps/web/e2e/a11y.spec.ts` and `storybook.spec.ts` run axe on every view and every story. A rule that is known to fail goes in `KNOWN_A11Y_EXCEPTIONS` in `e2e/support.ts` with an issue number, never silently disabled. Today that list has one entry: colour contrast (#66).
+- `apps/web/e2e/a11y.spec.ts` and `storybook.spec.ts` run axe on every view and every story. A rule that is known to fail goes in `KNOWN_A11Y_EXCEPTIONS` in `e2e/support.ts` with an issue number, never silently disabled. Today that list is empty.
+- **Text colours come from tokens that are checked for contrast.** `--color-text` and `--color-text-secondary` are readable on every surface; `--color-text-muted` only on the two darkest. The hue colours (node, edge, state, accent) are for fills, borders and tints and are too dark to read as text: coloured text uses the `--color-ink-*` tokens, and text on a bright fill uses `--color-text-on-fill`. `apps/web/src/styles/contrast.test.ts` checks every token by calculation and fails if a stylesheet sets a text colour any other way.
 - Stories type their data with `satisfies`, so a story cannot drift from its component's props.
 
 ### Data boundary

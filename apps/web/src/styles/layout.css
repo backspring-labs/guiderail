@@ -30,7 +30,7 @@
 	border: 1px solid #f59e0b;
 	border-radius: 6px;
 	background: #1e293b;
-	color: #fde68a;
+	color: var(--color-ink-amber);
 	font-size: 13px;
 }
 
@@ -50,7 +50,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--color-text-muted, #94a3b8);
+	color: var(--color-text-secondary);
 	font-size: 14px;
 	pointer-events: none;
 }
@@ -289,7 +289,7 @@
 
 .domain-browser__clear {
 	font-size: var(--font-size-sm);
-	color: var(--color-selected);
+	color: var(--color-ink-blue);
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -326,7 +326,7 @@
 
 .domain-browser__domain-btn--active {
 	background: rgba(37, 99, 235, 0.15);
-	color: var(--color-selected);
+	color: var(--color-ink-blue);
 }
 
 .domain-browser__chevron {
@@ -375,7 +375,7 @@
 
 .domain-browser__cap-btn--active {
 	background: rgba(37, 99, 235, 0.15);
-	color: var(--color-selected);
+	color: var(--color-ink-blue);
 }
 
 /* Context Bar */
@@ -416,7 +416,7 @@
 }
 
 .context-bar__segment--journey {
-	color: var(--color-highlighted);
+	color: var(--color-ink-amber);
 	cursor: default;
 }
 
@@ -429,17 +429,17 @@
 }
 
 .context-bar__segment--value-stream {
-	color: #0ea5e9;
+	color: var(--color-ink-sky);
 	cursor: default;
 }
 
 .context-bar__segment--process {
-	color: #a855f7;
+	color: var(--color-ink-purple);
 	cursor: default;
 }
 
 .context-bar__segment--sequence {
-	color: #6366f1;
+	color: var(--color-ink-indigo);
 	cursor: default;
 }
 

@@ -103,7 +103,7 @@
 	padding: 0 6px;
 	border-radius: 8px;
 	background: var(--color-bg-secondary);
-	color: var(--color-text-muted);
+	color: var(--color-text-secondary);
 	font-weight: 600;
 }
 
@@ -134,7 +134,7 @@
 
 .section-item--active,
 .section-item--active:hover {
-	color: var(--color-selected);
+	color: var(--color-ink-blue);
 	background: rgba(59, 130, 246, 0.1);
 	font-weight: 600;
 }

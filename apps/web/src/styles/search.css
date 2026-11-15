@@ -77,37 +77,37 @@
 
 .search-palette__result-type[data-type="domain"] {
 	background: rgba(244, 114, 182, 0.2);
-	color: #f472b6;
+	color: var(--color-ink-pink);
 }
 
 .search-palette__result-type[data-type="capability"] {
 	background: rgba(37, 99, 235, 0.2);
-	color: var(--color-selected);
+	color: var(--color-ink-blue);
 }
 
 .search-palette__result-type[data-type="node"] {
 	background: rgba(16, 185, 129, 0.2);
-	color: var(--color-node-service);
+	color: var(--color-ink-emerald);
 }
 
 .search-palette__result-type[data-type="provider"] {
 	background: rgba(96, 165, 250, 0.2);
-	color: var(--color-provider-scheme);
+	color: var(--color-ink-blue);
 }
 
 .search-palette__result-type[data-type="journey"] {
 	background: rgba(245, 158, 11, 0.2);
-	color: var(--color-highlighted);
+	color: var(--color-ink-amber);
 }
 
 .search-palette__result-type[data-type="process"] {
 	background: rgba(168, 85, 247, 0.2);
-	color: #a855f7;
+	color: var(--color-ink-purple);
 }
 
 .search-palette__result-type[data-type="route"] {
 	background: rgba(34, 197, 94, 0.2);
-	color: #22c55e;
+	color: var(--color-ink-green);
 }
 
 .search-palette__result-label {
