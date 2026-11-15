@@ -19,12 +19,13 @@ The 1.0 scope is defined by a specification that is not in the repository yet. U
 
 | Version | What it delivered | Plan |
 |---|---|---|
+| 0.8.0 | Repository foundation: required CI, security controls, corrected defects, one data boundary, a browser suite, contributor and release documentation. The first tagged version | [plan](docs/plans/repository-foundation-plan.md) |
 | 0.7.1 | Process canvas fidelity and stepper fixes | [plan](docs/plans/guiderail-0.7.1-plan.md) |
 | 0.6.0–0.7.0 | Navigation hub, stepper transport, Orientation perspective, self-referential demo corpus | [0.6.0](docs/plans/guiderail-0.6.0-plan.md), [0.7.0](docs/plans/guiderail-0.7.0-plan.md) |
 | 0.5.0 | Canvas fidelity and file-based content loading | [plan](docs/plans/guiderail-0.5.0-plan.md) |
 | 0.4.0 and earlier | Perspective system, kernel and monorepo foundations | [docs/plans/](docs/plans/) |
 
-These versions predate CI and were not released as tags. They are not represented as having passed the checks introduced by the foundation work.
+Versions up to 0.7.1 predate CI and were not released as tags. They are not represented as having passed the checks introduced by the foundation work.
 
 ## Not on the roadmap
 
