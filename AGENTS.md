@@ -78,6 +78,9 @@ guiderail/
 ├── packages/core/    ← @guiderail/core
 ├── apps/web/         ← @guiderail/web
 ├── docs/
+│   ├── README.md     ← index: what each document is and where it stands
+│   ├── architecture/ ← how it is put together; the data-integrity contract
+│   ├── adr/          ← decisions and their reasons
 │   ├── ideas/        ← product ideas (reference only)
 │   ├── prds/         ← product requirements
 │   └── plans/        ← implementation plans by version
@@ -203,7 +206,8 @@ Remove a row in the same PR that fixes it.
 - An issue is Ready when it states problem, scope, non-goals, acceptance and dependencies.
 - Branch from `main`. Do not push to `main` directly.
 - One concern per PR. An issue may take several PRs; it closes only when every acceptance item has evidence.
-- `docs/ideas/` is reference material. Do not edit idea documents unless asked. Ideas and historical plans are not approved work.
+- `docs/ideas/` is reference material. Do not edit idea documents unless asked. Ideas and historical plans are not approved work; [docs/README.md](docs/README.md) says which documents are current and which are history.
+- A decision that changes how the system is shaped gets a short record in `docs/adr/`.
 
 ### Hot files
 
