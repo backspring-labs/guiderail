@@ -83,6 +83,7 @@ guiderail/
 │   ├── adr/          ← decisions and their reasons
 │   ├── ideas/        ← product ideas (reference only)
 │   ├── prds/         ← product requirements
+│   ├── specs/        ← the 1.0 specification (proposed)
 │   └── plans/        ← implementation plans by version
 ├── turbo.json
 └── package.json
@@ -207,6 +208,7 @@ Remove a row in the same PR that fixes it.
 - Branch from `main`. Do not push to `main` directly.
 - One concern per PR. An issue may take several PRs; it closes only when every acceptance item has evidence.
 - `docs/ideas/` is reference material. Do not edit idea documents unless asked. Ideas and historical plans are not approved work; [docs/README.md](docs/README.md) says which documents are current and which are history.
+- `docs/specs/` holds the GuideRail 1.0 specification. Its status is proposed: it sets direction, and it does not authorise work until the maintainer triages it into issues. Do not edit it unless asked.
 - A decision that changes how the system is shaped gets a short record in `docs/adr/`.
 
 ### Hot files

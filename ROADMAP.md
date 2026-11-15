@@ -4,16 +4,25 @@ What GuideRail is working on, in order. Progress on each item lives in GitHub is
 
 ## Now: repository foundation
 
-Hygiene work that makes the repository safe to change and to contribute to: required CI, branch protection, security controls, corrected defects, contributor documentation, and a checked release path.
+Hygiene work that makes the repository safe to change and to contribute to: required CI, branch protection, security controls, corrected defects, contributor documentation, and a checked release path. It was released as 0.8.0.
+
+What remains is an independent assessment of the result by an external reviewer, and the items the campaign deferred, which are open issues in the milestone.
 
 - Plan: [docs/plans/repository-foundation-plan.md](docs/plans/repository-foundation-plan.md)
 - Status: the [Repository foundation milestone](https://github.com/backspring-labs/guiderail/milestone/1) and its tracking issue, #25
 
-No new product features land while this is in progress.
+No new product features land until the assessment is in.
 
 ## Next: GuideRail 1.0
 
-The 1.0 scope is defined by a specification that is not in the repository yet. Until it is added and triaged into issues, nothing under this heading is committed work.
+The 1.0 scope is defined by a [specification](docs/specs/GuideRail_Architecture_Exploration_and_Runtime_Spec_v1_0.md): point GuideRail at an existing repository and get an explorable, evidence-linked map of it. Its status is proposed. Nothing in it is committed work until it is triaged into issues.
+
+| Milestone | Outcome |
+|---|---|
+| 0.9 | Discovery foundation: read-only discovery of a real repository, one graph with provenance, useful partial maps |
+| 0.10 | Interactive architecture explorer: the seven perspectives over a discovered graph, tracing from business to code and back |
+| 0.11 | Runtime and deployment: a static project companion, a multi-project hub, incremental refresh |
+| 1.0 | Architecture intelligence: explainable risk, growth and change-impact overlays, and independent certification on unseen repositories |
 
 ## Shipped
 

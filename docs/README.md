@@ -13,9 +13,10 @@ Everything under `docs/`, with what each document is and where it stands. Owner 
 | **Shipped** | The work it plans is in the code. Any gaps are noted |
 | **Partly shipped** | Some of it is in the code and some clearly is not |
 | **Superseded** | Replaced by a later document, or written for the repositories that existed before this monorepo |
+| **Proposed** | A product baseline put forward by the maintainer. It sets direction, and nothing in the code implements it yet |
 | **Idea** | A proposal. Nothing in the code implements it. Not approved work |
 
-An idea or a historical plan never authorises work. Work starts from a GitHub issue ([CONTRIBUTING.md](../CONTRIBUTING.md)).
+An idea, a proposed specification or a historical plan never authorises work. Work starts from a GitHub issue ([CONTRIBUTING.md](../CONTRIBUTING.md)).
 
 Statuses were assigned on 2026-11-15 by comparing each document with the code, and a sample of the findings was re-checked by hand. Long idea documents were judged from their summaries and from searching the code for their distinctive features, not from a line-by-line reading.
 
@@ -34,6 +35,12 @@ Statuses were assigned on 2026-11-15 by comparing each document with the code, a
 | [examples/minimal-content.json](examples/minimal-content.json) | A small content dataset, loaded by a test |
 | [../CHANGELOG.md](../CHANGELOG.md), [../ROADMAP.md](../ROADMAP.md) | What changed, and what is next |
 
+## Product specification
+
+| Document | What it is | Status |
+|---|---|---|
+| [specs/GuideRail_Architecture_Exploration_and_Runtime_Spec_v1_0.md](specs/GuideRail_Architecture_Exploration_and_Runtime_Spec_v1_0.md) | The GuideRail 1.0 specification: point GuideRail at an existing repository, get an evidence-linked map, publish it as a static companion or to a hub, with release milestones 0.9, 0.10, 0.11 and 1.0 and an independent certification gate | Proposed. It is its own product baseline, separate from every plan below. None of it is triaged into issues yet |
+
 ## Plans
 
 ### Active
@@ -41,6 +48,7 @@ Statuses were assigned on 2026-11-15 by comparing each document with the code, a
 | Plan | Executed by |
 |---|---|
 | [plans/repository-foundation-plan.md](plans/repository-foundation-plan.md) | Issue #25 and the `Repository foundation` milestone. Ids HY-01 to HY-24 are issues #1 to #24 |
+| [plans/GuideRail_Hygiene_Action_Backlog_2026-11-14.md](plans/GuideRail_Hygiene_Action_Backlog_2026-11-14.md) | The source of the plan above: twenty draft issues, HY-01 to HY-20, written against commit `faac155`. Kept as the record of what was asked. Where the plan departs from it, the plan says why |
 
 ### Version plans
 
@@ -108,8 +116,7 @@ Proposals and reference material. Do not edit them unless asked ([ideas/CLAUDE.m
 
 | Document | State |
 |---|---|
-| The GuideRail 1.0 specification | Not here yet. It is its own product baseline, separate from every plan above, and is brought under version control by #33. Until then nothing under "1.0" is committed work |
-| The repository assessment the foundation plan was derived from | Not here yet; also #33 |
+| An independent assessment of the repository foundation | Not written yet. An external reviewer carries it out once the campaign's work is finished. It is what the backlog means by "the completion criteria in the assessment" |
 | Four idea drafts on AI-maintained models (canonical model lifecycle, self-describing architecture; two versions of each) | They exist only in the maintainer's working copy and are not tracked. They are ideas; the later version of each pair appears to replace the earlier |
 
 ## Things to know about the older documents
