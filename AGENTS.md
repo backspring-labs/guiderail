@@ -36,7 +36,7 @@ What each command proves:
 | `check:boundaries` | Import rules between web, kernel, demo corpus and fixtures hold | That the code behind an allowed import is correct |
 | `test:e2e` | In a real browser, against built output: every perspective renders, steppers and search work from the keyboard, navigation is consistent, every Storybook story renders, and the automated accessibility scan passes, colour contrast included | Anything a screen reader or a human eye would catch that axe does not. Axe cannot judge contrast for text drawn over another canvas element, and nodes dimmed to show focus are faded on purpose |
 
-Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core sits in the mid-80s. The web app is at about 9%, so a green run says little about the UI.
+Coverage floors are measured, not aspirational, and only move up: raise them in the pull request that raises coverage. Core's floor is 88% of statements and the web app's is 66%; the exact numbers are in each package's `vitest.config.ts`.
 
 Things the command names do not tell you:
 
