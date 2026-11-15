@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Gui
 
 ## [Unreleased]
 
+### Added
+- **Docs:** the GuideRail 1.0 specification (proposed) in `docs/specs/`, and the backlog the foundation campaign was built from in `docs/plans/`. The roadmap lists the specification's milestones: 0.9, 0.10, 0.11 and 1.0.
+
 ## [0.8.0] - 2026-11-15
 
 The repository foundation release. Everything below was done by the foundation campaign (issue #25) after 0.7.1. It is the first version cut from a commit that passed required checks, and the first to be tagged.

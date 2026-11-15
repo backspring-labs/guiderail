@@ -275,11 +275,11 @@ Reviews address semantic behaviour as well as green CI. Work left over becomes a
 
 Closing every issue is necessary but not sufficient. The campaign is complete when HY-27 passes:
 
-- **References are tracked.** The source assessment and the 1.0 spec are files in `docs/`, and the backlog is reconciled against the assessment's completion criteria: each criterion met with evidence, not applicable with a reason, or open with an issue.
+- **References are tracked.** The source backlog and the 1.0 spec are files in `docs/`, and the work is reconciled against the backlog's acceptance criteria: each criterion met with evidence, not applicable with a reason, or open with an issue.
 - **End-to-end verification passes** from a fresh clone on each supported Node line: frozen install, lint, test typecheck, build, tests, the packed-consumer check, the browser suite, both dependency audits, a readback of branch protection and security settings, and the documented onboarding steps.
 - **Closure audit is clean.** No issue is closed without evidence, and every open exception has an owner and an unexpired date.
 
-The tracker (#25) is closed by HY-27, not before it.
+HY-27 is the campaign checking itself. It is followed by an independent assessment by an external reviewer, which is what the backlog means by "the completion criteria in the assessment". The tracker (#25) stays open until that assessment's findings each have a disposition.
 
 ---
 
@@ -298,5 +298,5 @@ The tracker (#25) is closed by HY-27, not before it.
 ## Deferred, or waiting on the maintainer
 
 - **Automated contributors (SquadOps).** Repository controls and agent instructions specific to SquadOps are deferred to a later issue.
-- **The source assessment and the 1.0 spec.** Neither is in the repository yet. HY-27 needs both from the maintainer.
+- **The independent assessment.** An external reviewer assesses the repository after the campaign's work is finished. Earlier versions of this plan took the assessment to be an existing document the backlog was derived from; it is not.
 - **Release hardening.** npm trusted publishing, provenance attestations and artifact checksums wait for a decision to publish.
