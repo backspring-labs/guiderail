@@ -111,6 +111,10 @@ Proposals and reference material. Do not edit them unless asked ([ideas/CLAUDE.m
 | [higher_level_views_and_mermaid_addendum.md](ideas/higher_level_views_and_mermaid_addendum.md) | Higher-level views backed by Mermaid sources | Idea |
 | [session_replay_addendum.md](ideas/session_replay_addendum.md) | Replaying a real user session from logs and traces | Idea |
 | [switchboard-plugin-model-idea.md](ideas/switchboard-plugin-model-idea.md) | A plugin runtime ported from Switchboard | Idea |
+| [IDEA-canonical-model-lifecycle-v2.md](ideas/IDEA-canonical-model-lifecycle-v2.md) | The canonical model as a contract that AI generates from source systems, keeps current, and monitors runtime behaviour against | Idea. Overlaps the 1.0 specification on discovery, provenance and refresh; the specification is the baseline |
+| [ai-canonical-model-lifecycle-idea.md](ideas/ai-canonical-model-lifecycle-idea.md) | The earlier, shorter statement of the same generate, maintain, monitor lifecycle | Idea. The v2 above appears to replace it |
+| [ai-maintained-self-describing-architecture-idea-v2.md](ideas/ai-maintained-self-describing-architecture-idea-v2.md) | An architecture graph refreshed from code, API specs and process definitions, with AI-drafted guided tours per audience | Idea. Overlaps the 1.0 specification in the same way |
+| [ai-maintained-self-describing-architecture-idea.md](ideas/ai-maintained-self-describing-architecture-idea.md) | The earlier version of the same | Idea. The v2 above appears to replace it |
 | [NEBULUS_FINANCIAL_GENESIS_DESIGN_PACK_SPEC_v2_DDD_HEX.md](ideas/NEBULUS_FINANCIAL_GENESIS_DESIGN_PACK_SPEC_v2_DDD_HEX.md) | A design-pack spec for a different product, Nebulus | Reference only. Not about this repository |
 
 ## Not in the repository
@@ -118,7 +122,6 @@ Proposals and reference material. Do not edit them unless asked ([ideas/CLAUDE.m
 | Document | State |
 |---|---|
 | An independent assessment of the repository foundation | Not written yet. An external reviewer carries it out once the campaign's work is finished. It is what the backlog means by "the completion criteria in the assessment" |
-| Four idea drafts on AI-maintained models (canonical model lifecycle, self-describing architecture; two versions of each) | They exist only in the maintainer's working copy and are not tracked. They are ideas; the later version of each pair appears to replace the earlier |
 
 ## Things to know about the older documents
 
