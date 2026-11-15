@@ -5,7 +5,7 @@ Written for the independent assessment that follows the foundation campaign. It 
 - **Asked:** the twenty draft issues in the [hygiene action backlog](GuideRail_Hygiene_Action_Backlog_2026-11-14.md), HY-01 to HY-20, written against commit `faac155`.
 - **Planned:** the [repository foundation plan](repository-foundation-plan.md), which split some backlog items and added others.
 - **Tracked:** issue #25 and the `Repository foundation` milestone. Backlog ids HY-01 to HY-24 are issues #1 to #24.
-- **State described here:** `main` at `43a6886`, on 2026-11-15. Released as 0.8.0 from `858f243`; the changes since are in the changelog under Unreleased.
+- **State described here:** `main` at `43a6886`, on 2026-11-15. Released as 0.8.0 from `858f243`. The changes made after that, up to and including this report, are released as 0.8.1; the changelog lists them.
 
 This is the campaign checking itself. It is not the assessment.
 

@@ -4,7 +4,7 @@ What GuideRail is working on, in order. Progress on each item lives in GitHub is
 
 ## Now: repository foundation
 
-Hygiene work that makes the repository safe to change and to contribute to: required CI, branch protection, security controls, corrected defects, contributor documentation, and a checked release path. It was released as 0.8.0.
+Hygiene work that makes the repository safe to change and to contribute to: required CI, branch protection, security controls, corrected defects, contributor documentation, and a checked release path. It was released as 0.8.0, and closed out in 0.8.1.
 
 What remains is an independent assessment of the result by an external reviewer, and the items the campaign deferred, which are open issues in the milestone.
 
@@ -28,6 +28,7 @@ The 1.0 scope is defined by a [specification](docs/specs/GuideRail_Architecture_
 
 | Version | What it delivered | Plan |
 |---|---|---|
+| 0.8.1 | Text contrast meets WCAG AA and is enforced by the checks. The 1.0 specification, the source backlog and the campaign's closure report are tracked | [closure report](docs/plans/repository-foundation-closure.md) |
 | 0.8.0 | Repository foundation: required CI, security controls, corrected defects, one data boundary, a browser suite, contributor and release documentation. The first tagged version | [plan](docs/plans/repository-foundation-plan.md) |
 | 0.7.1 | Process canvas fidelity and stepper fixes | [plan](docs/plans/guiderail-0.7.1-plan.md) |
 | 0.6.0–0.7.0 | Navigation hub, stepper transport, Orientation perspective, self-referential demo corpus | [0.6.0](docs/plans/guiderail-0.6.0-plan.md), [0.7.0](docs/plans/guiderail-0.7.0-plan.md) |
