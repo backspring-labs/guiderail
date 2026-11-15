@@ -1,6 +1,6 @@
 # GuideRail — agent and contributor guide
 
-Guided architecture navigation from business understanding to code reality. A pnpm + Turborepo monorepo, currently at 0.7.1.
+Guided architecture navigation from business understanding to code reality. A pnpm + Turborepo monorepo. The current version is in `packages/core/package.json`; what changed in each is in `CHANGELOG.md`.
 
 This file is the single source of working instructions for any coding agent or contributor. Tool-specific files (`CLAUDE.md`) only point here.
 
