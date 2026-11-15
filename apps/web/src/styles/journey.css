@@ -70,11 +70,11 @@
 }
 
 .journey-step--customer .journey-step__actor {
-	color: #3b82f6;
+	color: var(--color-ink-blue);
 }
 
 .journey-step--system .journey-step__actor {
-	color: #8b5cf6;
+	color: var(--color-ink-violet);
 }
 
 .journey-step__action {
@@ -93,7 +93,7 @@
 .journey-step__seq--error {
 	background: #ef4444;
 	border-color: #ef4444;
-	color: white;
+	color: var(--color-text-on-fill);
 }
 
 /* Step type: confirmation */
@@ -106,7 +106,7 @@
 .journey-step__seq--confirmation {
 	background: #10b981;
 	border-color: #10b981;
-	color: white;
+	color: var(--color-text-on-fill);
 }
 
 /* Step type: info */
@@ -123,7 +123,7 @@
 .journey-step__seq--decision {
 	background: #f59e0b;
 	border-color: #f59e0b;
-	color: white;
+	color: var(--color-text-on-fill);
 }
 
 /* Step type: modal */
@@ -204,5 +204,5 @@
 
 .journey-picker__meta {
 	font-size: 11px;
-	color: var(--color-text-muted);
+	color: var(--color-text-secondary);
 }

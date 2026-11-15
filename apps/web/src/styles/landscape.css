@@ -23,7 +23,7 @@
 
 .landscape-domain__count {
 	font-size: 11px;
-	color: var(--color-text-muted);
+	color: var(--color-text-secondary);
 	background: var(--color-bg-secondary);
 	padding: 2px 8px;
 	border-radius: 10px;
@@ -70,14 +70,14 @@
 
 .landscape-capability__metric {
 	font-size: 10px;
-	color: var(--color-text-muted);
+	color: var(--color-text-secondary);
 	background: var(--color-bg-secondary);
 	padding: 1px 6px;
 	border-radius: 8px;
 }
 
 .landscape-capability__metric--provider {
-	color: #0ea5e9;
+	color: var(--color-ink-sky);
 	background: rgba(14, 165, 233, 0.1);
 }
 
@@ -93,7 +93,7 @@
 	padding: 1px 6px;
 	border-radius: 8px;
 	background: rgba(14, 165, 233, 0.15);
-	color: #0ea5e9;
+	color: var(--color-ink-sky);
 	font-weight: 600;
 }
 
@@ -121,7 +121,7 @@
 
 .landscape-actor:hover .landscape-actor__icon {
 	background: rgba(59, 130, 246, 0.15);
-	color: #3b82f6;
+	color: var(--color-ink-blue);
 }
 
 .landscape-actor--selected .landscape-actor__icon {

@@ -13,17 +13,17 @@
 
 .control-indicator--critical {
 	background: #ef4444;
-	color: white;
+	color: var(--color-text-on-fill);
 }
 
 .control-indicator--warning {
 	background: #f59e0b;
-	color: white;
+	color: var(--color-text-on-fill);
 }
 
 .control-indicator--info {
 	background: #10b981;
-	color: white;
+	color: var(--color-text-on-fill);
 }
 
 /* Risk Controls canvas mode — severity tint on tasks */

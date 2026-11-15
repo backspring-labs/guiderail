@@ -27,7 +27,6 @@ What it does not do yet:
 - **It has no backend and no editor.** Content is supplied in code, as a dataset.
 - **It ships only the demo dataset.** You can pass in your own (see [Use your own content](#use-your-own-content)), but there is no file picker or import screen.
 - **Some demo collections are empty**, so two modes have nothing to show: Landscape → Providers and Process → Controls.
-- **Colour contrast is below accessibility thresholds** in places ([#66](https://github.com/backspring-labs/guiderail/issues/66)).
 
 ## Requirements
 

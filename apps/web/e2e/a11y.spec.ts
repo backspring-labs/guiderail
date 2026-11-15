@@ -6,7 +6,8 @@ import { expectNoA11yViolations, pickFromLeftPanel, tab } from "./support.js";
  * They catch structural problems: missing landmarks, headings, names and roles.
  * They do not replace testing with a keyboard and a screen reader.
  *
- * Rules known to fail are listed, with their issue, in support.ts.
+ * Colour contrast is included. A rule that starts failing and cannot be fixed at
+ * once is listed, with its issue, in support.ts; today that list is empty.
  */
 
 const VIEWS = [
@@ -34,6 +35,30 @@ test("an open journey with its stepper has no accessibility violations", async (
 	await page.goto("/");
 	await pickFromLeftPanel(page, "Journeys", "The Full Descent");
 	await expect(page.locator(".stepper-control")).toBeVisible();
+	await expectNoA11yViolations(page);
+});
+
+test("a selected capability and its detail panel have no accessibility violations", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await pickFromLeftPanel(page, "Capabilities", "Context Machine");
+	await expect(page.locator(".detail-panel__type-badge").first()).toBeVisible();
+	await expectNoA11yViolations(page);
+});
+
+test("a selected process and its stages have no accessibility violations", async ({ page }) => {
+	await page.goto("/");
+	await pickFromLeftPanel(page, "Processes", "Stepper Forward");
+	await expect(page.locator(".stepper-control")).toBeVisible();
+	await page.waitForLoadState("networkidle");
+	await expectNoA11yViolations(page);
+});
+
+test("a guided route in progress has no accessibility violations", async ({ page }) => {
+	await page.goto("/");
+	await pickFromLeftPanel(page, "Guides", "How GuideRail Is Built");
+	await expect(page.locator(".story-route-bar")).toBeVisible();
 	await expectNoA11yViolations(page);
 });
 

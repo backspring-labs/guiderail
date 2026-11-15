@@ -38,7 +38,7 @@
 
 .story-route-bar__objective {
 	font-size: var(--font-size-sm);
-	color: #22c55e;
+	color: var(--color-ink-green);
 	font-style: italic;
 	line-height: 1.4;
 	padding: 6px 10px;
@@ -87,6 +87,7 @@
 .story-route-bar__btn:hover:not(:disabled) {
 	background: rgba(255, 255, 255, 0.1);
 	border-color: var(--color-text-secondary);
+	color: var(--color-text);
 }
 
 .story-route-bar__btn:disabled {
@@ -96,7 +97,7 @@
 
 .story-route-bar__btn--pause {
 	border-color: #f59e0b;
-	color: #f59e0b;
+	color: var(--color-ink-amber);
 }
 
 .story-route-bar__btn--pause:hover:not(:disabled) {
@@ -105,7 +106,7 @@
 
 .story-route-bar__btn--resume {
 	border-color: #22c55e;
-	color: #22c55e;
+	color: var(--color-ink-green);
 	font-weight: 500;
 }
 
@@ -123,6 +124,6 @@
 	padding: 2px 10px;
 	border-radius: 10px;
 	background: rgba(245, 158, 11, 0.2);
-	color: #f59e0b;
+	color: var(--color-ink-amber);
 	font-weight: 600;
 }

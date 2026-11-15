@@ -57,11 +57,7 @@ export async function pickFromLeftPanel(page: Page, section: LeftPanelSection, l
  * Accessibility rules that are known to fail and are tracked, not ignored.
  * Each entry needs an issue. Remove the entry in the pull request that fixes it.
  */
-export const KNOWN_A11Y_EXCEPTIONS = [
-	// Text and control colours in the dark theme are below the contrast threshold
-	// on every view. Fixing it is a palette decision. Tracked in issue #66.
-	"color-contrast",
-];
+export const KNOWN_A11Y_EXCEPTIONS: string[] = [];
 
 /** Runs axe on the page (or one region of it) and fails on any violation outside the known exceptions. */
 export async function expectNoA11yViolations(
