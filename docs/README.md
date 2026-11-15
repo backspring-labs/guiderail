@@ -49,6 +49,7 @@ Statuses were assigned on 2026-11-15 by comparing each document with the code, a
 |---|---|
 | [plans/repository-foundation-plan.md](plans/repository-foundation-plan.md) | Issue #25 and the `Repository foundation` milestone. Ids HY-01 to HY-24 are issues #1 to #24 |
 | [plans/GuideRail_Hygiene_Action_Backlog_2026-11-14.md](plans/GuideRail_Hygiene_Action_Backlog_2026-11-14.md) | The source of the plan above: twenty draft issues, HY-01 to HY-20, written against commit `faac155`. Kept as the record of what was asked. Where the plan departs from it, the plan says why |
+| [plans/repository-foundation-closure.md](plans/repository-foundation-closure.md) | The campaign's closure report, written for the independent assessment: each backlog item with its result, evidence and gaps, and what was not verified |
 
 ### Version plans
 
