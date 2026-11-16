@@ -50,6 +50,7 @@ Progress lives in GitHub issues and milestones only. Plans and docs describe int
 - **Merging:** only the maintainer merges. Pull requests are squash-merged, one commit per pull request. No approval count is required while there is a single maintainer; the required gate is CI.
 - **Releases:** only the maintainer tags and releases, following [docs/releasing.md](docs/releasing.md). See [ROADMAP.md](ROADMAP.md) for what is planned and [CHANGELOG.md](CHANGELOG.md) for what changed.
 - **Branch protection applies to the maintainer too.** There is no bypass.
+- **Automated contributors:** agents, bots and scripts open pull requests for issues the maintainer has authorised. They do not merge, release or change policy. What an agent may do is in [AGENTS.md](AGENTS.md#agent-authority); the reason is [ADR 0008](docs/adr/0008-agents-propose-the-maintainer-merges.md).
 
 Ownership by area is listed in [.github/CODEOWNERS](.github/CODEOWNERS).
 

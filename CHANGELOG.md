@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Gui
 
 ## [Unreleased]
 
+### Added
+- **Docs:** the agent authority model, in `AGENTS.md` and ADR 0008. Automated contributors work from an issue the maintainer has authorised and open pull requests; only the maintainer merges, releases and changes policy.
+
 ## [0.8.1] - 2026-11-15
 
 Closes out the repository foundation work: one accessibility fix and the documents an independent assessment will start from. No change to the kernel's public surface or to the content format.
