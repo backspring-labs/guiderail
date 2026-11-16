@@ -198,12 +198,22 @@ These are tracked defects and bridges, not design intent. Check the issue before
 
 | Limitation | Issue |
 |---|---|
+| Content loading drops an entity's unknown fields without a diagnostic, so a misspelled optional field loads as empty | #80 |
+| Process, Controls mode: control points are joined through the terrain node. A stage with no terrain node shows none, and processes that share a node show each other's | #81 |
+| Sequence: a message whose endpoint does not resolve is drawn from the first lifeline | #82 |
+| Search: Enter activates the highlighted result, not the one Tab moved focus to | #83 |
+| Search: the dialog does not keep keyboard focus inside it | #84 |
+| Content loading does not check a `bpmnNodes` entry's `parentNodeId` | #85 |
+| `parseContentBundle`: a collection that is supplied but is not an array suppresses the dangling-reference diagnostics that point at it | #86 |
+| A dangling-reference diagnostic's `index` is the position after filtering, not the position in the input | #87 |
+| The layout cache key is ambiguous for ids that contain commas, and ignores edge endpoints | #88 |
 
 Remove a row in the same PR that fixes it.
 
 ## How work is authorised
 
 - Work starts from a GitHub issue. The hygiene campaign is tracked in #25; issue numbers #1–#24 match backlog ids HY-01–HY-24, and HY-25–HY-27 are #31–#33, and HY-28 is #35.
+- The independent assessment of 0.8.1 produced findings ASSESS-01 to ASSESS-11, which are #80–#90, and verification follow-ups, #91. They are the "Assessment backlog" milestone.
 - CI is enforced first: nothing else in the campaign merges until the CI gate is proven and `main` is protected (#1, #2).
 - An issue is Ready when it states problem, scope, non-goals, acceptance and dependencies.
 - Branch from `main`. Do not push to `main` directly.
