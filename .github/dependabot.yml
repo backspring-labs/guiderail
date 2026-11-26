@@ -23,6 +23,13 @@ updates:
       security:
         applies-to: security-updates
         patterns: ["*"]
+      # The test stack moves together, majors included. Vitest and its coverage
+      # provider must be on the same version, and jest-dom supports only the
+      # current Vitest major (#100). Listed before the groups below because a
+      # dependency joins the first group it matches.
+      test-stack:
+        applies-to: version-updates
+        patterns: ["vitest", "@vitest/*", "@testing-library/jest-dom"]
       # Routine minor and patch updates, split by where the dependency runs.
       # Major versions arrive as individual pull requests.
       runtime:
